@@ -1,11 +1,11 @@
-import { Reference } from "./reference.interface";
+import { RedmineReference } from './redmine-reference.interface';
 
-export interface Project {
+export interface RedmineProject {
   id: number;
   name: string;
   identifier: string;
   description: string;
-  parent: Reference;
+  parent: RedmineReference;
   status: number;
   created_on: Date;
   updated_on: Date;

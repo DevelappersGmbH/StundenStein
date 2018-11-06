@@ -1,4 +1,4 @@
-export interface TimeEntry {
+export interface RedmineTimeEntry {
   id: number;
   project_id: number;
   user_id: number;

@@ -1,6 +1,6 @@
-import { Project } from './project.interface';
+import { RedmineProject } from './redmine-project.interface';
 
-export interface TimeTracker {
+export interface HourGlassTimeTracker {
   id: number;
   created_at: string;
   updated_at: string;
@@ -11,5 +11,5 @@ export interface TimeTracker {
   issue_id: number;
   comments: string;
 
-  project: Project;
+  project: RedmineProject;
 }
