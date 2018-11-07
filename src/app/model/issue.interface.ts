@@ -1,5 +1,5 @@
 import { Project } from './project.interface';
-import { User } from '../services/user/user.interface';
+import { User } from './user.interface';
 
 export interface Issue {
   id: number;
