@@ -21,9 +21,10 @@ import {
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
+import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
