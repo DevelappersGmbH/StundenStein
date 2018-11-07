@@ -10,7 +10,6 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
-import { MainFrameComponent } from './components/main-frame/main-frame.component';
 import {
   MatButtonModule,
   MatCardModule,
@@ -18,16 +17,12 @@ import {
   MatIconModule,
   MatInputModule
   } from '@angular/material';
+import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    MainFrameComponent,
-    LoginComponent,
-    MainComponent
-  ],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
