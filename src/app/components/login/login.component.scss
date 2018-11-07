@@ -1,0 +1,21 @@
+.container {
+  align-items: center;
+  display: grid;
+  height: 100vh;
+  margin: 0 auto;
+  width: 430px;
+
+  mat-form-field,
+  mat-checkbox {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  mat-checkbox {
+    display: inline-block;
+  }
+
+  button {
+    float: right;
+  }
+}

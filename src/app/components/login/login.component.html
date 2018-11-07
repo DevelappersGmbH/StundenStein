@@ -1,12 +1,40 @@
-<h5>Login</h5>
-<ng-container *ngIf="!isLoggedIn; else loggedIn;">
-  <form (ngSubmit)="login()">
-    <input placeholder="Redmine URL" required [(ngModel)]="redmineUrl" name="redmineUrl">
-    <input placeholder="API Key" required [(ngModel)]="apiKey" name="apiKey">
-    <button type="submit">Login</button>
-  </form>
-</ng-container>
-<ng-template #loggedIn>
-  <p>Your are already logged in!</p>
-  <button type="button" (click)="logout()">Logout</button>
-</ng-template>
+<div class="container">
+  <mat-card>
+    <h5>Login</h5>
+    <ng-container *ngIf="!isLoggedIn; else: loggedIn">
+      <form (ngSubmit)="login()">
+        <mat-form-field>
+          <input
+            matInput
+            placeholder="Redmine URL"
+            required
+            [(ngModel)]="redmineUrl"
+            name="redmineUrl"
+          />
+          <mat-hint>e.g. https://redmine.domain.com</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <input
+            matInput
+            placeholder="API Key"
+            required
+            [(ngModel)]="apiKey"
+            name="apiKey"
+          />
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit">Login</button>
+      </form>
+    </ng-container>
+    <ng-template #loggedIn>
+      <p>Your are already logged in!</p>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="logout()"
+      >
+        Logout
+      </button>
+    </ng-template></mat-card
+  >
+</div>
