@@ -31,11 +31,7 @@ export class LoginComponent implements OnInit {
         .login(this.redmineUrl, this.apiKey, this.rememberMe)
         .subscribe(
           result => {
-            this.userService.setUserName(
-              result.user.firstname,
-              result.user.lastname
-            );
-            this.userService.setUserId(result.user.id);
+            this.userService.setUser(result);
             const redirect = this.authenticationService.redirectUrl
               ? this.authenticationService.redirectUrl
               : '/';

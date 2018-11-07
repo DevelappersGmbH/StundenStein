@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { UserObject } from '../user/user.interface';
+import { RedmineUserObject } from 'src/app/redmine-model/redmine-user.interface';
+import { User } from 'src/app/model/user.interface';
 
 const currentUserAuthTokenKey = 'currentUserAuthToken';
 const redmineApiUrlKey = 'redmineApiUrl';
@@ -98,16 +99,19 @@ export class AuthenticationService {
     redmineUrl: string,
     apiKey: string,
     rememberMe: boolean = false
-  ): Observable<any> {
+  ): Observable<User> {
     this.setRedmineApiUrl(redmineUrl);
     this.setAuthToken(apiKey);
     const url =
       environment.corsProxyUrl + this.getRedmineApiUrl() + this.usersUrl;
 
-    return this.http.get<UserObject>(url).pipe(
-      map((res: UserObject) => {
+    return this.http.get<RedmineUserObject>(url).pipe(
+      map((res: RedmineUserObject) => {
         this.setExpirationDate(rememberMe);
-        return res;
+        return {
+          id: res.user.id,
+          name: `${res.user.firstname} ${res.user.lastname}`
+        };
       })
     );
   }
