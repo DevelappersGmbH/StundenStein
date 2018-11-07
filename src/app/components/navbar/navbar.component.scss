@@ -1,0 +1,17 @@
+mat-toolbar-row {
+  margin: 0 auto;
+  max-width: 1920px;
+  padding: 0;
+
+  .title {
+    margin-left: 10px;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .username {
+    padding-right: 10px;
+  }
+}

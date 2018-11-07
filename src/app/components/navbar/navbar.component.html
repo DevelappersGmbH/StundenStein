@@ -1,3 +1,9 @@
-<p>
-  navbar works!
-</p>
+<mat-toolbar color="primary">
+  <mat-toolbar-row>
+    <span class="title">StundenStein</span> <span class="spacer"></span>
+    <span class="username">{{ username }}</span>
+    <button mat-button type="button" (click)="logout()">
+      <mat-icon>exit_to_app</mat-icon>
+    </button>
+  </mat-toolbar-row>
+</mat-toolbar>
