@@ -17,6 +17,7 @@ export class TimeTrackerComponent implements OnInit {
   issues: Issue[];
   selectedIssue: Issue;
   selectedProject: Project;
+  taskDescription: string;
 
   ngOnInit() {
     this.loadProjects();

@@ -6,6 +6,12 @@
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select>
       </mat-form-field>
+      <mat-form-field class="field-mid">
+          <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >
+          <button mat-button *ngIf="taskDescription" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
       <mat-form-field class="field-right">
           <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="selectedProject" [ngModelOptions]="{standalone: true}">
             <mat-option>None</mat-option>
