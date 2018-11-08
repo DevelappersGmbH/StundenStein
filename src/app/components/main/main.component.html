@@ -1,4 +1,7 @@
 <app-navbar></app-navbar>
 <div class="main-container">
-  <div class="inner-container"><p>main works!</p></div>
+  <div class="inner-container">
+    <p>main works!</p>
+    <p *ngFor="let item of issues">{{ item.subject }}</p>
+  </div>
 </div>

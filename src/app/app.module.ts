@@ -5,6 +5,7 @@ import { AuthGuard } from './services/authguard/authguard.service';
 import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
+import { DataService } from './services/data/data.service';
 import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
@@ -46,6 +47,7 @@ import { UserService } from './services/user/user.service';
       useClass: AuthInterceptor,
       multi: true
     },
+    DataService,
     UserService
   ],
   bootstrap: [AppComponent]

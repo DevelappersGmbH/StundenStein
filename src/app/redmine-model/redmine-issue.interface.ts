@@ -1,6 +1,10 @@
 import { RedmineCustomField } from './redmine-custom-field.interface';
 import { RedmineReference } from './redmine-reference.interface';
 
+export interface RedmineIssues {
+  issues: RedmineIssue[];
+}
+
 export interface RedmineIssue {
   id: number;
   project: RedmineReference;
