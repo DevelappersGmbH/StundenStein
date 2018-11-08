@@ -24,6 +24,7 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   selectIssue() {
+    console.log(this.selectedIssue);
     if (isUndefined(this.selectedIssue)) {
       this.selectedProject = undefined;
     } else {
