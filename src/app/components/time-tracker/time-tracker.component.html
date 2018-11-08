@@ -1,13 +1,13 @@
 <mat-card>
   <form>
       <mat-form-field class="field-left">
-        <mat-select placeholder="Issue">
+        <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="selectedIssue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
           <mat-option>None</mat-option>
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select>
       </mat-form-field>
       <mat-form-field class="field-right">
-          <mat-select placeholder="Project">
+          <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="selectedProject" [ngModelOptions]="{standalone: true}">
             <mat-option>None</mat-option>
             <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
           </mat-select>
