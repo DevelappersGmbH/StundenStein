@@ -42,6 +42,7 @@ export class TimeTrackerComponent implements OnInit {
 
   selectProject() {
     console.log(this.selectedProject);
+    this.selectedIssue = undefined;
   }
 
   loadProjects() {
