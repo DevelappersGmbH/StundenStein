@@ -1,3 +1,6 @@
-<p>
-  time-tracker works!
-</p>
+<mat-card>
+  <mat-select placeholder="Project">
+      <mat-option>None</mat-option>
+      <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
+    </mat-select>
+</mat-card>
