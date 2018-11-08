@@ -6,7 +6,7 @@
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="field-mid">
+      <mat-form-field class="field-mid field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >
           <button mat-button *ngIf="taskDescription" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
             <mat-icon>close</mat-icon>
