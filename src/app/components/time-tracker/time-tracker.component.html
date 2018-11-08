@@ -1,6 +1,16 @@
 <mat-card>
-  <mat-select placeholder="Project">
-      <mat-option>None</mat-option>
-      <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
-    </mat-select>
+  <form>
+      <mat-form-field class="field-left">
+        <mat-select placeholder="Issue">
+          <mat-option>None</mat-option>
+          <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="field-right">
+          <mat-select placeholder="Project">
+            <mat-option>None</mat-option>
+            <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
+          </mat-select>
+      </mat-form-field>
+  </form>
 </mat-card>
