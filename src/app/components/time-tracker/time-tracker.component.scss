@@ -1,16 +1,16 @@
-mat-form-field {
-  width: 20%;
-}
-.field-left {
-  padding-right: 10px;
-}
-.field-right {
-  padding-left: 10px;
-}
-.field-mid {
+.field {
   padding-left: 10px;
   padding-right: 10px;
+}
+.field:first-child {
+  padding-right: 10px;
+}
+.field-right:last-child {
+  padding-left: 10px;
 }
 .field-large {
-  width: 40%;
+  width: 30%;
+}
+.field-small {
+  width: 15%;
 }
