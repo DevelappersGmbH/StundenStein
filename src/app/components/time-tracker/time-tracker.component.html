@@ -1,22 +1,26 @@
 <mat-card>
   <form>
-      <mat-form-field class="field-left">
+      <mat-form-field class="field field-small">
         <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="selectedIssue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
           <mat-option>None</mat-option>
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select>
       </mat-form-field>
-      <mat-form-field class="field-mid field-large">
+      <mat-form-field class="field field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >
           <button mat-button *ngIf="taskDescription" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
             <mat-icon>close</mat-icon>
           </button>
         </mat-form-field>
-      <mat-form-field class="field-right">
+      <mat-form-field class="field field-small">
           <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="selectedProject" [ngModelOptions]="{standalone: true}">
             <mat-option>None</mat-option>
             <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
           </mat-select>
       </mat-form-field>
+      <span class="field">{{ currentTrackerTimeString }}</span>
+      <mat-checkbox class="field">Billable</mat-checkbox>
+      <button class="field" mat-flat-button color="primary">Start</button>
+      <mat-slide-toggle class="field">Automatic mode</mat-slide-toggle>
   </form>
 </mat-card>

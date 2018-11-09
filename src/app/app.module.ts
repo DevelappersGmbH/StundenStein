@@ -17,7 +17,9 @@ import {
   MatIconModule,
   MatInputModule,
   MatToolbarModule,
-  MatSelectModule
+  MatSelectModule,
+  MatCheckboxModule,
+  MatSlideToggleModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -39,7 +41,9 @@ import { TimeTrackerComponent } from './components/time-tracker/time-tracker.com
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    MatSelectModule
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSlideToggleModule
   ],
   providers: [
     AuthenticationService,

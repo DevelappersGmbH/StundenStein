@@ -18,10 +18,12 @@ export class TimeTrackerComponent implements OnInit {
   selectedIssue: Issue;
   selectedProject: Project;
   taskDescription: string;
+  currentTrackerTimeString: string;
 
   ngOnInit() {
     this.loadProjects();
     this.loadIssues();
+    this.currentTrackerTimeString  = '00:00:00';
   }
 
   selectIssue() {
