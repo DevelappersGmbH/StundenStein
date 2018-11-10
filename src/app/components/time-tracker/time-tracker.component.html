@@ -1,10 +1,16 @@
 <mat-card>
   <form>
       <mat-form-field class="field field-small">
-        <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="selectedIssue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
+        <!--mat-select (selectionChange)="selectIssue()"  [(ngModel)]="selectedIssue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
           <mat-option>None</mat-option>
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
-        </mat-select>
+        </mat-select-->
+        <input type="text" [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="auto">
+        <mat-autocomplete (optionSelected)="selectIssue($event.optionSelected)" autoActiveFirstOption #auto="matAutocomplete">
+          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue.subject">
+            {{issue.subject}}
+          </mat-option>
+    </mat-autocomplete>
       </mat-form-field>
       <mat-form-field class="field field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >

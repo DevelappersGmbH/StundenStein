@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { RedmineService } from 'src/app/services/redmine/redmine.service';
 import { Project } from 'src/app/model/project.interface';
 import { Issue } from 'src/app/model/issue.interface';
 import { isUndefined } from 'util';
+import { FormControl } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-time-tracker',
@@ -21,8 +23,15 @@ export class TimeTrackerComponent implements OnInit {
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
+  issueCtrl = new FormControl();
+  filteredIssues: Observable<Issue[]>;
 
   ngOnInit() {
+    this.filteredIssues = this.issueCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(issue => issue ? this._filterIssues(issue) : this.issues.slice())
+      );
     this.loadProjects();
     this.loadIssues();
     this.currentTrackerTimeString  = '00:00:00';
@@ -31,8 +40,15 @@ export class TimeTrackerComponent implements OnInit {
     this.automaticLock = true;
   }
 
-  selectIssue() {
-    console.log(this.selectedIssue);
+  private _filterIssues(value: string): Issue[] {
+    const filterValue = value.toLowerCase();
+
+    return this.issues.filter(issue => issue.subject.toLowerCase().indexOf(filterValue) === 0);
+  }
+
+  selectIssue(data) {
+    console.log('issue selected: ' + data);
+    console.log('issue selected: ' + this.selectedIssue);
     if (isUndefined(this.selectedIssue)) {
       this.selectedProject = undefined;
     } else {
