@@ -1,5 +1,6 @@
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
+import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import {
@@ -13,13 +14,14 @@ import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 import { RedmineService } from '../redmine/redmine.service';
+import { TimeTracker } from 'src/app/model/time-tracker.interface';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
   private cachedProjects: Project[];
-  private cachedIssues: Partial<Issue>[];
+  private cachedIssues: Issue[];
 
   constructor(
     private redmineService: RedmineService,
@@ -90,9 +92,12 @@ export class DataService {
 
     this.cachedIssues = [];
     redmineIssues.issues.forEach(redmineIssue => {
-      const issue: Partial<Issue> = {
+      const issue: Issue = {
         id: redmineIssue.id,
-        subject: redmineIssue.subject
+        subject: redmineIssue.subject,
+        assignedTo: null,
+        project: null,
+        tracker: null
       };
       if (redmineIssue.assigned_to) {
         issue.assignedTo = redmineIssue.assigned_to;
@@ -108,5 +113,42 @@ export class DataService {
       this.cachedIssues.push(issue);
     });
     return this.cachedIssues;
+  }
+
+  // *************************************************
+  // ******************HourGlass**********************
+  // *************************************************
+
+  startTimeTracker(
+    issueId: number = null,
+    comment: string = null
+  ): Observable<TimeTracker> {
+    return this.hourglassService
+      .startTimeTracker(issueId, comment)
+      .pipe(map(t => this.mapHourGlassTimeTrackerToTimeTracker(t)));
+  }
+
+  mapHourGlassTimeTrackerToTimeTracker(
+    hourglassTimeTracker: HourGlassTimeTracker
+  ): TimeTracker {
+    const timeTracker: TimeTracker = {
+      id: hourglassTimeTracker.id,
+      timeStarted: hourglassTimeTracker.start,
+      billable: true
+    };
+    if (hourglassTimeTracker.issue_id) {
+      timeTracker.issue = this.cachedIssues.find(
+        i => i.id === hourglassTimeTracker.issue_id
+      );
+    }
+    if (hourglassTimeTracker.project_id) {
+      timeTracker.project = this.cachedProjects.find(
+        p => p.id === hourglassTimeTracker.project_id
+      );
+    }
+    if (hourglassTimeTracker.comments) {
+      timeTracker.comment = hourglassTimeTracker.comments;
+    }
+    return timeTracker;
   }
 }
