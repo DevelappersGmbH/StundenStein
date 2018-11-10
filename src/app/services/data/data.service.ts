@@ -9,7 +9,7 @@ import {
   tap
   } from 'rxjs/operators';
 import { Project } from 'src/app/model/project.interface';
-import { RedmineIssues } from 'src/app/redmine-model/redmine-issue.interface';
+import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 import { RedmineService } from '../redmine/redmine.service';
