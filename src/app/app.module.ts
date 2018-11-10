@@ -5,7 +5,7 @@ import { AuthGuard } from './services/authguard/authguard.service';
 import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
@@ -19,7 +19,8 @@ import {
   MatToolbarModule,
   MatSelectModule,
   MatCheckboxModule,
-  MatSlideToggleModule
+  MatSlideToggleModule,
+  MatAutocompleteModule,
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -43,7 +44,9 @@ import { TimeTrackerComponent } from './components/time-tracker/time-tracker.com
     MatToolbarModule,
     MatSelectModule,
     MatCheckboxModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule
   ],
   providers: [
     AuthenticationService,
