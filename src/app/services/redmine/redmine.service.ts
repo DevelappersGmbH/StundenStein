@@ -3,7 +3,7 @@ import { BaseDataService } from '../basedata/basedata.service';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { RedmineIssues } from 'src/app/redmine-model/redmine-issue.interface';
+import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 

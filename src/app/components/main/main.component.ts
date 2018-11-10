@@ -1,4 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/services/data/data.service';
+import { Issue } from 'src/app/model/issue.interface';
+import { Project } from 'src/app/model/project.interface';
 
 @Component({
   selector: 'app-main',
@@ -6,7 +9,16 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
-  constructor() {}
+  projects: Project[];
+  issues: Partial<Issue>[];
+  constructor(private dataService: DataService) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // this.dataService.getProjects().subscribe(p => {
+    //   this.projects = p;
+    // });
+    this.dataService.getIssues().subscribe(i => {
+      this.issues = i;
+    });
+  }
 }
