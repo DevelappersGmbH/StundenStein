@@ -5,7 +5,7 @@ export interface TimeTracker {
   id: number;
   timeStarted: string;
   billable: boolean;
-  comment: string;
-  issue: Issue;
-  project: Project;
+  comment?: string;
+  issue?: Issue;
+  project?: Project;
 }
