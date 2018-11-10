@@ -17,34 +17,51 @@ export class TimeTrackerComponent implements OnInit {
 
   projects: Project[];
   issues: Issue[];
-  issueStrings: string[] = [];
+  // issueStrings: string[] = [];
   selectedIssue: Issue;
   selectedProject: Project;
   taskDescription: string;
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
+  /*
   issueCtrl = new FormControl();
+  projectCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
+  filteredProjects: Observable<Project[]>;
+  */
 
   ngOnInit() {
-    this.filteredIssues = this.issueCtrl.valueChanges
-      .pipe(
-        startWith(''),
-        map(issue => issue ? this._filterIssues(issue) : this.issues.slice())
-      );
     this.loadProjects();
     this.loadIssues();
     this.currentTrackerTimeString  = '00:00:00';
     this.automaticMode = true;
     // Block manual mode until implemented
     this.automaticLock = true;
+    /*this.filteredIssues = this.issueCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(issue => issue ? this._filterIssues(issue) : this.issues.slice())
+      );
+    this.filteredProjects = this.projectCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(project => project ? this._filterProjects(project) : this.projects.slice())
+      );*/
   }
+
+  /*
 
   private _filterIssues(value: string): Issue[] {
     const filterValue = value.toLowerCase().replace('#', '').trim();
 
     return this.issues.filter(issue => issue.subject.toLowerCase().includes(filterValue) || issue.id.toString().includes(filterValue) );
+  }
+
+  private _filterProjects(value: string): Project[] {
+    const filterValue = value.toLowerCase().replace('#', '').trim();
+
+    return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
   }
 
   getIssueFromAutoSelectString(selector: string): Issue {
@@ -63,9 +80,11 @@ export class TimeTrackerComponent implements OnInit {
     return undefined;
   }
 
-  selectIssue(data) {
-    console.log('issue string selected: ' + data);
-    this.selectedIssue = this.getIssueFromAutoSelectString(data);
+  */
+
+  selectIssue() {
+    // console.log('issue string selected: ' + data);
+    // this.selectedIssue = this.getIssueFromAutoSelectString(data);
     console.log('issue selected: ' + this.selectedIssue);
     if (isUndefined(this.selectedIssue)) {
       this.selectedProject = undefined;
