@@ -11,7 +11,7 @@ import { isUndefined } from 'util';
 })
 export class TimeTrackerComponent implements OnInit {
 
-  constructor( private redmineService: RedmineService ) { }
+  constructor( ) { }
 
   projects: Project[];
   issues: Issue[];
@@ -19,11 +19,16 @@ export class TimeTrackerComponent implements OnInit {
   selectedProject: Project;
   taskDescription: string;
   currentTrackerTimeString: string;
+  automaticMode: boolean;
+  automaticLock: boolean;
 
   ngOnInit() {
     this.loadProjects();
     this.loadIssues();
     this.currentTrackerTimeString  = '00:00:00';
+    this.automaticMode = true;
+    // Block manual mode until implemented
+    this.automaticLock = true;
   }
 
   selectIssue() {
@@ -49,38 +54,39 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   loadProjects() {
-    this.redmineService.getProjects().subscribe(data => {
-      this.projects = new Array();
-      data.projects.forEach( project => {
-        this.projects.push(
-          {
-            id: project.id,
-            name: project.name
-          }
-        );
-      });
-    }, error => {
-      console.error(error);
-    });
+    this.projects = new Array();
+    this.projects.push(
+      {
+        id: 0,
+        name: 'Projekt I'
+      }
+    );
+    this.projects.push(
+      {
+        id: 1,
+        name: 'Projekt II'
+      }
+    );
+    console.log(this.projects);
   }
 
   loadIssues() {
-    this.redmineService.getIssues().subscribe(data => {
-      this.issues = new Array();
-      data.issues.forEach( issue => {
-        this.issues.push(
-          {
-            id: issue.id,
-            subject: issue.subject,
-            project: issue.project,
-            tracker: issue.tracker.name,
-            assignedTo: issue.assigned_to
-          }
-        );
-      });
-    }, error => {
-      console.error(error);
-    });
+    this.issues = new Array();
+    this.issues.push(
+      {
+        id: 0,
+        subject: 'Schriftart umstellen',
+        project: {
+          id: 1,
+          name: 'Projekt II'
+        },
+        tracker: 'feature',
+        assignedTo: {
+          id: 0,
+          name: 'Jakob Neumann'
+        }
+      }
+    );
   }
 
 }
