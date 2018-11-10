@@ -6,11 +6,11 @@
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select-->
         <input type="text" [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="auto">
-        <mat-autocomplete (optionSelected)="selectIssue($event.optionSelected)" autoActiveFirstOption #auto="matAutocomplete">
-          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue.subject">
-            {{issue.subject}}
+        <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" autoActiveFirstOption #auto="matAutocomplete">
+          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue.tracker + ' #' + issue.id + ': ' + issue.subject">
+            {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
           </mat-option>
-    </mat-autocomplete>
+        </mat-autocomplete>
       </mat-form-field>
       <mat-form-field class="field field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >

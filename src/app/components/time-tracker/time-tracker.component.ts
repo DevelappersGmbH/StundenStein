@@ -17,6 +17,7 @@ export class TimeTrackerComponent implements OnInit {
 
   projects: Project[];
   issues: Issue[];
+  issueStrings: string[] = [];
   selectedIssue: Issue;
   selectedProject: Project;
   taskDescription: string;
@@ -41,13 +42,30 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   private _filterIssues(value: string): Issue[] {
-    const filterValue = value.toLowerCase();
+    const filterValue = value.toLowerCase().replace('#', '').trim();
 
-    return this.issues.filter(issue => issue.subject.toLowerCase().indexOf(filterValue) === 0);
+    return this.issues.filter(issue => issue.subject.toLowerCase().includes(filterValue) || issue.id.toString().includes(filterValue) );
+  }
+
+  getIssueFromAutoSelectString(selector: string): Issue {
+    if (this.issueStrings.length !== this.issues.length) {
+      this.issues.forEach( issue => {
+        this.issueStrings.push(
+          issue.tracker + ' #' + issue.id + ': ' + issue.subject
+        );
+      });
+    }
+    for (let i = 0; i < this.issues.length; i++) {
+      if (this.issueStrings[i] === selector) {
+        return this.issues[i];
+      }
+    }
+    return undefined;
   }
 
   selectIssue(data) {
-    console.log('issue selected: ' + data);
+    console.log('issue string selected: ' + data);
+    this.selectedIssue = this.getIssueFromAutoSelectString(data);
     console.log('issue selected: ' + this.selectedIssue);
     if (isUndefined(this.selectedIssue)) {
       this.selectedProject = undefined;
@@ -97,6 +115,21 @@ export class TimeTrackerComponent implements OnInit {
           name: 'Projekt II'
         },
         tracker: 'feature',
+        assignedTo: {
+          id: 0,
+          name: 'Jakob Neumann'
+        }
+      }
+    );
+    this.issues.push(
+      {
+        id: 1,
+        subject: 'Logo reparieren',
+        project: {
+          id: 1,
+          name: 'Projekt II'
+        },
+        tracker: 'bug',
         assignedTo: {
           id: 0,
           name: 'Jakob Neumann'
