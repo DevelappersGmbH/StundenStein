@@ -1,6 +1,7 @@
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
+import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import {
@@ -150,5 +151,22 @@ export class DataService {
       timeTracker.comment = hourglassTimeTracker.comments;
     }
     return timeTracker;
+  }
+
+  getTimeTrackerByUserId(userId: number): Observable<TimeTracker> {
+    return this.hourglassService
+      .getTimeTrackersByUserId(userId)
+      .pipe(map(t => this.mapHourGlassTimeTrackersToFirstTimeTracker(t)));
+  }
+
+  mapHourGlassTimeTrackersToFirstTimeTracker(
+    hourglassTimeTrackers: HourGlassTimeTrackers
+  ): TimeTracker {
+    if (hourglassTimeTrackers.records.length === 0) {
+      return null;
+    }
+    return this.mapHourGlassTimeTrackerToTimeTracker(
+      hourglassTimeTrackers.records[0]
+    );
   }
 }
