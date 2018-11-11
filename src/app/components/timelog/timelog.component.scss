@@ -1,0 +1,49 @@
+input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+  display: none;
+}
+
+.field {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+.total-record {
+  display: inline;
+}
+
+.button_play{
+  margin-left: 18%;
+}
+
+.issue, .project {
+  width: 12%;
+}
+
+.comment {
+  width: 20%;
+}
+
+.start-time, .tracked-time {
+  width: 8%;
+}
+
+.start-time, .end-time{
+  width: 45px;
+}
+
+.icon{
+  color: #ccc;
+}
+
+
+.icon.active {
+  color: limegreen;
+}
+
+.icon.attention {
+  color: orangered;
+}
+
+::ng-deep mat-form-field.edit .mat-form-field-underline {
+  display: none;
+}
