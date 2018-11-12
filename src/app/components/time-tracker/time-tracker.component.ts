@@ -5,6 +5,7 @@ import { isUndefined } from 'util';
 import { FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
+import { DataService } from 'src/app/services/data/data.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -13,12 +14,12 @@ import { map, startWith } from 'rxjs/operators';
 })
 export class TimeTrackerComponent implements OnInit {
 
-  constructor( ) { }
+  constructor(private dataService: DataService ) { }
 
   projects: Project[];
-  issues: Issue[];
+  issues: Partial<Issue>[];
   // issueStrings: string[] = [];
-  selectedIssue: Issue;
+  selectedIssue: Partial<Issue>;
   selectedProject: Project;
   taskDescription: string;
   currentTrackerTimeString: string;
@@ -98,7 +99,6 @@ export class TimeTrackerComponent implements OnInit {
         });
       }
     }
-    console.log(this.selectedProject);
   }
 
   selectProject() {
@@ -107,54 +107,19 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   loadProjects() {
-    this.projects = new Array();
-    this.projects.push(
-      {
-        id: 0,
-        name: 'Projekt I'
-      }
-    );
-    this.projects.push(
-      {
-        id: 1,
-        name: 'Projekt II'
-      }
-    );
-    console.log(this.projects);
+    this.dataService.getProjects().subscribe( data => {
+      this.projects = data;
+    }, error => {
+      console.error('Couldn\'t get projects from data service.');
+    });
   }
 
   loadIssues() {
-    this.issues = new Array();
-    this.issues.push(
-      {
-        id: 0,
-        subject: 'Schriftart umstellen',
-        project: {
-          id: 1,
-          name: 'Projekt II'
-        },
-        tracker: 'feature',
-        assignedTo: {
-          id: 0,
-          name: 'Jakob Neumann'
-        }
-      }
-    );
-    this.issues.push(
-      {
-        id: 1,
-        subject: 'Logo reparieren',
-        project: {
-          id: 1,
-          name: 'Projekt II'
-        },
-        tracker: 'bug',
-        assignedTo: {
-          id: 0,
-          name: 'Jakob Neumann'
-        }
-      }
-    );
+    this.dataService.getIssues().subscribe( data => {
+      this.issues = data;
+    }, error => {
+      console.error('Couldn\'t get issues from data service.');
+    });
   }
 
 }
