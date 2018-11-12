@@ -164,18 +164,36 @@ export class TimeTrackerComponent implements OnInit {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
         this.timeTracker = t;
         if (!isNull(this.timeTracker)) {
-          this.selectedIssue = this.timeTracker.issue;
-          this.selectedProject = this.timeTracker.project;
-          this.taskDescription = this.timeTracker.comment;
-          this.billable = this.timeTracker.billable;
-          this.ensureSelectedIssueIsFromIssueList();
-          this.ensureSelectedProjectIsFromProjectList();
-          interval(1000).subscribe( val => {
-            this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
-          });
+          this.extractFromTimeTracker();
         }
       });
     });
+  }
+
+  extractFromTimeTracker(): void {
+    this.selectedIssue = this.timeTracker.issue;
+    this.selectedProject = this.timeTracker.project;
+    this.taskDescription = this.timeTracker.comment;
+    this.billable = this.timeTracker.billable;
+    this.ensureSelectedIssueIsFromIssueList();
+    this.ensureSelectedProjectIsFromProjectList();
+    interval(1000).subscribe( val => {
+      this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+    });
+  }
+
+  startTimeTracker(): void {
+    console.log('start time tracker with issue #' + this.selectedIssue.id.toString() + ' and description "' + this.taskDescription + '"');
+    this.dataService.startTimeTracker(this.selectedIssue.id, this.taskDescription).subscribe(
+      timeTracker => {
+        this.timeTracker = timeTracker;
+        this.extractFromTimeTracker();
+      }
+     );
+  }
+
+  stopTimeTracker(): void {
+    console.error('Not implemented yet.');
   }
 
 }
