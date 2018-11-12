@@ -6,6 +6,7 @@ import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DataService } from './services/data/data.service';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
@@ -56,6 +57,7 @@ import { TimeTrackerComponent } from './components/time-tracker/time-tracker.com
       useClass: AuthInterceptor,
       multi: true
     },
+    DataService,
     UserService
   ],
   bootstrap: [AppComponent]
