@@ -6,8 +6,7 @@ import { Observable } from 'rxjs';
 import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
-import { RedmineIssue } from 'src/app/redmine-model/redmine-issue.interface';
-import { RedmineIssuesRequest } from 'src/app/redmine-model/requests/redmine-issues-request.interface';
+import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +14,7 @@ import { RedmineIssuesRequest } from 'src/app/redmine-model/requests/redmine-iss
 export class RedmineService extends BaseDataService {
   private projectsUrl = '/projects';
   private issuesUrl = '/issues';
+  private activituesUrl = '/enumerations/time_entry_activities';
 
   constructor(
     protected authenticationService: AuthenticationService,
@@ -31,5 +31,10 @@ export class RedmineService extends BaseDataService {
   getIssues(): Observable<RedmineIssues> {
     const endpoint = this.getJsonEndpointUrl(this.issuesUrl) + '?limit=100';
     return this.httpClient.get<RedmineIssues>(endpoint);
+  }
+
+  getTimeEntryActivities(): Observable<RedmineTimeEntryActivities> {
+    const query = this.getJsonEndpointUrl(this.activituesUrl);
+    return this.httpClient.get<RedmineTimeEntryActivities>(query);
   }
 }
