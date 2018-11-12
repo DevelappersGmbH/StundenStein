@@ -3,7 +3,7 @@ import { Project } from 'src/app/model/project.interface';
 import { Issue } from 'src/app/model/issue.interface';
 import { isUndefined, isNull } from 'util';
 import { FormControl } from '@angular/forms';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, interval } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
@@ -143,6 +143,18 @@ export class TimeTrackerComponent implements OnInit {
     });
   }
 
+  setTimeString(duration: number): void {
+    let sec: number = Math.floor(duration);
+    let min: number = Math.floor(sec / 60);
+    const hrs: number = Math.floor(min / 60);
+    sec = sec % 60;
+    min = min % 60;
+    let secStr: string = sec.toString(); if (secStr.length < 2) { secStr = '0' + secStr; }
+    let minStr: string = min.toString(); if (minStr.length < 2) { minStr = '0' + minStr; }
+    let hrsStr: string = hrs.toString(); if (hrsStr.length < 2) { hrsStr = '0' + hrsStr; }
+    this.currentTrackerTimeString = hrsStr + ':' + minStr + ':' + secStr;
+  }
+
   loadTimeTracker() {
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
@@ -158,6 +170,9 @@ export class TimeTrackerComponent implements OnInit {
           this.billable = this.timeTracker.billable;
           this.ensureSelectedIssueIsFromIssueList();
           this.ensureSelectedProjectIsFromProjectList();
+          interval(1000).subscribe( val => {
+            this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+          });
         }
       });
     });
