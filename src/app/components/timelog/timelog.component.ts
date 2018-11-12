@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
+import {DataService} from '../../services/data/data.service';
+import {Issue} from '../../model/issue.interface';
+import {Project} from '../../model/project.interface';
 
 @Component({
   selector: 'app-record',
@@ -9,6 +12,11 @@ import {map, startWith} from 'rxjs/operators';
   styleUrls: ['./record.component.css']
 })
 export class TimelogComponent implements OnInit {
+
+  constructor(
+    private dataService: DataService
+  ) { }
+
   currentIssue = '';
   currentProject = '';
   currentComment = '';
@@ -21,16 +29,23 @@ export class TimelogComponent implements OnInit {
   booked = false;
   editButton = 'edit';
 
+  projects: Project[];
+  issues: Partial<Issue>[];
+
   issueControl = new FormControl();
   projectControl = new FormControl();
-  issueOptions: string[] = ['One', 'Two', 'Three']; // load options from Redmine
-  projectOptions: string[] = ['Project Software', 'Bowling', 'Rechnerarchitektur']; // load options from Redmine
+  issueOptions: string[]; // load options from Redmine
+  projectOptions: string[]; // load options from Redmine
   filteredIssueOptions: Observable<string[]>;
   filteredProjectOptions: Observable<string[]>;
-  constructor() { }
+
 
   ngOnInit() {
     this.trackedTime = new Date();
+
+    this.loadIssues();
+    this.loadProjects();
+
     this.filteredIssueOptions = this.issueControl.valueChanges
       .pipe(
         startWith(''),
@@ -42,6 +57,30 @@ export class TimelogComponent implements OnInit {
         startWith(''),
         map(value => this.filterProjects(value))
       );
+  }
+
+  loadProjects() {
+    this.dataService.getProjects().subscribe( data => {
+      this.projects = data;
+    }, error => {
+      console.error('Couldn\'t get projects from data service.');
+    });
+
+    this.projects.forEach(project => {
+      this.projectOptions.push(project.name);
+    });
+  }
+
+  loadIssues() {
+    this.dataService.getIssues().subscribe( data => {
+      this.issues = data;
+    }, error => {
+      console.error('Couldn\'t get issues from data service.');
+    });
+
+    this.issues.forEach(issue => {
+      this.issueOptions.push(issue.subject);
+    });
   }
 
   private filterIssues(value: string): string[] {
