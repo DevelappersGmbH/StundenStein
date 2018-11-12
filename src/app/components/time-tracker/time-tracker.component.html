@@ -31,7 +31,7 @@
             </mat-autocomplete-->
         </mat-form-field>
       <span class="field">{{ currentTrackerTimeString }}</span>
-      <mat-checkbox class="field">Billable</mat-checkbox>
+      <mat-checkbox [(value)]="billable" class="field">Billable</mat-checkbox>
       <button class="field" mat-flat-button color="primary">Start</button>
       <mat-slide-toggle [checked]="automaticMode" [disabled]="automaticLock" class="field">Automatic mode</mat-slide-toggle>
   </form>
