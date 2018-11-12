@@ -1,6 +1,7 @@
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
+import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import {
@@ -14,6 +15,8 @@ import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 import { RedmineService } from '../redmine/redmine.service';
+import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
+import { RedmineTimeEntryActivity } from 'src/app/redmine-model/redmine-time-entry-activity.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 
 @Injectable({
@@ -60,18 +63,23 @@ export class DataService {
     return { id: redmineProject.id, name: redmineProject.name };
   }
 
-  getIssues(): Observable<Partial<Issue>[]> {
+  getIssues(): Observable<Issue[]> {
     const calls: Observable<any>[] = [];
     if (!this.cachedProjects || this.cachedProjects.length === 0) {
       calls.push(this.redmineService.getProjects());
     }
     calls.push(this.redmineService.getIssues());
     return forkJoin(calls).pipe(
-      map(results => this.mapRedmineIssuesToIssueArray(results))
+      map(results => this.mapRedmineIssuesToIssueArrayAndStore(results))
     );
   }
 
-  mapRedmineIssuesToIssueArray(results: any[]): Partial<Issue>[] {
+  mapRedmineIssuesToIssueArrayAndStore(results: any[]): Issue[] {
+    this.cachedIssues = this.mapRedmineIssuesToIssueArray(results);
+    return this.cachedIssues;
+  }
+
+  mapRedmineIssuesToIssueArray(results: any[]): Issue[] {
     let redmineIssues: RedmineIssues;
     if (!results || results.length === 0) {
       console.error(
@@ -90,7 +98,7 @@ export class DataService {
       redmineIssues = results[1];
     }
 
-    this.cachedIssues = [];
+    const issues = [];
     redmineIssues.issues.forEach(redmineIssue => {
       const issue: Issue = {
         id: redmineIssue.id,
@@ -110,9 +118,9 @@ export class DataService {
           p => p.id === redmineIssue.project.id
         );
       }
-      this.cachedIssues.push(issue);
+      issues.push(issue);
     });
-    return this.cachedIssues;
+    return issues;
   }
 
   // *************************************************
@@ -123,13 +131,18 @@ export class DataService {
     issueId: number = null,
     comment: string = null
   ): Observable<TimeTracker> {
-    return this.hourglassService
-      .startTimeTracker(issueId, comment)
-      .pipe(map(t => this.mapHourGlassTimeTrackerToTimeTracker(t)));
+    return this.hourglassService.startTimeTracker(issueId, comment).pipe(
+      map(t =>
+        this.mapHourGlassTimeTrackerToTimeTracker(t, {
+          time_entry_activities: []
+        })
+      )
+    );
   }
 
   mapHourGlassTimeTrackerToTimeTracker(
-    hourglassTimeTracker: HourGlassTimeTracker
+    hourglassTimeTracker: HourGlassTimeTracker,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
   ): TimeTracker {
     const timeTracker: TimeTracker = {
       id: hourglassTimeTracker.id,
@@ -149,6 +162,61 @@ export class DataService {
     if (hourglassTimeTracker.comments) {
       timeTracker.comment = hourglassTimeTracker.comments;
     }
+    if (
+      hourglassTimeTracker.activity_id &&
+      redmineTimeEntryActivities.time_entry_activities.length > 0
+    ) {
+      const activity: RedmineTimeEntryActivity = redmineTimeEntryActivities.time_entry_activities.find(
+        a => a.id === hourglassTimeTracker.activity_id
+      );
+      if (activity) {
+        timeTracker.billable = activity.name === 'Billable';
+      }
+    }
     return timeTracker;
+  }
+
+  getTimeTrackerByUserId(userId: number): Observable<TimeTracker> {
+    const calls: Observable<any>[] = [
+      this.hourglassService.getTimeTrackersByUserId(userId),
+      this.redmineService.getTimeEntryActivities()
+    ];
+    return forkJoin(calls).pipe(
+      map(results => {
+        if (results.length === 0) {
+          console.error(
+            'DataService: getTimeTrackerByUserId got no parameter!'
+          );
+        }
+        const hourGlassTimeTrackers: HourGlassTimeTrackers = results.find(
+          item =>
+            (<HourGlassTimeTrackers>item).records !== undefined &&
+            (<HourGlassTimeTrackers>item).records !== null
+        );
+        const redmineTimeEntryActivities: RedmineTimeEntryActivities = results.find(
+          item =>
+            (<RedmineTimeEntryActivities>item).time_entry_activities !==
+              undefined &&
+            (<RedmineTimeEntryActivities>item).time_entry_activities !== null
+        );
+        return this.mapHourGlassTimeTrackersToFirstTimeTracker(
+          hourGlassTimeTrackers,
+          redmineTimeEntryActivities
+        );
+      })
+    );
+  }
+
+  mapHourGlassTimeTrackersToFirstTimeTracker(
+    hourglassTimeTrackers: HourGlassTimeTrackers,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): TimeTracker {
+    if (hourglassTimeTrackers.records.length === 0) {
+      return null;
+    }
+    return this.mapHourGlassTimeTrackerToTimeTracker(
+      hourglassTimeTrackers.records[0],
+      redmineTimeEntryActivities
+    );
   }
 }

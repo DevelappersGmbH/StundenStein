@@ -36,4 +36,10 @@ export class HourGlassService extends BaseDataService {
     }
     return this.httpClient.post<HourGlassTimeTracker>(endpoint, tracker);
   }
+
+  getTimeTrackersByUserId(userId: number): Observable<HourGlassTimeTrackers> {
+    const query =
+      this.getJsonEndpointUrl(this.timeTrackersUrl) + '?user_id=' + userId;
+    return this.httpClient.get<HourGlassTimeTrackers>(query);
+  }
 }
