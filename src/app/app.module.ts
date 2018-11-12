@@ -17,14 +17,16 @@ import {
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatListModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
+import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, RecentTimeLogsComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -37,7 +39,8 @@ import { UserService } from './services/user/user.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatListModule
   ],
   providers: [
     AuthenticationService,
