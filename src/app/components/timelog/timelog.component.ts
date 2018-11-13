@@ -7,9 +7,9 @@ import {Issue} from '../../model/issue.interface';
 import {Project} from '../../model/project.interface';
 
 @Component({
-  selector: 'app-record',
-  templateUrl: './record.component.html',
-  styleUrls: ['./record.component.css']
+  selector: 'app-timelog',
+  templateUrl: './timelog.component.html',
+  styleUrls: ['./timelog.component.scss']
 })
 export class TimelogComponent implements OnInit {
 
