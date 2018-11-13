@@ -11,6 +11,9 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {CdkTableModule} from '@angular/cdk/table';
+import {CdkTreeModule} from '@angular/cdk/tree';
 import {
   MatButtonModule,
   MatCardModule,
@@ -18,7 +21,7 @@ import {
   MatIconModule,
   MatInputModule,
   MatToolbarModule,
-  MatListModule
+  MatListModule,
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -40,7 +43,10 @@ import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-ti
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
-    MatListModule
+    MatListModule,
+    ScrollingModule,
+    CdkTableModule,
+    CdkTreeModule
   ],
   providers: [
     AuthenticationService,

@@ -20,8 +20,16 @@ export class RecentTimeLogsComponent implements OnInit {
     this.loadTimeLogs();
   }
 
+  clickedItem(){
+    console.log("clicked item");
+  }
+
   loadTimeLogs(){
-    this.timeLogList = [];
+    this.timeLogList = this.createTimeLogsArray(1000);
+  }
+
+  createTimeLogsArray(numberOfTimeLogs){
+    let timeLogList = [];
     var project = {
       id: 1,
       name: "prototypeProject"
@@ -39,7 +47,7 @@ export class RecentTimeLogsComponent implements OnInit {
       project: project,
       assignedTo: user
     };
-    for(let i=0;i<10;i++){
+    for(let i=0;i<numberOfTimeLogs;i++){
       var timeLog = {
       id: i,
       timeStarted: "10AM",
@@ -53,8 +61,9 @@ export class RecentTimeLogsComponent implements OnInit {
       project: project,
       user: user
       };
-      this.timeLogList.push(timeLog);
+      timeLogList.push(timeLog);
     }
+    return timeLogList;
   }
 
 }
