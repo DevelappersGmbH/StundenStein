@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {Observable} from 'rxjs';
 import {map, startWith} from 'rxjs/operators';
 import {DataService} from '../../services/data/data.service';
 import {Issue} from '../../model/issue.interface';
 import {Project} from '../../model/project.interface';
+import {TimeLog} from '../../model/time-log.interface';
+import {User} from '../../model/user.interface';
 
 @Component({
   selector: 'app-timelog',
@@ -17,16 +19,21 @@ export class TimelogComponent implements OnInit {
     private dataService: DataService
   ) { }
 
-  currentIssue = '';
-  currentProject = '';
-  currentComment = '';
-  startTime = '00:00';
-  endTime = '00:00';
-  billable = false;
+  @Input() timeLog: TimeLog;
+
+  currentIssueSubject = this.timeLog.issue.subject;
+  currentProjectName = this.timeLog.project.name;
+  currentIssue: Issue = this.timeLog.issue;
+  currentProject: Project = this.timeLog.project;
+  currentComment = this.timeLog.comment;
+  startTime = this.timeLog.timeStarted;
+  endTime = this.timeLog.timeStopped;
+  billable = this.timeLog.billable;
+  trackedTime = this.timeLog.timeInHours; // why in hours?
+  booked = this.timeLog.booked;
+  currentUser: User = this.timeLog.user;
   active = false;
-  trackedTime: any;
   editMode = false;
-  booked = false;
   editButton = 'edit';
 
   projects: Project[];
@@ -34,14 +41,13 @@ export class TimelogComponent implements OnInit {
 
   issueControl = new FormControl();
   projectControl = new FormControl();
-  issueOptions: string[] = []; // load options from Redmine
-  projectOptions: string[] = []; // load options from Redmine
+  issueOptions: string[] = [];
+  projectOptions: string[] = [];
   filteredIssueOptions: Observable<string[]>;
   filteredProjectOptions: Observable<string[]>;
 
 
   ngOnInit() {
-    this.trackedTime = new Date();
 
     this.loadIssues();
     this.loadProjects();
@@ -103,7 +109,7 @@ export class TimelogComponent implements OnInit {
 
     ??? the same to Hourglass?
     */
-    this.currentIssue = issue;
+    this.currentIssueSubject = issue;
   }
 
   private updateProject(project) {
@@ -114,7 +120,7 @@ export class TimelogComponent implements OnInit {
 
     ??? the same to Hourglass?
     */
-    this.currentProject = project;
+    this.currentProjectName = project;
   }
 
 
@@ -132,7 +138,6 @@ export class TimelogComponent implements OnInit {
     startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
     */
     /*make the trackedTime change according to timetracker*/
-    /*make the button green and not clickable*/
     this.active = true;
   }
 
@@ -140,8 +145,6 @@ export class TimelogComponent implements OnInit {
     /*
     send billable sign to TimeTracker
     */
-    /*make the button green*/
-
     this.billable = !this.billable;
   }
 
@@ -181,13 +184,12 @@ export class TimelogComponent implements OnInit {
 
   private isBooked() {
     if (this.booked === false) {
-      if (this.currentIssue === '' || this.currentProject === '') {
+      if (this.currentIssueSubject === '' || this.currentProjectName === '') {
       } else {
         this.booked = true;
       }
 
     }
-    /* if issue and project filled in set booked = true*/
   }
 
   private changeMode() {
