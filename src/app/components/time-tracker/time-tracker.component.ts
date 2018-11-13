@@ -123,7 +123,6 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   selectProject() {
-    console.log(this.selectedProject);
     this.selectedIssue = undefined;
   }
 
@@ -183,7 +182,6 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
-    console.log('start time tracker with issue #' + this.selectedIssue.id.toString() + ' and description "' + this.taskDescription + '"');
     this.dataService.startTimeTracker(this.selectedIssue.id, this.taskDescription).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
