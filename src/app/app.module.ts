@@ -23,10 +23,10 @@ import {
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
-import { TimelogComponent } from './components/timelog/timelog.component';
+import { TimeLogComponent } from './components/timelog/timelog.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimelogComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeLogComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
