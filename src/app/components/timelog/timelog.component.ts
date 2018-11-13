@@ -34,8 +34,8 @@ export class TimelogComponent implements OnInit {
 
   issueControl = new FormControl();
   projectControl = new FormControl();
-  issueOptions: string[]; // load options from Redmine
-  projectOptions: string[]; // load options from Redmine
+  issueOptions: string[] = []; // load options from Redmine
+  projectOptions: string[] = []; // load options from Redmine
   filteredIssueOptions: Observable<string[]>;
   filteredProjectOptions: Observable<string[]>;
 
@@ -46,10 +46,12 @@ export class TimelogComponent implements OnInit {
     this.loadIssues();
     this.loadProjects();
 
+    console.log(this.issueOptions);
+
     this.filteredIssueOptions = this.issueControl.valueChanges
       .pipe(
         startWith(''),
-        map(value => this.filterIssues(value))
+        map(value => value ? this.filterIssues(value) : this.issueOptions.slice())
       );
 
     this.filteredProjectOptions = this.projectControl.valueChanges
@@ -62,24 +64,22 @@ export class TimelogComponent implements OnInit {
   loadProjects() {
     this.dataService.getProjects().subscribe( data => {
       this.projects = data;
+      this.projects.forEach(project => {
+        this.projectOptions.push(project.name);
+      });
     }, error => {
       console.error('Couldn\'t get projects from data service.');
-    });
-
-    this.projects.forEach(project => {
-      this.projectOptions.push(project.name);
     });
   }
 
   loadIssues() {
     this.dataService.getIssues().subscribe( data => {
       this.issues = data;
+      this.issues.forEach(issue => {
+        this.issueOptions.push(issue.subject);
+      });
     }, error => {
       console.error('Couldn\'t get issues from data service.');
-    });
-
-    this.issues.forEach(issue => {
-      this.issueOptions.push(issue.subject);
     });
   }
 
