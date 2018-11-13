@@ -169,11 +169,7 @@ export class TimelogComponent implements OnInit {
   }
 
   private isRunning() {
-    if (this.active === true) {
-      return true;
-    } else {
-      return false;
-    }
+    return this.active;
   }
 
   private calculateTime() {
