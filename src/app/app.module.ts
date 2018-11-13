@@ -5,8 +5,8 @@ import { AuthGuard } from './services/authguard/authguard.service';
 import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DataService } from './services/data/data.service';
-import { FormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
@@ -17,14 +17,19 @@ import {
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatSelectModule,
+  MatCheckboxModule,
+  MatSlideToggleModule,
+  MatAutocompleteModule,
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
+import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -37,7 +42,12 @@ import { UserService } from './services/user/user.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSlideToggleModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule
   ],
   providers: [
     AuthenticationService,
