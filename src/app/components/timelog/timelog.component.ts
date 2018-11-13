@@ -13,7 +13,7 @@ import {User} from '../../model/user.interface';
   templateUrl: './timelog.component.html',
   styleUrls: ['./timelog.component.scss']
 })
-export class TimelogComponent implements OnInit {
+export class TimeLogComponent implements OnInit {
 
   constructor(
     private dataService: DataService
