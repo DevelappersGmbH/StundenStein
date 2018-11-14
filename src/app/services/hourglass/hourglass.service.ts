@@ -1,12 +1,14 @@
 import { AuthenticationService } from '../authentication/authentication.service';
 import { BaseDataService } from '../basedata/basedata.service';
+import { flatMap, map } from 'rxjs/operators';
+import { forkJoin, Observable } from 'rxjs';
 import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-bookings.interface';
+import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
 import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.interface';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from '../user/user.service';
 
@@ -49,7 +51,7 @@ export class HourGlassService extends BaseDataService {
     return this.httpClient.get<HourGlassTimeTrackers>(query);
   }
 
-  getTimeLogs(userId: number = -1): Observable<HourGlassTimeLogs> {
+  getTimeLogs(userId: number = -1): Observable<HourGlassTimeLog[]> {
     let query =
       this.getJsonEndpointUrl(this.timeLogsUrl) +
       '?limit=' +
@@ -57,7 +59,48 @@ export class HourGlassService extends BaseDataService {
     if (userId > -1) {
       query += '&user_id=' + userId;
     }
-    return this.httpClient.get<HourGlassTimeLogs>(query);
+    return this.httpClient.get<HourGlassTimeLogs>(query).pipe(
+      flatMap(timeLogs => {
+        const items: HourGlassTimeLog[] = timeLogs.records;
+        const itemsToDownload = timeLogs.count - items.length;
+        if (itemsToDownload >= 0) {
+          return this.downloadMoreItems<HourGlassTimeLogs>(
+            query,
+            itemsToDownload,
+            timeLogs.limit
+          ).pipe(
+            map(results => {
+              results.forEach(r => {
+                r.records.forEach(timelog => {
+                  if (
+                    items.findIndex(entry => entry.id === timelog.id) === -1
+                  ) {
+                    items.push(timelog);
+                  }
+                });
+              });
+              return items;
+            })
+          );
+        }
+        return Observable.create(items);
+      })
+    );
+  }
+
+  downloadMoreItems<T>(
+    query: string,
+    itemsToDownload: number,
+    limit: number
+  ): Observable<T[]> {
+    const downloadsToDo = itemsToDownload / limit;
+    const calls: Observable<T>[] = [];
+    // i starts by 1 because page is already downloaded.
+    for (let i = 1; i < downloadsToDo + 1; i++) {
+      const innerquery = query + '&offset=' + limit * i;
+      calls.push(this.httpClient.get<T>(innerquery));
+    }
+    return forkJoin(calls);
   }
 
   getTimeBookings(userId: number = -1): Observable<HourGlassTimeBookings> {
