@@ -2,6 +2,7 @@ import { AuthenticationService } from '../authentication/authentication.service'
 import { BaseDataService } from '../basedata/basedata.service';
 import { flatMap, map } from 'rxjs/operators';
 import { forkJoin, Observable } from 'rxjs';
+import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-bookings.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
 import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.interface';
@@ -88,7 +89,7 @@ export class HourGlassService extends BaseDataService {
     );
   }
 
-  getTimeBookings(userId: number = -1): Observable<HourGlassTimeBookings> {
+  getTimeBookings(userId: number = -1): Observable<HourGlassTimeBooking[]> {
     let query =
       this.getJsonEndpointUrl(this.timeBookingsUrl) +
       '?limit=' +
@@ -96,6 +97,32 @@ export class HourGlassService extends BaseDataService {
     if (userId > -1) {
       query += '&user_id=' + userId;
     }
-    return this.httpClient.get<HourGlassTimeBookings>(query);
+    return this.httpClient.get<HourGlassTimeBookings>(query).pipe(
+      flatMap(timeLogs => {
+        const items: HourGlassTimeBooking[] = timeLogs.records;
+        const itemsToDownload = timeLogs.count - items.length;
+        if (itemsToDownload >= 0) {
+          return this.downloadMoreItems<HourGlassTimeBookings>(
+            query,
+            itemsToDownload,
+            timeLogs.limit
+          ).pipe(
+            map(results => {
+              results.forEach(r => {
+                r.records.forEach(timebooking => {
+                  if (
+                    items.findIndex(entry => entry.id === timebooking.id) === -1
+                  ) {
+                    items.push(timebooking);
+                  }
+                });
+              });
+              return items;
+            })
+          );
+        }
+        return Observable.create(items);
+      })
+    );
   }
 }
