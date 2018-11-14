@@ -25,9 +25,9 @@ export class HourGlassService extends BaseDataService {
 
   constructor(
     protected authenticationService: AuthenticationService,
-    private httpClient: HttpClient
+    protected httpClient: HttpClient
   ) {
-    super(authenticationService);
+    super(authenticationService, httpClient);
   }
 
   startTimeTracker(
@@ -86,21 +86,6 @@ export class HourGlassService extends BaseDataService {
         return Observable.create(items);
       })
     );
-  }
-
-  downloadMoreItems<T>(
-    query: string,
-    itemsToDownload: number,
-    limit: number
-  ): Observable<T[]> {
-    const downloadsToDo = itemsToDownload / limit;
-    const calls: Observable<T>[] = [];
-    // i starts by 1 because page is already downloaded.
-    for (let i = 1; i < downloadsToDo + 1; i++) {
-      const innerquery = query + '&offset=' + limit * i;
-      calls.push(this.httpClient.get<T>(innerquery));
-    }
-    return forkJoin(calls);
   }
 
   getTimeBookings(userId: number = -1): Observable<HourGlassTimeBookings> {
