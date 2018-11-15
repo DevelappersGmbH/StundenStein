@@ -1,7 +1,6 @@
 import { AuthenticationService } from '../authentication/authentication.service';
 import { BaseDataService } from '../basedata/basedata.service';
 import { flatMap, map } from 'rxjs/operators';
-import { forkJoin, Observable } from 'rxjs';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-bookings.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
@@ -11,8 +10,7 @@ import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hour
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { TimeTracker } from 'src/app/model/time-tracker.interface';
-import { UserService } from '../user/user.service';
+import { Observable, of } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -58,7 +56,7 @@ export class HourGlassService extends BaseDataService {
       flatMap(timeLogs => {
         const items: HourGlassTimeLog[] = timeLogs.records;
         const itemsToDownload = timeLogs.count - items.length;
-        if (itemsToDownload >= 0) {
+        if (itemsToDownload > 0) {
           return this.downloadMoreItems<HourGlassTimeLogs>(
             query,
             itemsToDownload,
@@ -78,7 +76,7 @@ export class HourGlassService extends BaseDataService {
             })
           );
         }
-        return Observable.create(items);
+        return of(items);
       })
     );
   }
@@ -87,7 +85,7 @@ export class HourGlassService extends BaseDataService {
     let query =
       this.getJsonEndpointUrl(this.timeBookingsUrl) +
       '?limit=' +
-      this.timeLogsDownloadLimit;
+      this.timeBookingsDownloadLimit;
     if (userId > -1) {
       query += '&user_id=' + userId;
     }
@@ -95,7 +93,7 @@ export class HourGlassService extends BaseDataService {
       flatMap(timeLogs => {
         const items: HourGlassTimeBooking[] = timeLogs.records;
         const itemsToDownload = timeLogs.count - items.length;
-        if (itemsToDownload >= 0) {
+        if (itemsToDownload > 0) {
           return this.downloadMoreItems<HourGlassTimeBookings>(
             query,
             itemsToDownload,
@@ -115,7 +113,7 @@ export class HourGlassService extends BaseDataService {
             })
           );
         }
-        return Observable.create(items);
+        return of(items);
       })
     );
   }
