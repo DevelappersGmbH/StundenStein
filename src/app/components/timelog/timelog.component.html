@@ -3,7 +3,7 @@
     <!--Issue Autocomplete-->
     <form class="total-record" >
 
-      <mat-form-field class="field issue" [ngClass]="{'edit': !editMode}">
+      <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput [formControl]="issueControl" [matAutocomplete]="issue">
         <mat-placeholder class="placeholder">Issue</mat-placeholder>
       </mat-form-field>
@@ -14,13 +14,13 @@
         </mat-option>
       </mat-autocomplete>
 
-      <mat-form-field class="field comment" [ngClass]="{'edit': !editMode}">
+      <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput (keyup.enter)="updateComment($event.target.value)"
                (blur)="updateComment($event.target.value)">
         <mat-placeholder class="placeholder">Comment</mat-placeholder>
       </mat-form-field>
 
-      <mat-form-field class="field project" [ngClass]="{'edit': !editMode}">
+      <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput [formControl]="projectControl" [matAutocomplete]="auto">
         <mat-placeholder class="placeholder">Project</mat-placeholder>
       </mat-form-field>
