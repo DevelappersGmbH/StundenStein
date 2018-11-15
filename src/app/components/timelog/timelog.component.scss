@@ -11,6 +11,11 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: inline;
 }
 
+.mat-focused .placeholder {
+  color: transparent;
+}
+
+
 .button_play{
   margin-left: 18%;
 }

@@ -4,7 +4,8 @@
     <form class="total-record" >
 
       <mat-form-field class="field issue" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" placeholder="Issue" matInput [formControl]="issueControl" [matAutocomplete]="issue">
+        <input type="text" [readonly]="!editMode" matInput [formControl]="issueControl" [matAutocomplete]="issue">
+        <mat-placeholder class="placeholder">Issue</mat-placeholder>
       </mat-form-field>
 
       <mat-autocomplete #issue="matAutocomplete" (optionSelected)='updateIssue($event.option.value)'>
@@ -14,12 +15,14 @@
       </mat-autocomplete>
 
       <mat-form-field class="field comment" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" matInput placeholder="Comment" (keyup.enter)="updateComment($event.target.value)"
+        <input type="text" [readonly]="!editMode" matInput (keyup.enter)="updateComment($event.target.value)"
                (blur)="updateComment($event.target.value)">
+        <mat-placeholder class="placeholder">Comment</mat-placeholder>
       </mat-form-field>
 
       <mat-form-field class="field project" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" placeholder="Project" matInput [formControl]="projectControl" [matAutocomplete]="auto">
+        <input type="text" [readonly]="!editMode" matInput [formControl]="projectControl" [matAutocomplete]="auto">
+        <mat-placeholder class="placeholder">Project</mat-placeholder>
       </mat-form-field>
 
       <mat-autocomplete #auto="matAutocomplete" (optionSelected)='updateProject($event.option.value)'>
