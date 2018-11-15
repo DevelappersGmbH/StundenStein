@@ -30,7 +30,7 @@ export class TimeTrackerComponent implements OnInit {
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
-  timeTracker: TimeTracker;
+  timeTracker: Partial<TimeTracker> = {};
   billable: boolean;
   /*
   issueCtrl = new FormControl();
