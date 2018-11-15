@@ -52,8 +52,6 @@ export class TimeLogComponent implements OnInit {
     this.loadIssues();
     this.loadProjects();
 
-    console.log(this.issueOptions);
-
     this.filteredIssueOptions = this.issueControl.valueChanges
       .pipe(
         startWith(''),
@@ -70,9 +68,7 @@ export class TimeLogComponent implements OnInit {
   loadProjects() {
     this.dataService.getProjects().subscribe( data => {
       this.projects = data;
-      this.projects.forEach(project => {
-        this.projectOptions.push(project.name);
-      });
+      this.loadProjectOptions();
     }, error => {
       console.error('Couldn\'t get projects from data service.');
     });
@@ -81,11 +77,21 @@ export class TimeLogComponent implements OnInit {
   loadIssues() {
     this.dataService.getIssues().subscribe( data => {
       this.issues = data;
-      this.issues.forEach(issue => {
-        this.issueOptions.push(issue.subject);
-      });
+      this.loadIssueOptions();
     }, error => {
       console.error('Couldn\'t get issues from data service.');
+    });
+  }
+
+  loadIssueOptions() {
+    this.issues.forEach(issue => {
+      this.issueOptions.push(issue.subject);
+    });
+  }
+
+  loadProjectOptions() {
+    this.projects.forEach(project => {
+      this.projectOptions.push(project.name);
     });
   }
 
@@ -102,34 +108,50 @@ export class TimeLogComponent implements OnInit {
   }
 
   private updateIssue(issue) {
-    /*
-    get the record with current issue from Redmine
-    send issue to the Redmine
-    change current issue value to new
-
-    ??? the same to Hourglass?
-    */
+    console.log('Issue: ', issue);
     this.currentIssueSubject = issue;
+
+    const newIssue = this.issues.find(entry => entry.subject === issue);
+    if (newIssue) {
+      this.currentIssue = newIssue;
+      this.currentProject = newIssue.project;
+      this.currentProjectName = newIssue.project.name;
+
+      this.updateProject(this.currentProjectName);
+
+      this.projectOptions.length = 0;
+      this.projectOptions.push(this.currentProjectName);
+
+      this.projectControl.setValue(this.currentProjectName);
+
+    } else if (issue === '') {
+      this.loadIssueOptions();
+      this.loadProjectOptions();
+    } else {
+      // create a new Timelog entry with new issue value
+    }
+    console.log(this.projectOptions);
+
   }
 
   private updateProject(project) {
-    /*
-    get the record with current issue from Redmine
-    send project of this issue to the Redmine
-    change current project value to new
-
-    ??? the same to Hourglass?
-    */
+    console.log('Project :', project);
     this.currentProjectName = project;
+    this.issueOptions.length = 0;
+    if (project === '') {
+      this.loadIssueOptions();
+    } else {
+      this.issues.forEach(issue => {
+        if (issue.project.name === project) {
+          this.issueOptions.push(issue.subject);
+        }
+      });
+    }
+    console.log(this.projectOptions);
   }
 
 
   private updateComment(comment) {
-    /*
-    get the record with current issue from Hourglass
-    send comment to this issue to the Hourglass
-    change current comment value to new
-    */
     this.currentComment = comment;
   }
 
@@ -178,7 +200,7 @@ export class TimeLogComponent implements OnInit {
     */
   }
 
-  private isBooked() {
+  private toBooked() {
     if (this.booked === false) {
       if (this.currentIssueSubject === '' || this.currentProjectName === '') {
       } else {
@@ -196,7 +218,7 @@ export class TimeLogComponent implements OnInit {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
     } else {
-      this.isBooked();
+      this.toBooked();
       if (this.booked === false) {
         /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'assignment';
