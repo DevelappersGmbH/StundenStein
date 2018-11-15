@@ -7,6 +7,7 @@ import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-book
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
 import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.interface';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
+import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hourglass-time-tracker-request.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -32,18 +33,11 @@ export class HourGlassService extends BaseDataService {
   }
 
   startTimeTracker(
-    issueId: number = null,
-    comment: string = null
+    timeTracker: Partial<HourGlassTimeTracker>
   ): Observable<HourGlassTimeTracker> {
     const endpoint = this.getJsonEndpointUrl(this.startTimeTrackerUrl);
-    const tracker: Partial<HourGlassTimeTracker> = {};
-    if (issueId) {
-      tracker.issue_id = issueId;
-    }
-    if (comment) {
-      tracker.comments = comment;
-    }
-    return this.httpClient.post<HourGlassTimeTracker>(endpoint, tracker);
+    const request: HourGlassTimeTrackerRequest = { time_tracker: timeTracker };
+    return this.httpClient.post<HourGlassTimeTracker>(endpoint, request);
   }
 
   getTimeTrackersByUserId(userId: number): Observable<HourGlassTimeTrackers> {
