@@ -179,7 +179,7 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
-    this.dataService.startTimeTracker(this.timeTracker.issue.id, this.timeTracker.comment).subscribe(
+    this.dataService.startTimeTracker(this.timeTracker).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
         this.extractFromTimeTracker();
