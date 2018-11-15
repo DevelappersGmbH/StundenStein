@@ -2,26 +2,13 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: none;
 }
 
+.total-div{
+  display: flex;
+  justify-content: space-between;
+}
+
 .field {
-  padding-left: 5px;
-}
-
-.total-record {
-  display: inline;
-}
-
-.button_play{
-  margin-left: 15%;
-}
-
-.issue, .project {
-  width: 17%;
-  padding-left: 10px;
-}
-
-.comment {
-  width: 20%;
-  padding-left: 10px;
+  margin-left: 5px;
 }
 
 .start-time, .end-time, .tracked-time{

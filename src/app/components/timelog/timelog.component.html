@@ -1,8 +1,8 @@
 <mat-card class="record-component">
   <mat-card-content >
     <form class="total-record">
-
-      <span class="inputs" >
+      <div class="total-div">
+      <div>
       <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="issueControl" [matAutocomplete]="issue">
         <mat-placeholder class="placeholder">Issue</mat-placeholder>
@@ -30,37 +30,37 @@
           {{ project }}
         </mat-option>
       </mat-autocomplete>
-      </span>
+      </div>
 
-    <span class="empty-space" >
+        <div>
       <!--empty space-->
-    </span>
+        </div>
 
-    <span class="buttons" >
+        <div>
+          <button mat-icon-button class="field button_play" [disabled]="editMode" (click)="startTracker()">
+            <mat-icon class="icon" [ngClass]="{'active': active}">play_arrow</mat-icon>
+          </button>
 
-      <button mat-icon-button class="field button_play" [disabled]="editMode" (click)="startTracker()">
-        <mat-icon class="icon" [ngClass]="{'active': active}">play_arrow</mat-icon>
-      </button>
+          <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()">
+            <mat-icon class="icon" [ngClass]="{'active': billable}">attach_money</mat-icon>
+          </button>
 
-      <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()">
-        <mat-icon class="icon" [ngClass]="{'active': billable}">attach_money</mat-icon>
-      </button>
+          <mat-form-field class="field start-time" [ngClass]="{'edit': !editMode}">
+            <input [(ngModel)]="startTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
+          </mat-form-field> -
+          <mat-form-field class="field end-time" [ngClass]="{'edit': !editMode}">
+            <input [(ngModel)]="endTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
+          </mat-form-field>
 
-      <mat-form-field class="field start-time" [ngClass]="{'edit': !editMode}">
-        <input [(ngModel)]="startTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
-      </mat-form-field> -
-      <mat-form-field class="field end-time" [ngClass]="{'edit': !editMode}">
-        <input [(ngModel)]="endTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
-      </mat-form-field>
+          <span class=" field tracked-time">
+            {{trackedTime | date : 'HH:mm:ss'}}
+          </span>
 
-      <span class=" field tracked-time">
-        {{trackedTime | date : 'HH:mm:ss'}}
-      </span>
-
-      <button mat-icon-button class="field button" (click)="changeMode()">
-        <mat-icon class="icon" [ngClass]="{'active': editMode, 'attention': editButton == 'assignment'}">{{editButton}}</mat-icon>
-      </button>
-    </span>
+          <button mat-icon-button class="field button" (click)="changeMode()">
+            <mat-icon class="icon" [ngClass]="{'active': editMode, 'attention': editButton == 'assignment'}">{{editButton}}</mat-icon>
+          </button>
+        </div>
+      </div>
     </form>
   </mat-card-content>
 </mat-card>
