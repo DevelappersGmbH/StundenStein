@@ -18,9 +18,9 @@ export class RedmineService extends BaseDataService {
 
   constructor(
     protected authenticationService: AuthenticationService,
-    private httpClient: HttpClient
+    protected httpClient: HttpClient
   ) {
-    super(authenticationService);
+    super(authenticationService, httpClient);
   }
 
   getProjects(): Observable<RedmineProjects> {

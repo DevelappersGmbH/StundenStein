@@ -1,0 +1,16 @@
+.field {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.field:first-child {
+  padding-right: 10px;
+}
+.field-right:last-child {
+  padding-left: 10px;
+}
+.field-large {
+  width: 30%;
+}
+.field-small {
+  width: 15%;
+}
