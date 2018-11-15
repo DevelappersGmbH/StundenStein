@@ -11,6 +11,9 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {CdkTableModule} from '@angular/cdk/table';
+import {CdkTreeModule} from '@angular/cdk/tree';
 import {
   MatButtonModule,
   MatCardModule,
@@ -18,18 +21,20 @@ import {
   MatIconModule,
   MatInputModule,
   MatToolbarModule,
+  MatListModule,
   MatSelectModule,
   MatCheckboxModule,
   MatSlideToggleModule,
-  MatAutocompleteModule,
+  MatAutocompleteModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
+import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent, RecentTimeLogsComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -43,6 +48,10 @@ import { TimeTrackerComponent } from './components/time-tracker/time-tracker.com
     MatButtonModule,
     MatIconModule,
     MatToolbarModule,
+    MatListModule,
+    ScrollingModule,
+    CdkTableModule,
+    CdkTreeModule,
     MatSelectModule,
     MatCheckboxModule,
     MatSlideToggleModule,
