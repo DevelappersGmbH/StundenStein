@@ -24,7 +24,6 @@ export class TimeTrackerComponent implements OnInit {
   projects: Project[];
   issues: Issue[];
   // issueStrings: string[] = [];
-  taskDescription: string;
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
@@ -172,9 +171,6 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   extractFromTimeTracker(): void {
-    this.timeTracker.issue = this.timeTracker.issue;
-    this.timeTracker.project = this.timeTracker.project;
-    this.taskDescription = this.timeTracker.comment;
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
     interval(1000).subscribe( val => {
@@ -183,7 +179,7 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
-    this.dataService.startTimeTracker(this.timeTracker.issue.id, this.taskDescription).subscribe(
+    this.dataService.startTimeTracker(this.timeTracker.issue.id, this.timeTracker.comment).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
         this.extractFromTimeTracker();

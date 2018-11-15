@@ -13,8 +13,8 @@
         </mat-autocomplete-->
       </mat-form-field>
       <mat-form-field class="field field-large">
-          <input matInput type="text" placeholder="Task description" [(ngModel)]="taskDescription"  [ngModelOptions]="{standalone: true}" >
-          <button mat-button *ngIf="taskDescription" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
+          <input matInput type="text" placeholder="Task description" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
+          <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
             <mat-icon>close</mat-icon>
           </button>
         </mat-form-field>
