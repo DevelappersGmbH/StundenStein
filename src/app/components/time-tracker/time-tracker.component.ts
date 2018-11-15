@@ -28,7 +28,7 @@ export class TimeTrackerComponent implements OnInit {
   automaticMode: boolean;
   automaticLock: boolean;
   timeTracker: Partial<TimeTracker> = {
-    billable: false,
+    billable: true,
     comment: '',
     issue: null,
     project: null
