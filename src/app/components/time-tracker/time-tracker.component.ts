@@ -22,10 +22,8 @@ export class TimeTrackerComponent implements OnInit {
     ) { }
 
   projects: Project[];
-  issues: Partial<Issue>[];
+  issues: Issue[];
   // issueStrings: string[] = [];
-  selectedIssue: Partial<Issue>;
-  selectedProject: Project;
   taskDescription: string;
   currentTrackerTimeString: string;
   automaticMode: boolean;
@@ -98,36 +96,36 @@ export class TimeTrackerComponent implements OnInit {
   selectIssue() {
     // console.log('issue string selected: ' + data);
     // this.selectedIssue = this.getIssueFromAutoSelectString(data);
-    if (isUndefined(this.selectedIssue)) {
-      this.selectedProject = undefined;
+    if (isUndefined(this.timeTracker.issue)) {
+      this.timeTracker.issue = undefined;
     } else {
-      this.selectedProject = this.selectedIssue.project;
+      this.timeTracker.project = this.timeTracker.issue.project;
       this.ensureSelectedProjectIsFromProjectList();
     }
   }
 
   ensureSelectedProjectIsFromProjectList() {
-    if (!this.projects.includes(this.selectedProject)) {
+    if (!this.projects.includes(this.timeTracker.project)) {
       this.projects.forEach( project => {
-        if (JSON.stringify(project) === JSON.stringify(this.selectedProject)) {
-          this.selectedProject = project;
+        if (JSON.stringify(project) === JSON.stringify(this.timeTracker.project)) {
+          this.timeTracker.project = project;
         }
       });
     }
   }
 
   ensureSelectedIssueIsFromIssueList() {
-    if (!this.issues.includes(this.selectedIssue)) {
+    if (!this.issues.includes(this.timeTracker.issue)) {
       this.issues.forEach( issue => {
-        if (JSON.stringify(issue) === JSON.stringify(this.selectedIssue)) {
-          this.selectedIssue = issue;
+        if (JSON.stringify(issue) === JSON.stringify(this.timeTracker.issue)) {
+          this.timeTracker.issue = issue;
         }
       });
     }
   }
 
   selectProject() {
-    this.selectedIssue = undefined;
+    this.timeTracker.issue = undefined;
   }
 
   loadProjects() {
@@ -174,8 +172,8 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   extractFromTimeTracker(): void {
-    this.selectedIssue = this.timeTracker.issue;
-    this.selectedProject = this.timeTracker.project;
+    this.timeTracker.issue = this.timeTracker.issue;
+    this.timeTracker.project = this.timeTracker.project;
     this.taskDescription = this.timeTracker.comment;
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
@@ -185,7 +183,7 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
-    this.dataService.startTimeTracker(this.selectedIssue.id, this.taskDescription).subscribe(
+    this.dataService.startTimeTracker(this.timeTracker.issue.id, this.taskDescription).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
         this.extractFromTimeTracker();

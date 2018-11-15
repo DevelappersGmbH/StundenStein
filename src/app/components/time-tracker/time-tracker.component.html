@@ -1,7 +1,7 @@
 <mat-card>
   <form>
       <mat-form-field class="field field-small">
-        <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="selectedIssue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
+        <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="timeTracker.issue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
           <mat-option>None</mat-option>
           <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
         </mat-select>
@@ -19,7 +19,7 @@
           </button>
         </mat-form-field>
       <mat-form-field class="field field-small">
-          <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="selectedProject" [ngModelOptions]="{standalone: true}">
+          <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="timeTracker.project" [ngModelOptions]="{standalone: true}">
             <mat-option>None</mat-option>
             <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
           </mat-select>
@@ -32,8 +32,8 @@
         </mat-form-field>
       <span class="field">{{ currentTrackerTimeString }}</span>
       <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
-      <button *ngIf="this.timeTracker === null" (click)="startTimeTracker()" class="field" mat-flat-button color="primary">Start</button>
-      <button *ngIf="this.timeTracker" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+      <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary">Start</button>
+      <button *ngIf="this.timeTracker.id !== undefined" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
       <mat-slide-toggle [checked]="automaticMode" [disabled]="automaticLock" class="field">Automatic mode</mat-slide-toggle>
   </form>
 </mat-card>
