@@ -30,8 +30,12 @@ export class TimeTrackerComponent implements OnInit {
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
-  timeTracker: Partial<TimeTracker> = {};
-  billable: boolean;
+  timeTracker: Partial<TimeTracker> = {
+    billable: false,
+    comment: '',
+    issue: null,
+    project: null
+  };
   /*
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
@@ -161,8 +165,8 @@ export class TimeTrackerComponent implements OnInit {
     ];
     forkJoin(calls).subscribe(x => {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
-        this.timeTracker = t;
-        if (!isNull(this.timeTracker)) {
+        if (!isNull(t)) {
+          this.timeTracker = t;
           this.extractFromTimeTracker();
         }
       });
@@ -173,7 +177,6 @@ export class TimeTrackerComponent implements OnInit {
     this.selectedIssue = this.timeTracker.issue;
     this.selectedProject = this.timeTracker.project;
     this.taskDescription = this.timeTracker.comment;
-    this.billable = this.timeTracker.billable;
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
     interval(1000).subscribe( val => {
