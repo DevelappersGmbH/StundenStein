@@ -159,6 +159,17 @@ export class DataService {
     );
   }
 
+  stopTimeTracker(timeTracker: TimeTracker): Observable<boolean> {
+    return this.hourglassService.stopTimeTracker(timeTracker.id).pipe(
+      map(hgTimeTrackerStopResponse => {
+        if (hgTimeTrackerStopResponse.time_log) {
+          return true;
+        }
+        return false;
+      })
+    );
+  }
+
   mapPartialTimeTrackerToPartialHourGlassTimeTracker(
     timeTracker: Partial<TimeTracker>,
     redmineTimeEntryActivities: RedmineTimeEntryActivities
