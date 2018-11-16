@@ -1,3 +1,10 @@
+import {
+  flatMap,
+  map,
+  mapTo,
+  switchMap,
+  tap
+  } from 'rxjs/operators';
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
@@ -6,12 +13,6 @@ import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-track
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
-import {
-  map,
-  mapTo,
-  switchMap,
-  tap
-  } from 'rxjs/operators';
 import { Project } from 'src/app/model/project.interface';
 import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
@@ -133,17 +134,59 @@ export class DataService {
   // ******************HourGlass**********************
   // *************************************************
 
-  startTimeTracker(
-    issueId: number = null,
-    comment: string = null
-  ): Observable<TimeTracker> {
-    return this.hourglassService.startTimeTracker(issueId, comment).pipe(
-      map(t =>
-        this.mapHourGlassTimeTrackerToTimeTracker(t, {
-          time_entry_activities: []
-        })
-      )
+  startTimeTracker(timeTracker: Partial<TimeTracker>): Observable<TimeTracker> {
+    const calls: Observable<any>[] = [
+      this.redmineService.getTimeEntryActivities(),
+      this.redmineService.getIssues()
+    ];
+    return forkJoin(calls).pipe(
+      flatMap(results => {
+        return this.hourglassService
+          .startTimeTracker(
+            this.mapPartialTimeTrackerToPartialHourGlassTimeTracker(
+              timeTracker,
+              results[0]
+            )
+          )
+          .pipe(
+            map(t =>
+              this.mapHourGlassTimeTrackerToTimeTracker(t, {
+                time_entry_activities: []
+              })
+            )
+          );
+      })
     );
+  }
+
+  mapPartialTimeTrackerToPartialHourGlassTimeTracker(
+    timeTracker: Partial<TimeTracker>,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): Partial<HourGlassTimeTracker> {
+    const hgtracker: Partial<HourGlassTimeTracker> = {
+      comments: timeTracker.comment,
+      issue_id: timeTracker.issue ? timeTracker.issue.id : undefined,
+      project_id: timeTracker.project ? timeTracker.project.id : undefined,
+      id: timeTracker.id ? timeTracker.id : undefined,
+      activity_id: this.mapBillableToRedmineTimeEntryActivityId(
+        timeTracker.billable,
+        redmineTimeEntryActivities
+      )
+    };
+    return hgtracker;
+  }
+
+  mapBillableToRedmineTimeEntryActivityId(
+    value: boolean,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): number {
+    return value
+      ? redmineTimeEntryActivities.time_entry_activities.find(
+          entry => entry.name === 'Billable'
+        ).id
+      : redmineTimeEntryActivities.time_entry_activities.find(
+          entry => entry.name === 'Non billable'
+        ).id;
   }
 
   mapHourGlassTimeTrackerToTimeTracker(
