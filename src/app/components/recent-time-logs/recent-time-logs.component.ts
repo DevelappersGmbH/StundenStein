@@ -5,6 +5,7 @@ import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
 import { User } from 'src/app/model/user.interface';
 import { Observable, forkJoin } from 'rxjs';
+import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
   selector: 'app-recent-time-logs',
@@ -15,7 +16,8 @@ import { Observable, forkJoin } from 'rxjs';
 export class RecentTimeLogsComponent implements OnInit {
 
   constructor(
-    private dataService: DataService
+    private dataService: DataService,
+    private userService: UserService
     ) {
   }
 
@@ -28,6 +30,6 @@ export class RecentTimeLogsComponent implements OnInit {
   clickedItem() { }
 
   loadTimeLogs() {
-    this.dataService.getTimeLogs().subscribe(timeLogs => { this.timeLogList = timeLogs });
+    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { this.timeLogList = timeLogs });
   }
 }
