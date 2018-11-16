@@ -11,6 +11,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
+
 import {
   MatButtonModule,
   MatCardModule,
@@ -27,9 +28,10 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
+import { UserreportsComponent } from './components/userreports/userreports.component';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent, UserreportsComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

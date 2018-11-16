@@ -1,0 +1,25 @@
+        if (count == 0){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'red'});
+        }
+        else if (count == 1){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'blue'});
+        }
+        else if (count == 2){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'green'});
+        }
+        else if (count == 3){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'yellow'});
+        }
+        else if (count == 4){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'purple'})
+        }
+        else if (count == 5){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'orange'})
+        }
+        else if (count == 6){
+          this.color[i] = randomColor({luminosity: 'dark', hue: 'pink'})
+        }
+        count++;
+        if (count > 6){
+          count = 0;
+        }

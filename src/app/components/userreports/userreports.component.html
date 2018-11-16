@@ -1,0 +1,30 @@
+<mat-card>
+  <mat-card-title>User Reports</mat-card-title>
+  <mat-card-content>
+    <mat-form-field>
+      <mat-select [(value)]="selected" (selectionChange)="selectedOption()">
+        <mat-option value="day">Day</mat-option>
+        <mat-option value="week">Week</mat-option>
+        <mat-option value="month">Month</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-checkbox class="checkbox" (change)="checkBox($event)">Show only billable</mat-checkbox>
+    <br /><br />
+    <table >
+        <tr>
+          <td *ngFor="let arrays of array; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}">
+            <a>{{getProjectData(i)}}
+            <div class="bubblePosition hoverBubble" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}</div>
+          </a>
+          </td>
+        </tr> 
+      </table>
+      <div class="placeholder"></div>
+    <table >
+      <tr>
+        <td *ngFor="let arrays of array; let i = index" class="chart" [ngStyle]="{'width': getWidth(i), 'background-color': color[i]}">
+        </td>
+      </tr> 
+    </table>
+  </mat-card-content>
+</mat-card>
