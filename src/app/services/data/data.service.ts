@@ -67,7 +67,11 @@ export class DataService {
   }
 
   mapRedmineProjectToProject(redmineProject: RedmineProject): Project {
-    return { id: redmineProject.id, name: redmineProject.name };
+    return {
+      id: redmineProject.id,
+      name: redmineProject.name,
+      color: '#123456'
+    };
   }
 
   getIssues(): Observable<Issue[]> {
@@ -195,7 +199,7 @@ export class DataService {
   ): TimeTracker {
     const timeTracker: TimeTracker = {
       id: hourglassTimeTracker.id,
-      timeStarted: hourglassTimeTracker.start,
+      timeStarted: new Date(hourglassTimeTracker.start),
       billable: true
     };
     if (hourglassTimeTracker.issue_id) {
@@ -305,8 +309,8 @@ export class DataService {
             ),
             booked: true,
             comment: hgbooking.time_entry.comments,
-            timeStarted: hgbooking.start,
-            timeStopped: hgbooking.stop,
+            timeStarted: new Date(hgbooking.start),
+            timeStopped: new Date(hgbooking.stop),
             timeInHours: hgbooking.time_entry.hours,
             project: this.cachedProjects.find(
               entry => entry.id === hgbooking.time_entry.project_id
@@ -329,8 +333,8 @@ export class DataService {
               hourGlassTimeBookingId: null,
               issue: null,
               project: null,
-              timeStarted: hglog.start,
-              timeStopped: hglog.stop,
+              timeStarted: new Date(hglog.start),
+              timeStopped: new Date(hglog.stop),
               timeInHours: hglog.hours,
               user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id)
             });

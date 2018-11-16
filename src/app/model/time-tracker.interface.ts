@@ -3,7 +3,7 @@ import { Project } from './project.interface';
 
 export interface TimeTracker {
   id: number;
-  timeStarted: string;
+  timeStarted: Date;
   billable: boolean;
   comment?: string;
   issue?: Issue;
