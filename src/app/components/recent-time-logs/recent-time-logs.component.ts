@@ -31,5 +31,6 @@ export class RecentTimeLogsComponent implements OnInit {
 
   loadTimeLogs() {
     this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { this.timeLogList = timeLogs });
+
   }
 }
