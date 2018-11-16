@@ -46,7 +46,6 @@ export class TimeLogComponent implements OnInit {
   filteredIssueOptions: Observable<string[]>;
   filteredProjectOptions: Observable<string[]>;
 
-
   ngOnInit() {
 
     this.loadIssues();
@@ -109,10 +108,11 @@ export class TimeLogComponent implements OnInit {
 
   private updateIssue(issue) {
     console.log('Issue: ', issue);
-    this.currentIssueSubject = issue;
 
     const newIssue = this.issues.find(entry => entry.subject === issue);
+
     if (newIssue) {
+      this.currentIssueSubject = issue;
       this.currentIssue = newIssue;
       this.currentProject = newIssue.project;
       this.currentProjectName = newIssue.project.name;
@@ -124,11 +124,16 @@ export class TimeLogComponent implements OnInit {
 
       this.projectControl.setValue(this.currentProjectName);
 
-    } else if (issue === '') {
+    } else {
+      // optional: ERROR popup - no such issue
+      this.currentIssueSubject = 'Issue';
+      this.currentProjectName = 'Project';
+      this.issueControl.setValue(this.currentIssueSubject);
+      this.projectControl.setValue(this.currentProjectName);
       this.loadIssueOptions();
       this.loadProjectOptions();
-    } else {
-      // create a new Timelog entry with new issue value
+      this.currentProject = null;
+      this.currentIssue = null;
     }
     console.log(this.projectOptions);
 
@@ -136,16 +141,26 @@ export class TimeLogComponent implements OnInit {
 
   private updateProject(project) {
     console.log('Project :', project);
-    this.currentProjectName = project;
+    const newProject = this.projects.find(entry => entry.name === project);
     this.issueOptions.length = 0;
-    if (project === '') {
-      this.loadIssueOptions();
-    } else {
+    if (newProject) {
+      this.currentProject = newProject;
+      this.currentProjectName = project;
       this.issues.forEach(issue => {
         if (issue.project.name === project) {
           this.issueOptions.push(issue.subject);
         }
       });
+    } else {
+      // optional: ERROR popup - no such project
+      this.currentIssueSubject = 'Issue';
+      this.currentProjectName = 'Project';
+      this.issueControl.setValue(this.currentIssueSubject);
+      this.projectControl.setValue(this.currentProjectName);
+      this.loadIssueOptions();
+      this.loadProjectOptions();
+      this.currentProject = null;
+      this.currentIssue = null;
     }
     console.log(this.projectOptions);
   }
