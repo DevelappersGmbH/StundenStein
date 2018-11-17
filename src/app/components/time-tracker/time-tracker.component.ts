@@ -43,8 +43,8 @@ export class TimeTrackerComponent implements OnInit {
   ngOnInit() {
     this.loadProjects();
     this.loadIssues();
-    this.loadTimeTracker();
     this.currentTrackerTimeString  = '00:00:00';
+    this.loadTimeTracker();
     this.automaticMode = true;
     // Block manual mode until implemented
     this.automaticLock = true;
@@ -162,7 +162,7 @@ export class TimeTrackerComponent implements OnInit {
     ];
     forkJoin(calls).subscribe(x => {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
-        if (!isNull(t)) {
+        if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
           this.extractFromTimeTracker();
         }
@@ -188,7 +188,25 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   stopTimeTracker(): void {
-    console.error('Not implemented yet.');
+    let timeTracker: TimeTracker;
+    timeTracker = {
+      id: this.timeTracker.id,
+      timeStarted: this.timeTracker.timeStarted,
+      billable: this.timeTracker.billable,
+      comment: this.timeTracker.comment,
+      issue: this.timeTracker.issue,
+      project: this.timeTracker.project
+    };
+    this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
+      if (data === false) {
+        console.error('Couldn\'t stop time tracker');
+      } else {
+        this.loadTimeTracker();
+      }
+    }, error => {
+      console.error(error);
+    }
+    );
   }
 
 }
