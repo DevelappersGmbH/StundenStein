@@ -1,25 +1,27 @@
-        if (count == 0){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'red'});
+      for (let i = 1; i < res.length; i++){
+        let element = res[i].project;
+        console.log('element: ' +  element + ', i: ' + i);
+        for (let j = 0; j < res.length; j++){
+          console.log('j: ' + j);
+          if (res[j].project == element){
+            let projectExists = false;
+            let indexK;
+            for (let k = 0; k < projectArray.length; k++){
+              if (projectArray[k][0] == element){
+                projectExists = true;
+                indexK = k;
+              }
+            }
+            if (projectExists){
+              console.log('proj ex');
+              let tempTime = projectArray[indexK][1];
+              projectArray[indexK][1] = tempTime + res[j].timeInHours;
+            }
+            else{
+              console.log('new proj');
+              projectArray[i] = [element, res[j].timeInHours];
+            }
+          }
         }
-        else if (count == 1){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'blue'});
-        }
-        else if (count == 2){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'green'});
-        }
-        else if (count == 3){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'yellow'});
-        }
-        else if (count == 4){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'purple'})
-        }
-        else if (count == 5){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'orange'})
-        }
-        else if (count == 6){
-          this.color[i] = randomColor({luminosity: 'dark', hue: 'pink'})
-        }
-        count++;
-        if (count > 6){
-          count = 0;
-        }
+        console.log(projectArray);
+      }

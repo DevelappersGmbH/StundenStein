@@ -3,6 +3,8 @@ import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
 import { randomColor } from 'randomcolor';
 import { StaticInjector } from '@angular/core/src/di/injector';
+import { formatDate } from '@angular/common';
+import { toDate } from '@angular/common/src/i18n/format_date';
 
 @Component({
   selector: 'app-userreports',
@@ -17,13 +19,75 @@ export class UserreportsComponent implements OnInit {
   projectData = [];
   selected = 'day';
   colorHue = ['green', 'blue', 'red', 'orange', 'purple', 'pink'];
+  periodArray = [[]];
+  projectIndex = 0;
 
   constructor(private dataService: DataService, private userService: UserService) { }
 
   ngOnInit() {
     this.dataService.getTimeLogs(this.userService.getUser().id)
     .subscribe(res => {
-      console.log('what: ' + res);
+      console.log(res);
+      let date = new Date();
+      let projectArray = [[]];
+      let subFrom = 8;
+      let subTo = 10;
+      let dmy = 3;
+        for (let i = 0; i < res.length; i++){
+          if (res[i].timeStarted.substring(0,4) == date.getFullYear().toString()){
+            if (res[i].timeStarted.substring(5,7) == (date.getMonth() + 1).toString()){
+            dmy = 2;
+            if (res[i].timeStarted.substring(8,10) == date.getDate().toString()){
+              dmy = 0;
+            }
+          }
+          }
+          let date2 = new Date(res[i].timeStarted);
+          if (this.getWeekNumber(date2) == this.getWeekNumber(date)){
+            dmy = 1;
+          }
+            if (res[i].booked == false){
+              let projEx = false
+              let indexJ = 0;
+              for (let j = 0; j < projectArray.length; j++){
+                if (projectArray[j][0] == null){
+                  projEx = true;
+                  indexJ = j;
+                }
+              }
+              if (projEx){
+                projectArray[indexJ][projectArray[indexJ].length] = [dmy, res[i].timeInHours];
+                this.projectIndex = indexJ;
+              }
+              else{
+                projectArray[i] = [null, [dmy, res[i].timeInHours]];
+                this.projectIndex = i;
+              }
+            }
+            else if (res[i].booked){
+              let projEx = false
+              let indexJ = 0;
+              for (let j = 0; j < projectArray.length; j++){
+                if (projectArray[j][0] == res[i].issue.project.id){
+                  projEx = true;
+                  indexJ = j;
+                }
+              }
+              if (projEx){
+                projectArray[indexJ][projectArray[indexJ].length] = [dmy, res[i].timeInHours];
+                this.projectIndex = indexJ;
+              }
+              else{
+                projectArray[i] = [res[i].issue.project.id, [dmy, res[i].timeInHours];
+                this.projectIndex = i;
+              }
+            }
+            if (dmy < 3){
+              this.periodArray[dmy] = projectArray[this.projectIndex];
+            }
+        }
+        console.log(projectArray);
+        console.log(this.periodArray);
     })
     this.dataService.getProjects().subscribe(p => {
       this.projectData = p;
@@ -42,6 +106,15 @@ export class UserreportsComponent implements OnInit {
       }
     })
   }
+
+  getWeekNumber(d: Date): number {
+    d = new Date(+d);
+    d.setHours(0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    var yearStart = new Date(d.getFullYear(), 0, 1);
+    var weekNo = Math.ceil((((d.valueOf() - yearStart.valueOf()) / 86400000) + 1) / 7);
+    return weekNo;
+}
 
   getWidth(i){
     //set array for stripe chart percentages
