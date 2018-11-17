@@ -149,30 +149,12 @@ export class TimeLogComponent implements OnInit {
     console.log(this.projectOptions);
   }
 
-  // blur or onkeyup events for autocomplete
-  private blurInput(input) {
-    const newProject = this.projects.find(entry => entry.name === input);
-    const newIssue = this.issues.find(entry => entry.subject === input);
-    console.log(newProject || newIssue);
-    if (newProject || newIssue) {
-      // do nothing, currently selected input wasn't altered
-    } else {
-      // set everything to zero state
-      /*this.currentIssueSubject = '';
-      this.currentProjectName = '';
-      this.issueControl.setValue(this.currentIssueSubject);
-      this.projectControl.setValue(this.currentProjectName);
-      this.projectOptions.length = 0;
-      this.issueOptions.length = 0;
-      this.loadIssueOptions();
-      this.loadProjectOptions();
-      this.currentProject = null;
-      this.currentIssue = null;*/
-    }
-  }
-
   private updateComment(comment) {
     this.currentComment = comment;
+  }
+
+  private updateForm() {
+    console.log('OnSelectionChange');
   }
 
   private startTracker() {
