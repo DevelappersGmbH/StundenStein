@@ -5,7 +5,7 @@
       <div>
       <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="issueControl"
-               [matAutocomplete]="issue" (blur)="blurInput()" (keyup.enter)="blurInput()">
+               [matAutocomplete]="issue" (blur)="blurInput($event.target.value)" (keyup.enter)="blurInput($event.target.value)">
         <mat-placeholder class="placeholder">Issue</mat-placeholder>
       </mat-form-field>
 
@@ -23,7 +23,7 @@
 
       <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{'edit': !editMode}">
         <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="projectControl"
-               [matAutocomplete]="auto" (blur)="blurInput()" (keyup.enter)="blurInput()">
+               [matAutocomplete]="auto" (blur)="blurInput($event.target.value)" (keyup.enter)="blurInput($event.target.value)">
         <mat-placeholder class="placeholder">Project</mat-placeholder>
       </mat-form-field>
 

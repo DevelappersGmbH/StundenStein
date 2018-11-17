@@ -29,7 +29,7 @@ export class TimeLogComponent implements OnInit {
   startTime = this.timeLog.timeStarted;
   endTime = this.timeLog.timeStopped;
   billable = this.timeLog.billable;
-  trackedTime = this.timeLog.timeInHours; // why in hours?
+  trackedTime = this.timeLog.timeInHours;
   booked = this.timeLog.booked;
   currentUser: User = this.timeLog.user;
   active = false;
@@ -125,7 +125,7 @@ export class TimeLogComponent implements OnInit {
       this.projectControl.setValue(this.currentProjectName);
 
     } else {
-
+      console.log('Something went wrong');
     }
     console.log(this.projectOptions);
 
@@ -150,16 +150,25 @@ export class TimeLogComponent implements OnInit {
   }
 
   // blur or onkeyup events for autocomplete
-  private blurInput() {
-    this.currentIssueSubject = 'Issue';
-    this.currentProjectName = 'Project';
-    this.issueControl.setValue(this.currentIssueSubject);
-    this.projectControl.setValue(this.currentProjectName);
-    this.loadIssueOptions();
-    this.loadProjectOptions();
-    this.currentProject = null;
-    this.currentIssue = null;
-
+  private blurInput(input) {
+    const newProject = this.projects.find(entry => entry.name === input);
+    const newIssue = this.issues.find(entry => entry.subject === input);
+    console.log(newProject || newIssue);
+    if (newProject || newIssue) {
+      // do nothing, currently selected input wasn't altered
+    } else {
+      // set everything to zero state
+      /*this.currentIssueSubject = '';
+      this.currentProjectName = '';
+      this.issueControl.setValue(this.currentIssueSubject);
+      this.projectControl.setValue(this.currentProjectName);
+      this.projectOptions.length = 0;
+      this.issueOptions.length = 0;
+      this.loadIssueOptions();
+      this.loadProjectOptions();
+      this.currentProject = null;
+      this.currentIssue = null;*/
+    }
   }
 
   private updateComment(comment) {
