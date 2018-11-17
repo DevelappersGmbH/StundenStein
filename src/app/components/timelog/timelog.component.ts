@@ -109,7 +109,7 @@ export class TimeLogComponent implements OnInit {
   private updateIssue(issue) {
     console.log('Issue: ', issue);
 
-    const newIssue = this.issues.find(entry => entry.subject === issue);
+    const newIssue = this.issues.find(entry => entry.subject === issue) as Issue; // anything better?
 
     if (newIssue) {
       this.currentIssueSubject = issue;
@@ -125,15 +125,7 @@ export class TimeLogComponent implements OnInit {
       this.projectControl.setValue(this.currentProjectName);
 
     } else {
-      // optional: ERROR popup - no such issue
-      this.currentIssueSubject = 'Issue';
-      this.currentProjectName = 'Project';
-      this.issueControl.setValue(this.currentIssueSubject);
-      this.projectControl.setValue(this.currentProjectName);
-      this.loadIssueOptions();
-      this.loadProjectOptions();
-      this.currentProject = null;
-      this.currentIssue = null;
+
     }
     console.log(this.projectOptions);
 
@@ -152,19 +144,23 @@ export class TimeLogComponent implements OnInit {
         }
       });
     } else {
-      // optional: ERROR popup - no such project
-      this.currentIssueSubject = 'Issue';
-      this.currentProjectName = 'Project';
-      this.issueControl.setValue(this.currentIssueSubject);
-      this.projectControl.setValue(this.currentProjectName);
-      this.loadIssueOptions();
-      this.loadProjectOptions();
-      this.currentProject = null;
-      this.currentIssue = null;
+      console.log('Something went wrong');
     }
     console.log(this.projectOptions);
   }
 
+  // blur or onkeyup events for autocomplete
+  private blurInput() {
+    this.currentIssueSubject = 'Issue';
+    this.currentProjectName = 'Project';
+    this.issueControl.setValue(this.currentIssueSubject);
+    this.projectControl.setValue(this.currentProjectName);
+    this.loadIssueOptions();
+    this.loadProjectOptions();
+    this.currentProject = null;
+    this.currentIssue = null;
+
+  }
 
   private updateComment(comment) {
     this.currentComment = comment;
