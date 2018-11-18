@@ -1,3 +1,4 @@
+import { ColorService } from '../color/color.service';
 import {
   flatMap,
   map,
@@ -35,7 +36,8 @@ export class DataService {
   constructor(
     private redmineService: RedmineService,
     private hourglassService: HourGlassService,
-    private userService: UserService
+    private userService: UserService,
+    private colorService: ColorService
   ) {
     this.cachedProjects = [];
     this.cachedIssues = [];
@@ -70,7 +72,7 @@ export class DataService {
     return {
       id: redmineProject.id,
       name: redmineProject.name,
-      color: '#123456'
+      color: this.colorService.getColor(redmineProject.identifier)
     };
   }
 
@@ -102,7 +104,7 @@ export class DataService {
         'IssuesConversion the only parameter in Array is not RedmineIssues!'
       );
     } else {
-      redmineIssues = results[1];
+      redmineIssues = results[0];
     }
     if (results.length === 2 && (<RedmineProjects>results[0]).projects) {
       this.cachedProjects = this.mapRedmineProjectsToProjectArray(results[0]);
