@@ -41,6 +41,13 @@ export class TimeTrackerComponent implements OnInit {
   */
 
   ngOnInit() {
+    interval(1000).subscribe( val => {
+      if (!isUndefined(this.timeTracker.timeStarted)) {
+        this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+      } else {
+        this.currentTrackerTimeString  = '00:00:00';
+      }
+    });
     this.loadProjects();
     this.loadIssues();
     this.currentTrackerTimeString  = '00:00:00';
@@ -165,6 +172,13 @@ export class TimeTrackerComponent implements OnInit {
         if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
           this.extractFromTimeTracker();
+        } else {
+          this.timeTracker = {
+            billable: true,
+            comment: '',
+            issue: null,
+            project: null
+          };
         }
       });
     });
@@ -173,9 +187,6 @@ export class TimeTrackerComponent implements OnInit {
   extractFromTimeTracker(): void {
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
-    interval(1000).subscribe( val => {
-      this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
-    });
   }
 
   startTimeTracker(): void {
