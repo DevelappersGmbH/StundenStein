@@ -2,9 +2,6 @@ import { Component, OnInit, OnChanges } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
 import { randomColor } from 'randomcolor';
-import { StaticInjector } from '@angular/core/src/di/injector';
-import { formatDate } from '@angular/common';
-import { toDate } from '@angular/common/src/i18n/format_date';
 
 @Component({
   selector: 'app-userreports',
@@ -21,73 +18,125 @@ export class UserreportsComponent implements OnInit {
   colorHue = ['green', 'blue', 'red', 'orange', 'purple', 'pink'];
   periodArray = [[]];
   projectIndex = 0;
-
+  dwmArray = new Array();
+  
   constructor(private dataService: DataService, private userService: UserService) { }
 
   ngOnInit() {
+    console.log();
+    let projectArray = [[],[],[]];
     this.dataService.getTimeLogs(this.userService.getUser().id)
     .subscribe(res => {
       console.log(res);
       let date = new Date();
-      let projectArray = [[]];
-      let subFrom = 8;
-      let subTo = 10;
-      let dmy = 3;
-        for (let i = 0; i < res.length; i++){
-          if (res[i].timeStarted.substring(0,4) == date.getFullYear().toString()){
-            if (res[i].timeStarted.substring(5,7) == (date.getMonth() + 1).toString()){
-            dmy = 2;
-            if (res[i].timeStarted.substring(8,10) == date.getDate().toString()){
-              dmy = 0;
+      for (let i = 0; i < res.length; i++){
+        if (new Date(res[i].timeStopped).getFullYear() == date.getFullYear()
+        && new Date(res[i].timeStopped).getMonth() == date.getMonth()){
+          if (this.dwmArray[i] == undefined){
+            this.dwmArray[i] = [2];
+          }
+          else{
+            this.dwmArray[i][this.dwmArray[i].length] = 2
+          }
+          if (new Date(res[i].timeStopped).getDate() == date.getDate()){
+            if (this.dwmArray[i] == undefined){
+              this.dwmArray[i] = [0];
+            }
+            else{
+              this.dwmArray[i][this.dwmArray[i].length] = 0
             }
           }
-          }
-          let date2 = new Date(res[i].timeStarted);
-          if (this.getWeekNumber(date2) == this.getWeekNumber(date)){
-            dmy = 1;
-          }
-            if (res[i].booked == false){
-              let projEx = false
-              let indexJ = 0;
-              for (let j = 0; j < projectArray.length; j++){
-                if (projectArray[j][0] == null){
-                  projEx = true;
-                  indexJ = j;
-                }
-              }
-              if (projEx){
-                projectArray[indexJ][projectArray[indexJ].length] = [dmy, res[i].timeInHours];
-                this.projectIndex = indexJ;
-              }
-              else{
-                projectArray[i] = [null, [dmy, res[i].timeInHours]];
-                this.projectIndex = i;
-              }
-            }
-            else if (res[i].booked){
-              let projEx = false
-              let indexJ = 0;
-              for (let j = 0; j < projectArray.length; j++){
-                if (projectArray[j][0] == res[i].issue.project.id){
-                  projEx = true;
-                  indexJ = j;
-                }
-              }
-              if (projEx){
-                projectArray[indexJ][projectArray[indexJ].length] = [dmy, res[i].timeInHours];
-                this.projectIndex = indexJ;
-              }
-              else{
-                projectArray[i] = [res[i].issue.project.id, [dmy, res[i].timeInHours];
-                this.projectIndex = i;
-              }
-            }
-            if (dmy < 3){
-              this.periodArray[dmy] = projectArray[this.projectIndex];
-            }
         }
-        console.log(projectArray);
-        console.log(this.periodArray);
+        if (this.getWeekNumber(new Date(res[i].timeStopped)) == this.getWeekNumber(date)){
+          if (this.dwmArray[i] == undefined){
+            this.dwmArray[i] = [1];
+          }
+          else{
+            this.dwmArray[i][this.dwmArray[i].length] = 1
+          }
+        }
+      }
+      console.log(this.dwmArray);
+      for (let i = 0; i < res.length; i++){
+        for (let m = 0; m < this.dwmArray[i].length; m++)
+            if (res[i].booked){
+              let projEx = false;
+              let projN = 0;
+              if (projectArray != undefined){
+                for (let n = 0; n < projectArray[this.dwmArray[i][m]].length; n++){
+                  if (projectArray[this.dwmArray[i][m]][n][0] == res[i].issue.project.id){
+                    projEx = true;
+                    projN = n;
+                  }
+                }
+              }
+              if (projEx){
+                if (this.workInSameMonth(new Date(res[i].timeStarted), new Date(res[i].timeStopped))){
+                  console.log('b add normal' + i);
+                  projectArray[this.dwmArray[i][m]][projN][projectArray[this.dwmArray[i][m]].length] = res[i].timeInHours;
+                  console.log(projectArray);
+                } 
+                else{
+                  console.log('b add unnormal' + i);
+                  let date = new Date();
+                  projectArray[this.dwmArray[i][m]][projN][projectArray[this.dwmArray[i][m]].length] = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+                  console.log(projectArray);
+                } 
+              }
+              else{
+                if (this.workInSameMonth(new Date(res[i].timeStarted), new Date(res[i].timeStopped))){
+                  console.log('b create new normal ' + i);
+                  projectArray[this.dwmArray[i][m]][projectArray[this.dwmArray[i][m]].length] = [res[i].issue.project.id, res[i].timeInHours];
+                  console.log(projectArray);
+                }
+                else{
+                  console.log('b create new unnormal' + i);
+                  let date = new Date(res[i].timeStopped);
+                  projectArray[this.dwmArray[i][m]][projectArray[this.dwmArray[i][m]].length] = [res[i].issue.project.id, date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600];
+                  console.log(projectArray);
+                }
+              }
+            }
+            else{
+              let projEx = false;
+              let projN = 0;
+              if (projectArray != undefined){
+                for (let n = 0; n < projectArray[this.dwmArray[i][m]].length; n++){
+                  if (projectArray[this.dwmArray[i][m]][n][0] == null){
+                    projEx = true;
+                    projN = n;
+                  }
+                }
+              }
+              if (projEx){
+                if (this.workInSameMonth(new Date(res[i].timeStarted), new Date(res[i].timeStopped))){
+                  console.log('add normal' + i);
+                  projectArray[this.dwmArray[i][m]][projN][projectArray[this.dwmArray[i][m]].length] = res[i].timeInHours;
+                  console.log(projectArray);
+                } 
+                else{
+                  console.log('add unnormal' + i);
+                  projectArray[this.dwmArray[i][m]][projN][projectArray[this.dwmArray[i][m]].length] = date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+                  console.log(projectArray);
+                } 
+              }
+              else{
+                if (this.workInSameMonth(new Date(res[i].timeStarted), new Date(res[i].timeStopped))){
+                  console.log('create new normal ' + i);
+                  console.log(res[i].timeInHours);
+                  projectArray[this.dwmArray[i][m]][projectArray[this.dwmArray[i][m]].length] = [null, res[i].timeInHours];
+                  console.log(projectArray);
+                }
+                else{
+                  console.log('create new unnormal' + i);
+                  let date = new Date(res[i].timeStopped);
+                  projectArray[this.dwmArray[i][m]][projectArray[this.dwmArray[i][m]].length] = [null, date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600];
+                  console.log(projectArray);
+                }
+              }
+            }
+      }
+      console.log(projectArray);
     })
     this.dataService.getProjects().subscribe(p => {
       this.projectData = p;
@@ -105,6 +154,14 @@ export class UserreportsComponent implements OnInit {
         tempRand = rand
       }
     })
+  }
+
+  workInSameMonth(date1: Date, date2: Date){
+    return (date1.getDate() == date2.getDate()
+    && date1.getMonth() == date2.getMonth()
+    && date1.getFullYear() == date2.getFullYear())
+    || (new Date(+new Date() + 86400000).getDate() > new Date().getDate()
+    && new Date(+new Date() - 86400000).getDate() < new Date().getDate());
   }
 
   getWeekNumber(d: Date): number {

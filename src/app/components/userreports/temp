@@ -25,3 +25,55 @@
         }
         console.log(projectArray);
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+      -----------------------------------
+      let projEx = false
+          let indexJ = 0;
+          if (res[i].booked == false){
+            for (let j = 0; j < projectArray.length; j++){
+              for(let k = 0; k < projectArray[j].length; k++){
+                if (projectArray[j][k] == null){
+                  projEx = true;
+                  indexJ = j;
+                }
+              }
+            }
+          }
+          else{
+            for (let j = 0; j < projectArray.length; j++){
+                if (projectArray[j][0] == res[i].issue.project.id){
+                  projEx = true;
+                  indexJ = j;
+                }
+            }
+          }
+          if (projEx){
+            projectArray[indexJ][projectArray[indexJ].length] = [dmy, res[i].timeInHours];
+            this.projectIndex = indexJ;
+          }
+          else{
+            if (!res[i].booked){
+              projectArray[i] = [null, [dmy, res[i].timeInHours]];
+            }
+            else{
+              projectArray[i] = [res[i].issue.project.id, [dmy, res[i].timeInHours]];
+            }
+            this.projectIndex = i;
+          }
+          if (dmy != ''){
+              this.periodArray[dmy] = projectArray[this.projectIndex];
+          }
+        }
+        console.log(projectArray);
