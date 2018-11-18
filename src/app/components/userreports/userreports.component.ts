@@ -2,6 +2,7 @@ import { Component, OnInit, OnChanges } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
 import { randomColor } from 'randomcolor';
+import { ColorService } from 'src/app/services/color/color.service';
 
 @Component({
   selector: 'app-userreports',
@@ -20,7 +21,7 @@ export class UserreportsComponent implements OnInit {
   projectIndex = 0;
   dwmArray = new Array();
   
-  constructor(private dataService: DataService, private userService: UserService) { }
+  constructor(private dataService: DataService, private userService: UserService, private colorService: ColorService) { }
 
   ngOnInit() {
     console.log();
@@ -144,7 +145,7 @@ export class UserreportsComponent implements OnInit {
         this.projectData[i] = p[i].name;
       }
       //set array for stripe chart color
-      let tempRand = 8;
+      let tempRand = 8; 
       let rand = 0;
       for(let i in p){
         while (rand == tempRand){
@@ -154,6 +155,7 @@ export class UserreportsComponent implements OnInit {
         tempRand = rand
       }
     })
+    //this.colorService.getColor().subscribe()
   }
 
   workInSameMonth(date1: Date, date2: Date){
