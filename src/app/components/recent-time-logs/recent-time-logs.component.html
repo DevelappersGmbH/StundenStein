@@ -1,0 +1,8 @@
+<mat-action-list>
+  <h3 mat-subheader>Recently added TimeLogs</h3>
+    <button mat-list-item (click)="clickedItem()" *ngFor="let TimeLog of timeLogList">
+        <h4 mat-line>{{"TimeLog-ID:" + TimeLog.id}}</h4>
+        <p mat-line> {{"Started at:" + TimeLog.timeStarted}}</p>
+        <p mat-line> {{"Stopped at:" + TimeLog.timeStopped}}</p>
+    </button>
+</mat-action-list>

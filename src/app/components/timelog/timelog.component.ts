@@ -1,12 +1,12 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {Observable} from 'rxjs';
-import {map, startWith} from 'rxjs/operators';
-import {DataService} from '../../services/data/data.service';
-import {Issue} from '../../model/issue.interface';
-import {Project} from '../../model/project.interface';
-import {TimeLog} from '../../model/time-log.interface';
-import {User} from '../../model/user.interface';
+import { Component, Input, OnInit } from '@angular/core';
+import { DataService } from '../../services/data/data.service';
+import { FormControl } from '@angular/forms';
+import { Issue } from '../../model/issue.interface';
+import { map, startWith } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { Project } from '../../model/project.interface';
+import { TimeLog } from '../../model/time-log.interface';
+import { User } from '../../model/user.interface';
 
 @Component({
   selector: 'app-timelog',
@@ -14,10 +14,7 @@ import {User} from '../../model/user.interface';
   styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit {
-
-  constructor(
-    private dataService: DataService
-  ) { }
+  constructor(private dataService: DataService) {}
 
   @Input() timeLog: TimeLog;
 
@@ -26,8 +23,8 @@ export class TimeLogComponent implements OnInit {
   currentIssue: Issue;
   currentProject: Project;
   currentComment: string;
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
   billable: boolean;
   trackedTime: any;
   booked: boolean;
@@ -55,7 +52,7 @@ export class TimeLogComponent implements OnInit {
     this.startTime = this.timeLog.timeStarted;
     this.endTime = this.timeLog.timeStopped;
     this.billable = this.timeLog.billable;
-    this.trackedTime = new Date (this.timeLog.timeInHours * 3600 * 1000);
+    this.trackedTime = new Date(this.timeLog.timeInHours * 3600 * 1000);
     this.booked = this.timeLog.booked;
     this.currentUser = this.timeLog.user;
 
@@ -65,36 +62,41 @@ export class TimeLogComponent implements OnInit {
     this.loadIssues();
     this.loadProjects();
 
-    this.filteredIssueOptions = this.issueControl.valueChanges
-      .pipe(
-        startWith(''),
-        map(value => value ? this.filterIssues(value) : this.issueOptions.slice())
-      );
+    this.filteredIssueOptions = this.issueControl.valueChanges.pipe(
+      startWith(''),
+      map(value =>
+        value ? this.filterIssues(value) : this.issueOptions.slice()
+      )
+    );
 
-    this.filteredProjectOptions = this.projectControl.valueChanges
-      .pipe(
-        startWith(''),
-        map(value => this.filterProjects(value))
-      );
-
+    this.filteredProjectOptions = this.projectControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this.filterProjects(value))
+    );
   }
 
   loadProjects() {
-    this.dataService.getProjects().subscribe( data => {
-      this.projects = data;
-      this.loadProjectOptions();
-    }, error => {
-      console.error('Couldn\'t get projects from data service.');
-    });
+    this.dataService.getProjects().subscribe(
+      data => {
+        this.projects = data;
+        this.loadProjectOptions();
+      },
+      error => {
+        console.error('Couldn\'t get projects from data service.');
+      }
+    );
   }
 
   loadIssues() {
-    this.dataService.getIssues().subscribe( data => {
-      this.issues = data;
-      this.loadIssueOptions();
-    }, error => {
-      console.error('Couldn\'t get issues from data service.');
-    });
+    this.dataService.getIssues().subscribe(
+      data => {
+        this.issues = data;
+        this.loadIssueOptions();
+      },
+      error => {
+        console.error('Couldn\'t get issues from data service.');
+      }
+    );
   }
 
   loadIssueOptions() {
@@ -112,19 +114,25 @@ export class TimeLogComponent implements OnInit {
   private filterIssues(value: string): string[] {
     const filterValue = value.toLowerCase();
 
-    return this.issueOptions.filter(issue => issue.toLowerCase().includes(filterValue));
+    return this.issueOptions.filter(issue =>
+      issue.toLowerCase().includes(filterValue)
+    );
   }
 
   private filterProjects(value: string): string[] {
     const filterValue = value.toLowerCase();
 
-    return this.projectOptions.filter(project => project.toLowerCase().includes(filterValue));
+    return this.projectOptions.filter(project =>
+      project.toLowerCase().includes(filterValue)
+    );
   }
 
   private updateIssue(issue) {
     console.log('Issue: ', issue);
 
-    const newIssue = this.issues.find(entry => entry.subject === issue) as Issue; // anything better?
+    const newIssue = this.issues.find(
+      entry => entry.subject === issue
+    ) as Issue; // anything better?
 
     if (newIssue) {
       this.currentIssueSubject = issue;
@@ -138,12 +146,10 @@ export class TimeLogComponent implements OnInit {
       this.projectOptions.push(this.currentProjectName);
 
       this.projectControl.setValue(this.currentProjectName);
-
     } else {
       console.log('Something went wrong');
     }
     console.log(this.projectOptions);
-
   }
 
   private updateProject(project) {
@@ -217,7 +223,6 @@ export class TimeLogComponent implements OnInit {
       } else {
         this.booked = true;
       }
-
     }
   }
 
@@ -237,7 +242,6 @@ export class TimeLogComponent implements OnInit {
         /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'edit';
       }
-
     }
     this.editMode = !this.editMode;
   }
@@ -277,4 +281,3 @@ export class TimeLogComponent implements OnInit {
       console.log('Please select a project');
     }
   }*/
-

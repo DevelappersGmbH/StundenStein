@@ -5,8 +5,10 @@ import { AuthGuard } from './services/authguard/authguard.service';
 import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
+import { CdkTableModule } from '@angular/cdk/table';
+import { CdkTreeModule } from '@angular/cdk/tree';
 import { DataService } from './services/data/data.service';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
@@ -15,18 +17,33 @@ import {
   MatAutocompleteModule,
   MatButtonModule,
   MatCardModule,
+  MatCheckboxModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
+  MatListModule,
+  MatSelectModule,
+  MatSlideToggleModule,
   MatToolbarModule
-} from '@angular/material';
+  } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
-import { UserService } from './services/user/user.service';
+import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
+import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
+import { UserService } from './services/user/user.service';
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeLogComponent],
+  declarations: [
+    AppComponent,
+    LoginComponent,
+    MainComponent,
+    NavbarComponent,
+    TimeLogComponent,
+    TimeTrackerComponent,
+    RecentTimeLogsComponent
+  ],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -41,7 +58,16 @@ import { TimeLogComponent } from './components/timelog/timelog.component';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
-    MatToolbarModule
+    MatToolbarModule,
+    MatListModule,
+    ScrollingModule,
+    CdkTableModule,
+    CdkTreeModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSlideToggleModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule
   ],
   providers: [
     AuthenticationService,

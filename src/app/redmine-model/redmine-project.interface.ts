@@ -7,6 +7,6 @@ export interface RedmineProject {
   description: string;
   parent: RedmineReference;
   status: number;
-  created_on: Date;
-  updated_on: Date;
+  created_on: string;
+  updated_on: string;
 }

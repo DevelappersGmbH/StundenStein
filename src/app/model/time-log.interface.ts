@@ -4,8 +4,8 @@ import { User } from './user.interface';
 
 export interface TimeLog {
   id: number;
-  timeStarted: string;
-  timeStopped: string;
+  timeStarted: Date;
+  timeStopped: Date;
   comment: string;
   timeInHours: number;
   booked: boolean;
