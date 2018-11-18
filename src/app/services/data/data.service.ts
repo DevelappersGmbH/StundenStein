@@ -104,7 +104,7 @@ export class DataService {
         'IssuesConversion the only parameter in Array is not RedmineIssues!'
       );
     } else {
-      redmineIssues = results[1];
+      redmineIssues = results[0];
     }
     if (results.length === 2 && (<RedmineProjects>results[0]).projects) {
       this.cachedProjects = this.mapRedmineProjectsToProjectArray(results[0]);
