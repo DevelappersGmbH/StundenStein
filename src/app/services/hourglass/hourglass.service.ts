@@ -8,6 +8,7 @@ import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.int
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hourglass-time-tracker-request.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
+import { HourGlassTimeTrackerStopResponse } from 'src/app/redmine-model/responses/hourglass-time-tracker-stop-response.interface';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
@@ -38,7 +39,16 @@ export class HourGlassService extends BaseDataService {
     return this.httpClient.post<HourGlassTimeTracker>(endpoint, request);
   }
 
-  getTimeTrackersByUserId(userId: number = -1): Observable<HourGlassTimeTrackers> {
+  stopTimeTracker(
+    timeTrackerId: number
+  ): Observable<HourGlassTimeTrackerStopResponse> {
+    const query = this.getJsonEndpointUrl(
+      this.timeTrackersUrl + '/' + timeTrackerId + '/stop'
+    );
+    return this.httpClient.delete<HourGlassTimeTrackerStopResponse>(query);
+  }
+
+  getTimeTrackersByUserId(userId: number): Observable<HourGlassTimeTrackers> {
     const query =
       this.getJsonEndpointUrl(this.timeTrackersUrl) + '?user_id=' + userId;
     return this.httpClient.get<HourGlassTimeTrackers>(query);

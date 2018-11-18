@@ -1,3 +1,4 @@
+import { ColorService } from '../color/color.service';
 import {
   flatMap,
   map,
@@ -35,7 +36,8 @@ export class DataService {
   constructor(
     private redmineService: RedmineService,
     private hourglassService: HourGlassService,
-    private userService: UserService
+    private userService: UserService,
+    private colorService: ColorService
   ) {
     this.cachedProjects = [];
     this.cachedIssues = [];
@@ -67,7 +69,11 @@ export class DataService {
   }
 
   mapRedmineProjectToProject(redmineProject: RedmineProject): Project {
-    return { id: redmineProject.id, name: redmineProject.name };
+    return {
+      id: redmineProject.id,
+      name: redmineProject.name,
+      color: this.colorService.getColor(redmineProject.identifier)
+    };
   }
 
   getIssues(): Observable<Issue[]> {
@@ -159,6 +165,17 @@ export class DataService {
     );
   }
 
+  stopTimeTracker(timeTracker: TimeTracker): Observable<boolean> {
+    return this.hourglassService.stopTimeTracker(timeTracker.id).pipe(
+      map(hgTimeTrackerStopResponse => {
+        if (hgTimeTrackerStopResponse.time_log) {
+          return true;
+        }
+        return false;
+      })
+    );
+  }
+
   mapPartialTimeTrackerToPartialHourGlassTimeTracker(
     timeTracker: Partial<TimeTracker>,
     redmineTimeEntryActivities: RedmineTimeEntryActivities
@@ -195,7 +212,7 @@ export class DataService {
   ): TimeTracker {
     const timeTracker: TimeTracker = {
       id: hourglassTimeTracker.id,
-      timeStarted: hourglassTimeTracker.start,
+      timeStarted: new Date(hourglassTimeTracker.start),
       billable: true
     };
     if (hourglassTimeTracker.issue_id) {
@@ -305,8 +322,8 @@ export class DataService {
             ),
             booked: true,
             comment: hgbooking.time_entry.comments,
-            timeStarted: hgbooking.start,
-            timeStopped: hgbooking.stop,
+            timeStarted: new Date(hgbooking.start),
+            timeStopped: new Date(hgbooking.stop),
             timeInHours: hgbooking.time_entry.hours,
             project: this.cachedProjects.find(
               entry => entry.id === hgbooking.time_entry.project_id
@@ -329,8 +346,8 @@ export class DataService {
               hourGlassTimeBookingId: null,
               issue: null,
               project: null,
-              timeStarted: hglog.start,
-              timeStopped: hglog.stop,
+              timeStarted: new Date(hglog.start),
+              timeStopped: new Date(hglog.stop),
               timeInHours: hglog.hours,
               user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id)
             });
