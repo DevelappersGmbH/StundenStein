@@ -32,11 +32,11 @@ import { NgModule } from '@angular/core';
 import { UserService } from './services/user/user.service';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
-import { UserreportsComponent } from './components/userreports/userreports.component';
+import { UserReportsComponent } from './components/userreports/userreports.component';
 
 @NgModule({
   
-  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent, RecentTimeLogsComponent, UserreportsComponent],
+  declarations: [AppComponent, LoginComponent, MainComponent, NavbarComponent, TimeTrackerComponent, RecentTimeLogsComponent, UserReportsComponent],
 
   imports: [
     BrowserModule,
