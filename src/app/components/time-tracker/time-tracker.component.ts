@@ -41,10 +41,17 @@ export class TimeTrackerComponent implements OnInit {
   */
 
   ngOnInit() {
+    interval(1000).subscribe( val => {
+      if (!isUndefined(this.timeTracker.timeStarted)) {
+        this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+      } else {
+        this.currentTrackerTimeString  = '00:00:00';
+      }
+    });
     this.loadProjects();
     this.loadIssues();
-    this.loadTimeTracker();
     this.currentTrackerTimeString  = '00:00:00';
+    this.loadTimeTracker();
     this.automaticMode = true;
     // Block manual mode until implemented
     this.automaticLock = true;
@@ -162,9 +169,16 @@ export class TimeTrackerComponent implements OnInit {
     ];
     forkJoin(calls).subscribe(x => {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
-        if (!isNull(t)) {
+        if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
           this.extractFromTimeTracker();
+        } else {
+          this.timeTracker = {
+            billable: true,
+            comment: '',
+            issue: null,
+            project: null
+          };
         }
       });
     });
@@ -173,9 +187,6 @@ export class TimeTrackerComponent implements OnInit {
   extractFromTimeTracker(): void {
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
-    interval(1000).subscribe( val => {
-      this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
-    });
   }
 
   startTimeTracker(): void {
@@ -188,7 +199,25 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   stopTimeTracker(): void {
-    console.error('Not implemented yet.');
+    let timeTracker: TimeTracker;
+    timeTracker = {
+      id: this.timeTracker.id,
+      timeStarted: this.timeTracker.timeStarted,
+      billable: this.timeTracker.billable,
+      comment: this.timeTracker.comment,
+      issue: this.timeTracker.issue,
+      project: this.timeTracker.project
+    };
+    this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
+      if (data === false) {
+        console.error('Couldn\'t stop time tracker');
+      } else {
+        this.loadTimeTracker();
+      }
+    }, error => {
+      console.error(error);
+    }
+    );
   }
 
 }
