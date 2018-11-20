@@ -44,8 +44,8 @@ export class TimeLogComponent implements OnInit {
   filteredProjectOptions: Observable<string[]>;
 
   ngOnInit() {
-    this.currentIssueSubject = this.timeLog.issue.subject;
-    this.currentProjectName = this.timeLog.project.name;
+    this.currentIssueSubject = this.timeLog.issue ? this.timeLog.issue.subject : '';
+    this.currentProjectName = this.timeLog.project ? this.timeLog.project.name : '';
     this.currentIssue = this.timeLog.issue;
     this.currentProject = this.timeLog.project;
     this.currentComment = this.timeLog.comment;
