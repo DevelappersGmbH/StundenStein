@@ -14,6 +14,7 @@ import { User } from '../../model/user.interface';
   styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit {
+
   constructor(private dataService: DataService) {}
 
   @Input() timeLog: TimeLog;
@@ -26,7 +27,7 @@ export class TimeLogComponent implements OnInit {
   startTime: string;
   endTime: string;
   billable: boolean;
-  trackedTime: any;
+  trackedTime: string;
   booked: boolean;
   currentUser: User;
   active = false;
@@ -43,6 +44,13 @@ export class TimeLogComponent implements OnInit {
   filteredIssueOptions: Observable<string[]>;
   filteredProjectOptions: Observable<string[]>;
 
+  public static transformNumberToString(time: number): string {
+    const hours = Math.floor(time);
+    const mins = ((time % 1) * 60).toFixed(2);
+    return hours + ':' + mins + ':00';
+
+  }
+
   ngOnInit() {
     this.currentIssueSubject = this.timeLog.issue ? this.timeLog.issue.subject : '';
     this.currentProjectName = this.timeLog.project ? this.timeLog.project.name : '';
@@ -52,7 +60,7 @@ export class TimeLogComponent implements OnInit {
     this.startTime = this.timeLog.timeStarted.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     this.endTime = this.timeLog.timeStopped.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     this.billable = this.timeLog.billable;
-    this.trackedTime = new Date(this.timeLog.timeInHours * 3600 * 1000);
+    this.trackedTime = TimeLogComponent.transformNumberToString(this.timeLog.timeInHours);
     this.booked = this.timeLog.booked;
     this.currentUser = this.timeLog.user;
 
@@ -74,6 +82,7 @@ export class TimeLogComponent implements OnInit {
       map(value => this.filterProjects(value))
     );
   }
+
 
   loadProjects() {
     this.dataService.getProjects().subscribe(
@@ -245,7 +254,10 @@ export class TimeLogComponent implements OnInit {
     }
     this.editMode = !this.editMode;
   }
+
 }
+
+
 
 /*  private blurIssue (input) {
     if (input === '') {
