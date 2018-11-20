@@ -16,7 +16,7 @@
       </mat-autocomplete>
 
       <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
+        <input type="text" [readonly]="!editMode" [(ngModel)]="currentComment" [ngModelOptions]="{standalone: true}" matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
                (blur)="updateComment($event.target.value)">
         <mat-placeholder class="placeholder">Comment</mat-placeholder>
       </mat-form-field>

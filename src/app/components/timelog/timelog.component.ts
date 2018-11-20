@@ -21,17 +21,17 @@ export class TimeLogComponent implements OnInit {
 
   @Input() timeLog: TimeLog;
 
-  currentIssueSubject = this.timeLog.issue.subject;
-  currentProjectName = this.timeLog.project.name;
-  currentIssue: Issue = this.timeLog.issue;
-  currentProject: Project = this.timeLog.project;
-  currentComment = this.timeLog.comment;
-  startTime = this.timeLog.timeStarted;
-  endTime = this.timeLog.timeStopped;
-  billable = this.timeLog.billable;
-  trackedTime = this.timeLog.timeInHours;
-  booked = this.timeLog.booked;
-  currentUser: User = this.timeLog.user;
+  currentIssueSubject: string;
+  currentProjectName: string;
+  currentIssue: Issue;
+  currentProject: Project;
+  currentComment: string;
+  startTime: string;
+  endTime: string;
+  billable: boolean;
+  trackedTime: any;
+  booked: boolean;
+  currentUser: User;
   active = false;
   editMode = false;
   editButton = 'edit';
@@ -47,6 +47,20 @@ export class TimeLogComponent implements OnInit {
   filteredProjectOptions: Observable<string[]>;
 
   ngOnInit() {
+    this.currentIssueSubject = this.timeLog.issue.subject;
+    this.currentProjectName = this.timeLog.project.name;
+    this.currentIssue = this.timeLog.issue;
+    this.currentProject = this.timeLog.project;
+    this.currentComment = this.timeLog.comment;
+    this.startTime = this.timeLog.timeStarted;
+    this.endTime = this.timeLog.timeStopped;
+    this.billable = this.timeLog.billable;
+    this.trackedTime = new Date (this.timeLog.timeInHours * 3600 * 1000);
+    this.booked = this.timeLog.booked;
+    this.currentUser = this.timeLog.user;
+
+    this.issueControl.setValue(this.currentIssueSubject);
+    this.projectControl.setValue(this.currentProjectName);
 
     this.loadIssues();
     this.loadProjects();
@@ -62,6 +76,7 @@ export class TimeLogComponent implements OnInit {
         startWith(''),
         map(value => this.filterProjects(value))
       );
+
   }
 
   loadProjects() {
@@ -172,24 +187,20 @@ export class TimeLogComponent implements OnInit {
     this.billable = !this.billable;
   }
 
-  private changeEndTime() {
-    /*
-    send to TimeTracker notice about changing end time
-    refresh trackedTime
-    */
+  private changeEndTime(time) {
+    this.endTime = time;
+    this.calculateTime();
+    this.refreshTrackedTime();
   }
 
-  private changeStartTime() {
-    /*
-    send to TimeTracker notice about changing start time
-    refresh trackedTime
-    */
+  private changeStartTime(time) {
+    this.startTime = time;
+    this.calculateTime();
+    this.refreshTrackedTime();
   }
 
   private refreshTrackedTime() {
-    /*
-    get from TimeTracker tracked time for this record
-    */
+    // send tracked time to TimeTracker?
   }
 
   private isRunning() {
@@ -197,9 +208,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    /*
-    recalculate trackedTime according to endTime - startTime
-    */
+    // this.trackedTime = this.endTime - this.startTime;
   }
 
   private toBooked() {
@@ -233,4 +242,39 @@ export class TimeLogComponent implements OnInit {
     this.editMode = !this.editMode;
   }
 }
+
+/*  private blurIssue (input) {
+    if (input === '') {
+      this.issueOptions.length = 0;
+      this.currentIssueSubject = '';
+      this.currentIssue = undefined;
+      if (this.currentProjectName !== '') {
+        this.issues.forEach(issue => {
+          if (issue.project.name === this.currentProjectName) {
+            this.issueOptions.push(issue.subject);
+          }
+          this.loadIssueOptions();
+        });
+      } else {
+        this.loadIssueOptions();
+      }
+    } else {
+      console.log('Please select an issue');
+    }
+  }
+
+  private blurProject (input) {
+    if (input === '') {
+      this.projectOptions.length = 0;
+      if (this.currentIssueSubject !== '') {
+        this.currentProjectName = this.currentIssue.project.name;
+      } else {
+        this.currentProjectName = '';
+        this.currentProject = undefined;
+        this.loadProjectOptions();
+      }
+    } else {
+      console.log('Please select a project');
+    }
+  }*/
 
