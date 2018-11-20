@@ -1,65 +1,66 @@
 <mat-card class="record-component">
-  <mat-card-content >
+  <mat-card-content>
     <form class="total-record">
       <div class="total-div">
-      <div>
-      <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="issueControl"
-               [matAutocomplete]="issue">
-        <mat-placeholder class="placeholder">Issue</mat-placeholder>
-      </mat-form-field>
-
-      <mat-autocomplete #issue="matAutocomplete" (optionSelected)='updateIssue($event.option.value)'>
-        <mat-option *ngFor="let issue of filteredIssueOptions| async" [value]="issue">
-          {{ issue }}
-        </mat-option>
-      </mat-autocomplete>
-
-      <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" [(ngModel)]="currentComment" [ngModelOptions]="{standalone: true}" matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
-               (blur)="updateComment($event.target.value)">
-        <mat-placeholder class="placeholder">Comment</mat-placeholder>
-      </mat-form-field>
-
-      <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{'edit': !editMode}">
-        <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="projectControl"
-               [matAutocomplete]="auto">
-        <mat-placeholder class="placeholder">Project</mat-placeholder>
-      </mat-form-field>
-
-      <mat-autocomplete #auto="matAutocomplete" (optionSelected)='updateProject($event.option.value)'>
-        <mat-option *ngFor="let project of filteredProjectOptions| async" [value]="project">
-          {{ project }}
-        </mat-option>
-      </mat-autocomplete>
-      </div>
-
         <div>
-      <!--empty space-->
-        </div>
-
-        <div>
-          <button mat-icon-button class="field button_play" [disabled]="editMode" (click)="startTracker()">
-            <mat-icon class="icon" [ngClass]="{'active': active}">play_arrow</mat-icon>
-          </button>
-
-          <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()">
-            <mat-icon class="icon" [ngClass]="{'active': billable}">attach_money</mat-icon>
-          </button>
-
-          <mat-form-field class="field start-time" [ngClass]="{'edit': !editMode}">
-            <input [(ngModel)]="startTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
-          </mat-form-field> -
-          <mat-form-field class="field end-time" [ngClass]="{'edit': !editMode}">
-            <input [(ngModel)]="endTime" [readonly]="!editMode" [ngModelOptions]="{standalone: true}" type="time" matInput>
+          <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
+            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="issueControl" [matAutocomplete]="issue" />
+            <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
 
-          <span class=" field tracked-time">
-            {{trackedTime | date : 'HH:mm:ss'}}
-          </span>
+          <mat-autocomplete #issue="matAutocomplete" (optionSelected)="updateIssue($event.option.value)">
+            <mat-option *ngFor="let issue of (filteredIssueOptions | async)" [value]="issue"> {{ issue }} </mat-option>
+          </mat-autocomplete>
+
+          <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
+            <input
+              type="text"
+              [readonly]="!editMode"
+              [(ngModel)]="currentComment"
+              [ngModelOptions]="{ standalone: true }"
+              matInput
+              (click)="$event.target.select()"
+              (keyup.enter)="updateComment($event.target.value)"
+              (blur)="updateComment($event.target.value)"
+            />
+            <mat-placeholder class="placeholder">Comment</mat-placeholder>
+          </mat-form-field>
+
+          <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
+            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()" [formControl]="projectControl" [matAutocomplete]="auto" />
+            <mat-placeholder class="placeholder">Project</mat-placeholder>
+          </mat-form-field>
+
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="updateProject($event.option.value)">
+            <mat-option *ngFor="let project of (filteredProjectOptions | async)" [value]="project"> {{ project }} </mat-option>
+          </mat-autocomplete>
+        </div>
+
+        <div><!-- empty space --></div>
+
+        <div>
+          <button mat-icon-button class="field button_play" [disabled]="editMode" (click)="startTracker()"><mat-icon class="icon" [ngClass]="{ active: active }">play_arrow</mat-icon></button>
+
+          <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()"><mat-icon class="icon" [ngClass]="{ active: billable }">attach_money</mat-icon></button>
+
+          <mat-form-field class="field start-time" [ngClass]="{ edit: !editMode }" *ngIf="editMode">
+            <input [(ngModel)]="startTime" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+          </mat-form-field>
+
+          <span *ngIf="!editMode" class="field end-time">{{ startTime | date: "HH:mm" }}</span>
+
+          -
+
+          <mat-form-field class="field end-time" [ngClass]="{ edit: !editMode }" *ngIf="editMode">
+            <input [(ngModel)]="endTime" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+          </mat-form-field>
+
+          <span *ngIf="!editMode" class="field end-time">{{ endTime | date: "HH:mm" }}</span>
+
+          <span class=" field tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
           <button mat-icon-button class="field button" (click)="changeMode()">
-            <mat-icon class="icon" [ngClass]="{'active': editMode, 'attention': editButton == 'assignment'}">{{editButton}}</mat-icon>
+            <mat-icon class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}</mat-icon>
           </button>
         </div>
       </div>
