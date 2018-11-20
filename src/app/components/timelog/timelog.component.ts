@@ -71,6 +71,14 @@ export class TimeLogComponent implements OnInit {
     this.loadIssues();
     this.loadProjects();
 
+/*    this.issueControl.valueChanges.subscribe(
+      value => {
+        if (value === '') {
+          this.loadIssueOptions();
+        }
+      }
+    );*/
+
     this.filteredIssueOptions = this.issueControl.valueChanges.pipe(
       startWith(''),
       map(value =>
@@ -81,6 +89,22 @@ export class TimeLogComponent implements OnInit {
     this.filteredProjectOptions = this.projectControl.valueChanges.pipe(
       startWith(''),
       map(value => this.filterProjects(value))
+    );
+  }
+
+  private filterIssues(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.issueOptions.filter(issue =>
+      issue.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private filterProjects(value: string): string[] {
+    const filterValue = value.toLowerCase();
+
+    return this.projectOptions.filter(project =>
+      project.toLowerCase().includes(filterValue)
     );
   }
 
@@ -120,22 +144,6 @@ export class TimeLogComponent implements OnInit {
     });
   }
 
-  private filterIssues(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.issueOptions.filter(issue =>
-      issue.toLowerCase().includes(filterValue)
-    );
-  }
-
-  private filterProjects(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.projectOptions.filter(project =>
-      project.toLowerCase().includes(filterValue)
-    );
-  }
-
   private updateIssue(issue) {
     console.log('Issue: ', issue);
 
@@ -166,13 +174,18 @@ export class TimeLogComponent implements OnInit {
     const newProject = this.projects.find(entry => entry.name === project);
     this.issueOptions.length = 0;
     if (newProject) {
+      console.log('New project detected');
       this.currentProject = newProject;
       this.currentProjectName = project;
+      console.log('Project name: ', project);
       this.issues.forEach(issue => {
         if (issue.project.name === project) {
           this.issueOptions.push(issue.subject);
         }
+        this.issueControl.setValue('Dummy value');
+        this.issueControl.setValue(this.currentIssueSubject);
       });
+      console.log(this.issueOptions);
     } else {
       console.log('Something went wrong');
     }
@@ -254,6 +267,22 @@ export class TimeLogComponent implements OnInit {
     }
     this.editMode = !this.editMode;
   }
+
+  private blurProject (input) {
+    console.log('blur' + input);
+    /*if (input === '') {
+      this.projectOptions.length = 0;
+      if (this.currentIssueSubject !== '') {
+        this.currentProjectName = this.currentIssue.project.name;
+      } else {
+        this.currentProjectName = '';
+        this.currentProject = undefined;
+        this.loadProjectOptions();
+      }
+    } else {
+      console.log('Please select a project');
+    }*/
+  }
 }
 
 /*  private blurIssue (input) {
@@ -274,19 +303,6 @@ export class TimeLogComponent implements OnInit {
     } else {
       console.log('Please select an issue');
     }
-  }
-
-  private blurProject (input) {
-    if (input === '') {
-      this.projectOptions.length = 0;
-      if (this.currentIssueSubject !== '') {
-        this.currentProjectName = this.currentIssue.project.name;
-      } else {
-        this.currentProjectName = '';
-        this.currentProject = undefined;
-        this.loadProjectOptions();
-      }
-    } else {
-      console.log('Please select a project');
-    }
   }*/
+
+
