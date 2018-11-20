@@ -23,8 +23,8 @@ export class TimeLogComponent implements OnInit {
   currentIssue: Issue;
   currentProject: Project;
   currentComment: string;
-  startTime: Date;
-  endTime: Date;
+  startTime: string;
+  endTime: string;
   billable: boolean;
   trackedTime: any;
   booked: boolean;
@@ -49,8 +49,8 @@ export class TimeLogComponent implements OnInit {
     this.currentIssue = this.timeLog.issue;
     this.currentProject = this.timeLog.project;
     this.currentComment = this.timeLog.comment;
-    this.startTime = this.timeLog.timeStarted;
-    this.endTime = this.timeLog.timeStopped;
+    this.startTime = this.timeLog.timeStarted.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    this.endTime = this.timeLog.timeStopped.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
     this.billable = this.timeLog.billable;
     this.trackedTime = new Date(this.timeLog.timeInHours * 3600 * 1000);
     this.booked = this.timeLog.booked;
