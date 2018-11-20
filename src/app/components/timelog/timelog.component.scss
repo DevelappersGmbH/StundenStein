@@ -1,0 +1,38 @@
+input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+  display: none;
+}
+
+.total-div{
+  display: flex;
+  justify-content: space-between;
+}
+
+.field {
+  margin-left: 5px;
+}
+
+.start-time, .end-time, .tracked-time{
+  width: 45px;
+}
+
+.icon{
+  color: #ccc;
+}
+
+
+.icon.active {
+  color: limegreen;
+}
+
+.icon.attention {
+  color: orangered;
+}
+
+::ng-deep mat-form-field.edit .mat-form-field-underline {
+  display: none;
+}
+
+::ng-deep .cdk-overlay-pane {
+  width: auto !important;
+  max-width: 400px;
+}
