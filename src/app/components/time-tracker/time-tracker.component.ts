@@ -77,9 +77,13 @@ export class TimeTrackerComponent implements OnInit {
 
   private _filterIssues(value): Issue[] {
     if (!this.isString(value)) { value = value.subject; }
-    const filterValue = value.toLowerCase().replace('#', '').trim();
+    const filterValue: string = value.toLowerCase().replace('#', '').trim();
 
-    return this.issues.filter(issue => issue.subject.toLowerCase().includes(filterValue) || issue.id.toString().includes(filterValue) );
+    return this.issues.filter(issue =>
+      issue.subject.toLowerCase().includes(filterValue) ||
+      issue.id.toString().includes(filterValue) ||
+      issue.subject.toLowerCase().includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
+    );
   }
 
   private isString(value): boolean {
