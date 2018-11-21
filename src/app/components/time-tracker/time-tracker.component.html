@@ -15,7 +15,7 @@
           </button>
         </mat-form-field>
       <mat-form-field class="field field-small">
-          <input type="text" [formControl]="projectCtrl" name="project" placeholder="Project" matInput [matAutocomplete]="autoProject">
+          <input type="text" [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
             <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
               <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
                 {{project.name}}

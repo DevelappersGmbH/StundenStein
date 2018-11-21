@@ -37,6 +37,7 @@ export class TimeTrackerComponent implements OnInit {
   projectCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredObject = false;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -65,6 +66,12 @@ export class TimeTrackerComponent implements OnInit {
       );
   }
 
+  _getProjectColor(): string {
+    if (!this.filteredObject) { return '#000'; }
+    if (isNull(this.timeTracker) || isNull(this.timeTracker.project) || isUndefined(this.timeTracker.project)) { return '#000'; }
+    return this.timeTracker.project.color;
+  }
+
   _displayIssue(issue: Issue): string {
     if (isNull(issue) || isUndefined(issue)) { return ''; }
     return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
@@ -91,7 +98,12 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   private _filterProjects(value): Project[] {
-    if (!this.isString(value)) { value = value.name; }
+    if (!this.isString(value)) {
+      value = value.name;
+      this.filteredObject = true;
+    } else {
+      this.filteredObject = false;
+    }
     const filterValue = value.toLowerCase().replace('#', '').trim();
 
     return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
