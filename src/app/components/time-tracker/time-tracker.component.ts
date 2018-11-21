@@ -66,12 +66,12 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   _displayIssue(issue: Issue): string {
-    if (isNull(issue)) { return ''; }
+    if (isNull(issue) || isUndefined(issue)) { return ''; }
     return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   _displayProject(project: Project): string {
-    if (isNull(project)) { return ''; }
+    if (isNull(project) || isUndefined(project)) { return ''; }
     return project.name;
   }
 
@@ -97,30 +97,13 @@ export class TimeTrackerComponent implements OnInit {
     return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
   }
 
-  getIssueFromAutoSelectString(selector: string): Issue {
-    if (this.issueStrings.length !== this.issues.length) {
-      this.issues.forEach( issue => {
-        this.issueStrings.push(
-          issue.tracker + ' #' + issue.id + ': ' + issue.subject
-        );
-      });
-    }
-    for (let i = 0; i < this.issues.length; i++) {
-      if (this.issueStrings[i] === selector) {
-        return this.issues[i];
-      }
-    }
-    return undefined;
-  }
-
-  selectIssue(data) {
-     console.log('issue string selected: ' + data);
-     this.timeTracker.issue = this.getIssueFromAutoSelectString(data);
-    if (isUndefined(this.timeTracker.issue)) {
-      this.timeTracker.issue = undefined;
-    } else {
+  selectIssue(issue: Issue) {
+    this.timeTracker.issue = issue;
+    this.ensureSelectedIssueIsFromIssueList();
+    if (!isUndefined(this.timeTracker.issue)) {
       this.timeTracker.project = this.timeTracker.issue.project;
       this.ensureSelectedProjectIsFromProjectList();
+      this.projectCtrl.setValue(this.timeTracker.project);
     }
   }
 
@@ -144,8 +127,11 @@ export class TimeTrackerComponent implements OnInit {
     }
   }
 
-  selectProject() {
+  selectProject(project: Project) {
+    this.timeTracker.project = project;
+    this.ensureSelectedProjectIsFromProjectList();
     this.timeTracker.issue = undefined;
+    this.issueCtrl.setValue(undefined);
   }
 
   loadProjects() {
