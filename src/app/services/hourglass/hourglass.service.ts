@@ -39,6 +39,12 @@ export class HourGlassService extends BaseDataService {
     return this.httpClient.post<HourGlassTimeTracker>(endpoint, request);
   }
 
+  updateTimeTracker(timeTracker: HourGlassTimeTracker): Observable<HourGlassTimeTracker> {
+    const query = this.getJsonEndpointUrl(this.timeTrackersUrl + '/' + timeTracker.id);
+    const request: HourGlassTimeTrackerRequest = {time_tracker: timeTracker};
+    return this.httpClient.put<HourGlassTimeTracker>(query, request);
+  }
+
   stopTimeTracker(
     timeTrackerId: number
   ): Observable<HourGlassTimeTrackerStopResponse> {
