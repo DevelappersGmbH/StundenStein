@@ -10,7 +10,7 @@
       </mat-form-field>
       <mat-form-field class="field field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
-          <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="taskDescription=''">
+          <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="this.timeTracker.comment=''">
             <mat-icon>close</mat-icon>
           </button>
         </mat-form-field>
