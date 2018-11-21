@@ -174,6 +174,11 @@ export class TimeTrackerComponent implements OnInit {
     this.currentTrackerTimeString = hrsStr + ':' + minStr + ':' + secStr;
   }
 
+  private updateAutoCompletes(): void {
+    this.issueCtrl.setValue(this.timeTracker.issue);
+    this.projectCtrl.setValue(this.timeTracker.project);
+  }
+
   loadTimeTracker() {
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
@@ -192,6 +197,7 @@ export class TimeTrackerComponent implements OnInit {
             project: null
           };
         }
+        this.updateAutoCompletes();
       });
     });
   }
