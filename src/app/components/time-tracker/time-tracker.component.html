@@ -1,16 +1,12 @@
 <mat-card>
   <form>
       <mat-form-field class="field field-small">
-        <mat-select (selectionChange)="selectIssue()"  [(ngModel)]="timeTracker.issue" [ngModelOptions]="{standalone: true}" placeholder="Issue">
-          <mat-option>None</mat-option>
-          <mat-option *ngFor="let issue of issues" [value]="issue">{{issue.subject}}</mat-option>
-        </mat-select>
-        <!--input type="text" [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="auto">
-        <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" autoActiveFirstOption #auto="matAutocomplete">
-          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue.tracker + ' #' + issue.id + ': ' + issue.subject">
+        <input type="text" [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
+        <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"  autoActiveFirstOption #autoIssue="matAutocomplete">
+          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
             {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
           </mat-option>
-        </mat-autocomplete-->
+        </mat-autocomplete>
       </mat-form-field>
       <mat-form-field class="field field-large">
           <input matInput type="text" placeholder="Task description" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
@@ -19,16 +15,12 @@
           </button>
         </mat-form-field>
       <mat-form-field class="field field-small">
-          <mat-select (selectionChange)="selectProject()" placeholder="Project" [(ngModel)]="timeTracker.project" [ngModelOptions]="{standalone: true}">
-            <mat-option>None</mat-option>
-            <mat-option *ngFor="let project of projects" [value]="project">{{project.name}}</mat-option>
-          </mat-select>
-          <!--input type="text" [formControl]="projectCtrl" name="project" placeholder="Project" matInput [matAutocomplete]="auto">
-            <mat-autocomplete (optionSelected)="selectProject($event.option.value)" autoActiveFirstOption #auto="matAutocomplete">
-              <mat-option *ngFor="let project of filteredProjects | async" [value]="project.name + ' (' + project.id + ')'">
-                {{project.name}} ({{project.id}})
+          <input type="text" [formControl]="projectCtrl" name="project" placeholder="Project" matInput [matAutocomplete]="autoProject">
+            <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
+              <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
+                {{project.name}}
               </mat-option>
-            </mat-autocomplete-->
+            </mat-autocomplete>
         </mat-form-field>
       <span class="field">{{ currentTrackerTimeString }}</span>
       <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
