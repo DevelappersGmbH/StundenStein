@@ -4,7 +4,8 @@ import {
   map,
   mapTo,
   switchMap,
-  tap
+  tap,
+  throttleTime
   } from 'rxjs/operators';
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
@@ -165,6 +166,24 @@ export class DataService {
     );
   }
 
+  updateTimeTracker(timeTracker: TimeTracker): Observable<TimeTracker> {
+    const calls: Observable<any>[] = [
+      this.redmineService.getTimeEntryActivities(),
+      this.redmineService.getIssues()
+    ];
+    return forkJoin(calls).pipe(
+      flatMap(results => {
+        return this.hourglassService
+          .updateTimeTracker(
+            this.mapTimeTrackerToHourGlassTimeTracker(timeTracker, results[0])
+          )
+          .pipe(
+            map(t => this.mapHourGlassTimeTrackerToTimeTracker(t, results[0]))
+          );
+      })
+    );
+  }
+
   stopTimeTracker(timeTracker: TimeTracker): Observable<boolean> {
     return this.hourglassService.stopTimeTracker(timeTracker.id).pipe(
       map(hgTimeTrackerStopResponse => {
@@ -174,6 +193,25 @@ export class DataService {
         return false;
       })
     );
+  }
+
+  mapTimeTrackerToHourGlassTimeTracker(
+    timeTracker: TimeTracker,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): HourGlassTimeTracker {
+    const hgtracker: HourGlassTimeTracker = {
+      id: timeTracker.id,
+      user_id: this.userService.getUser().id,
+      start: timeTracker.timeStarted.toISOString(),
+      activity_id: this.mapBillableToRedmineTimeEntryActivityId(
+        timeTracker.billable,
+        redmineTimeEntryActivities
+      ),
+      comments: timeTracker.comment,
+      issue_id: timeTracker.issue ? timeTracker.issue.id : undefined,
+      project_id: timeTracker.project ? timeTracker.project.id : undefined
+    };
+    return hgtracker;
   }
 
   mapPartialTimeTrackerToPartialHourGlassTimeTracker(
