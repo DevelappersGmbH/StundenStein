@@ -37,7 +37,7 @@ export class ColorService {
     // const hue = Math.abs(hash % 360);
     const hue = this.getHue(Math.abs(hash % 6), hash % 15);
     const saturation = 80 + Math.abs(((hash + 1) % 20));
-    const lightness = 40 + Math.abs(((hash + 2) % 15));
+    const lightness = 25 + Math.abs(((hash + 2) % 15));
     return 'hsl(' + hue + ',' + saturation + '%,' + lightness + '%)';
   }
 
