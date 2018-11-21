@@ -208,7 +208,6 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
-    console.log(this.timeTracker);
     this.dataService.startTimeTracker(this.timeTracker).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
