@@ -1,7 +1,7 @@
 <mat-card>
   <form>
       <mat-form-field class="field field-small">
-        <input type="text" [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
+        <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
         <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"  autoActiveFirstOption #autoIssue="matAutocomplete">
           <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
             {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
@@ -15,7 +15,7 @@
           </button>
         </mat-form-field>
       <mat-form-field class="field field-small">
-          <input type="text" [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
+          <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
             <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
               <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
                 {{project.name}}

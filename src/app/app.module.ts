@@ -33,6 +33,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserService } from './services/user/user.service';
+import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { UserService } from './services/user/user.service';
     NavbarComponent,
     TimeLogComponent,
     TimeTrackerComponent,
-    RecentTimeLogsComponent
+    RecentTimeLogsComponent,
+    EnforcedInputsDirective
   ],
   imports: [
     BrowserModule,
