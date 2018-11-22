@@ -43,7 +43,7 @@
             class="icon" [ngClass]="{ active: billable }">attach_money</mat-icon></button>
 
           <mat-form-field class="field start-time" [ngClass]="{ edit: !editMode }" *ngIf="editMode">
-            <input [(ngModel)]="startTime" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input ngModel ="startTime" (ngModelChange)="changeStartTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           <span *ngIf="!editMode" class="field end-time">{{ startTime | date: "HH:mm" }}</span>
@@ -51,7 +51,7 @@
           -
 
           <mat-form-field class="field end-time" [ngClass]="{ edit: !editMode }" *ngIf="editMode">
-            <input [(ngModel)]="endTime" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input ngModel ="endTime" (ngModelChange)="changeEndTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           <span *ngIf="!editMode" class="field end-time">{{ endTime | date: "HH:mm" }}</span>

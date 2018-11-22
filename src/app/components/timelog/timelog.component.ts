@@ -251,13 +251,33 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeEndTime(time) {
-    this.endTime = time;
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.endTime = new Date(
+      1,
+      1,
+      1,
+      hours,
+      mins,
+      0,
+      0
+    );
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
   changeStartTime(time) {
-    this.startTime = time;
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.startTime = new Date(
+      1,
+      1,
+      1,
+      hours,
+      mins,
+      0,
+      0
+    );
     this.calculateTime();
     this.refreshTrackedTime();
   }
