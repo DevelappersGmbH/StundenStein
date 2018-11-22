@@ -293,9 +293,9 @@ export class TimeLogComponent implements OnInit {
   private calculateTime() {
     const seconds = (this.endTime - this.startTime) / 1000;
     const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds - hours * 3600) / 60)
+    const mins = Math.floor((seconds - hours * 3600) / 60);
     const secs = seconds - hours * 3600 - mins * 60;
-
+    
     this.trackedTime = new Date(
       1,
       1,
@@ -307,14 +307,13 @@ export class TimeLogComponent implements OnInit {
     );
   }
 
-  private toBooked() {
-    if (this.booked === false) {
-      if (this.currentIssueSubject === '' || this.currentProjectName === '') {
+  private isBooked() {
+      if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
+        this.booked = false;
       } else {
         this.booked = true;
       }
     }
-  }
 
   changeMode() {
     if (this.isRunning()) {
@@ -324,7 +323,7 @@ export class TimeLogComponent implements OnInit {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
     } else {
-      this.toBooked();
+      this.isBooked();
       if (this.booked === false) {
         /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'assignment';
