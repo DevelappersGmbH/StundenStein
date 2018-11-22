@@ -291,7 +291,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    // this.trackedTime = this.endTime - this.startTime;
+    this.trackedTime = this.endTime - this.startTime;
   }
 
   private toBooked() {
