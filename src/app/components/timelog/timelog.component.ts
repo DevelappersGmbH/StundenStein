@@ -14,7 +14,8 @@ import { User } from '../../model/user.interface';
   styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) {
+  }
 
   @Input() timeLog: TimeLog;
 
@@ -75,7 +76,7 @@ export class TimeLogComponent implements OnInit {
       value => {
         if (value === '') {
           if (this.currentProject && this.currentIssue) {
-          this.updateIssueOptions(this.currentProject);
+            this.updateIssueOptions(this.currentProject);
           } else if (this.currentIssue) {
             this.projectControl.setValue('');
           }
@@ -89,14 +90,14 @@ export class TimeLogComponent implements OnInit {
       value => {
         if (value === '') {
           console.log('Here');
-            this.issueOptions = this.issues;
+          this.issueOptions = this.issues;
           console.log('Length options: ', this.issueOptions.length);
-            this.projectOptions = this.projects;
-            this.issueControl.setValue('Dummy value');
-            this.issueControl.setValue('');
-            this.currentIssue = null;
-            this.currentProject = null;
-          }
+          this.projectOptions = this.projects;
+          this.issueControl.setValue('Dummy value');
+          this.issueControl.setValue('');
+          this.currentIssue = null;
+          this.currentProject = null;
+        }
       }
     );
 
@@ -114,7 +115,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   loadProjects() {
-    this.dataService.getProjects().subscribe( data => {
+    this.dataService.getProjects().subscribe(data => {
       this.projects = data;
       this.projectOptions = this.projects;
     }, error => {
@@ -135,7 +136,9 @@ export class TimeLogComponent implements OnInit {
   }
 
   private filterIssues(value): Issue[] {
-    if (!this.isString(value)) { value = value.subject; }
+    if (!this.isString(value)) {
+      value = value.subject;
+    }
     const filterValue: string = value.toLowerCase().replace('#', '').trim();
 
     return this.issueOptions.filter(issue =>
@@ -170,33 +173,29 @@ export class TimeLogComponent implements OnInit {
     });
   }
 
-  private selectIssue(issue) {
+  selectIssue(issue) {
     console.log('Issue: ', issue);
 
-    const newIssue = this.issues.find(
-      entry => entry.id === issue.id
-    );
-
-    if (newIssue) {
+    if (this.findIssue(issue)) {
       console.log('Existing issue detected');
-      this.currentIssue = newIssue;
-      this.currentProject = newIssue.project;
+      this.currentIssue = issue;
+      this.currentProject = issue.project;
       this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
 
       this.updateIssueOptions(this.currentProject);
 
       this.projectControl.setValue(this.currentProject ? this.currentProject.name : '');
-    } else  {
+    } else {
       console.log('No such issue!');
     }
     console.log(this.projectOptions);
   }
 
-  private selectProject(project) {
-    const newProject = this.projectOptions.find(entry => entry.id === project.id);
-    if (newProject) {
+  selectProject(project) {
+
+    if (this.findProject(project)) {
       console.log('New project detected', project);
-      this.currentProject = newProject;
+      this.currentProject = project;
       this.projectControl.setValue(project ? project.name : '');
       this.updateIssueOptions(project);
       this.issueControl.setValue('Dummy value');
@@ -207,7 +206,7 @@ export class TimeLogComponent implements OnInit {
     }
   }
 
-  private updateComment(comment) {
+  updateComment(comment) {
     this.currentComment = comment;
   }
 
@@ -232,11 +231,11 @@ export class TimeLogComponent implements OnInit {
   }
 
 
-  private updateForm() {
+  updateForm() {
     console.log('OnSelectionChange');
   }
 
-  private startTracker() {
+  startTracker() {
     /*
     startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
     */
@@ -244,26 +243,26 @@ export class TimeLogComponent implements OnInit {
     this.active = true;
   }
 
-  private markBillable() {
+  markBillable() {
     /*
     send billable sign to TimeTracker
     */
     this.billable = !this.billable;
   }
 
-  private changeEndTime(time) {
+  changeEndTime(time) {
     this.endTime = time;
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
-  private changeStartTime(time) {
+  changeStartTime(time) {
     this.startTime = time;
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
-  private refreshTrackedTime() {
+  refreshTrackedTime() {
     // send tracked time to TimeTracker?
   }
 
@@ -284,7 +283,7 @@ export class TimeLogComponent implements OnInit {
     }
   }
 
-  private changeMode() {
+  changeMode() {
     if (this.isRunning()) {
       /*ERROR: stop the tracker first*/
     }
@@ -304,41 +303,45 @@ export class TimeLogComponent implements OnInit {
     this.editMode = !this.editMode;
   }
 
-  private blurProject (input) {
-    console.log('blur' + input);
-    /*if (input === '') {
-      this.projectOptions.length = 0;
-      if (this.currentIssueSubject !== '') {
-        this.currentProjectName = this.currentIssue.project.name;
-      } else {
-        this.currentProjectName = '';
-        this.currentProject = undefined;
-        this.loadProjectOptions();
+  private findProject(project): Project {
+    return this.projectOptions.find(entry => entry.id === project.id);
+  }
+
+  private findIssue(issue): Issue {
+    return this.issueOptions.find(entry => entry.id === issue.id);
+  }
+
+  blurProject(input) {
+    console.log('blurProject' + input);
+    let exists = false;
+    this.projectOptions.forEach(project => {
+      if (!exists) {
+        if (input === project.name) {
+          exists = true;
+        }
       }
+    });
+    if (exists) {
+      this.projectControl.setValue(input);
     } else {
-      console.log('Please select a project');
-    }*/
+      this.projectControl.setValue('');
+    }
+  }
+
+  blurIssue(input) {
+    console.log('blurIssue' + input);
+    let exists = false;
+    this.issueOptions.forEach(issue => {
+      if (!exists) {
+        if (input === issue.subject) {
+          exists = true;
+        }
+      }
+    });
+    if (exists) {
+      this.issueControl.setValue(input);
+    } else {
+      this.issueControl.setValue('');
+    }
   }
 }
-
-/*  private blurIssue (input) {
-    if (input === '') {
-      this.issueOptions.length = 0;
-      this.currentIssueSubject = '';
-      this.currentIssue = undefined;
-      if (this.currentProjectName !== '') {
-        this.issues.forEach(issue => {
-          if (issue.project.name === this.currentProjectName) {
-            this.issueOptions.push(issue.subject);
-          }
-          this.loadIssueOptions();
-        });
-      } else {
-        this.loadIssueOptions();
-      }
-    } else {
-      console.log('Please select an issue');
-    }
-  }*/
-
-
