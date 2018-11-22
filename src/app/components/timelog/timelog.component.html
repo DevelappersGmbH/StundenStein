@@ -9,8 +9,8 @@
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
 
-          <mat-autocomplete #issue="matAutocomplete" (optionSelected)="updateIssue($event.option.value)">
-            <mat-option *ngFor="let issue of (filteredIssueOptions | async)" [value]="issue"> {{ issue }} </mat-option>
+          <mat-autocomplete #issue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)">
+            <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.id}}: {{issue.subject}} </mat-option>
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
@@ -38,8 +38,8 @@
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
 
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="updateProject($event.option.value)">
-            <mat-option *ngFor="let project of (filteredProjectOptions | async)" [value]="project"> {{ project }}
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectProject($event.option.value)">
+            <mat-option *ngFor="let project of (filteredProjects| async)" [value]="project"> {{project.name}}
             </mat-option>
           </mat-autocomplete>
         </div>

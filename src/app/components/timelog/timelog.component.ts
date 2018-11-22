@@ -34,19 +34,19 @@ export class TimeLogComponent implements OnInit {
   editMode = false;
   editButton = 'edit';
 
-  projects: Project[];
-  issues: Partial<Issue>[];
+  projects: Project[] = [];
+  issues: Issue[] = [];
 
   issueControl = new FormControl();
   projectControl = new FormControl();
-  issueOptions: string[] = [];
-  projectOptions: string[] = [];
-  filteredIssueOptions: Observable<string[]>;
-  filteredProjectOptions: Observable<string[]>;
+  issueOptions: Issue[] = [];
+  projectOptions: Project[] = [];
+  filteredIssues: Observable<Issue[]>;
+  filteredProjects: Observable<Project[]>;
+
+  filteredObject = false;
 
   ngOnInit() {
-    this.currentIssueSubject = this.timeLog.issue ? this.timeLog.issue.subject : '';
-    this.currentProjectName = this.timeLog.project ? this.timeLog.project.name : '';
     this.currentIssue = this.timeLog.issue;
     this.currentProject = this.timeLog.project;
     this.currentComment = this.timeLog.comment;
@@ -65,66 +65,68 @@ export class TimeLogComponent implements OnInit {
     this.booked = this.timeLog.booked;
     this.currentUser = this.timeLog.user;
 
-    this.issueControl.setValue(this.currentIssueSubject);
-    this.projectControl.setValue(this.currentProjectName);
+    this.issueControl.setValue(this.timeLog.issue ? this.timeLog.issue.subject : '');
+    this.projectControl.setValue(this.timeLog.project ? this.timeLog.project.name : '');
 
     this.loadIssues();
     this.loadProjects();
 
-/*    this.issueControl.valueChanges.subscribe(
+    this.issueControl.valueChanges.subscribe(
       value => {
         if (value === '') {
-          this.loadIssueOptions();
+          if (this.currentProject && this.currentIssue) {
+          this.updateIssueOptions(this.currentProject);
+          } else if (this.currentIssue) {
+            this.projectControl.setValue('');
+          }
+          this.projectOptions = this.projects;
+          this.currentIssue = null;
         }
       }
-    );*/
+    );
 
-    this.filteredIssueOptions = this.issueControl.valueChanges.pipe(
+    this.projectControl.valueChanges.subscribe(
+      value => {
+        if (value === '') {
+          console.log('Here');
+            this.issueOptions = this.issues;
+          console.log('Length options: ', this.issueOptions.length);
+            this.projectOptions = this.projects;
+            this.issueControl.setValue('Dummy value');
+            this.issueControl.setValue('');
+            this.currentIssue = null;
+            this.currentProject = null;
+          }
+      }
+    );
+
+    this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
-      map(value =>
-        value ? this.filterIssues(value) : this.issueOptions.slice()
+      map(issue =>
+        issue ? this.filterIssues(issue) : this.issueOptions.slice()
       )
     );
 
-    this.filteredProjectOptions = this.projectControl.valueChanges.pipe(
+    this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(value => this.filterProjects(value))
-    );
-  }
-
-  private filterIssues(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.issueOptions.filter(issue =>
-      issue.toLowerCase().includes(filterValue)
-    );
-  }
-
-  private filterProjects(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.projectOptions.filter(project =>
-      project.toLowerCase().includes(filterValue)
+      map(project => this.filterProjects(project))
     );
   }
 
   loadProjects() {
-    this.dataService.getProjects().subscribe(
-      data => {
-        this.projects = data;
-        this.loadProjectOptions();
-      },
-      error => {
-        console.error('Couldn\'t get projects from data service.');
-      }
-    );
+    this.dataService.getProjects().subscribe( data => {
+      this.projects = data;
+      this.projectOptions = this.projects;
+    }, error => {
+      console.error('Couldn\'t get projects from data service.');
+    });
   }
 
   loadIssues() {
     this.dataService.getIssues().subscribe(
       data => {
         this.issues = data;
-        this.loadIssueOptions();
+        this.issueOptions = this.issues;
       },
       error => {
         console.error('Couldn\'t get issues from data service.');
@@ -132,69 +134,103 @@ export class TimeLogComponent implements OnInit {
     );
   }
 
-  loadIssueOptions() {
+  private filterIssues(value): Issue[] {
+    if (!this.isString(value)) { value = value.subject; }
+    const filterValue: string = value.toLowerCase().replace('#', '').trim();
+
+    return this.issueOptions.filter(issue =>
+      issue.subject.toLowerCase().includes(filterValue) ||
+      issue.id.toString().includes(filterValue) ||
+      issue.subject.toLowerCase().includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
+    );
+  }
+
+  private filterProjects(value): Project[] {
+    if (!this.isString(value)) {
+      value = value.name;
+      this.filteredObject = true;
+    } else {
+      this.filteredObject = false;
+    }
+    const filterValue = value.toLowerCase().replace('#', '').trim();
+
+    return this.projectOptions.filter(project => project.name.toLowerCase().includes(filterValue));
+  }
+
+  private isString(value): boolean {
+    return Object.prototype.toString.call(value) === '[object String]';
+  }
+
+  updateIssueOptions(project) {
+    this.issueOptions = [];
     this.issues.forEach(issue => {
-      this.issueOptions.push(issue.subject);
+      if (issue.project.id === project.id) {
+        this.issueOptions.push(issue);
+      }
     });
   }
 
-  loadProjectOptions() {
-    this.projects.forEach(project => {
-      this.projectOptions.push(project.name);
-    });
-  }
-
-  private updateIssue(issue) {
+  private selectIssue(issue) {
     console.log('Issue: ', issue);
 
     const newIssue = this.issues.find(
-      entry => entry.subject === issue
-    ) as Issue; // anything better?
+      entry => entry.id === issue.id
+    );
 
     if (newIssue) {
-      this.currentIssueSubject = issue;
+      console.log('Existing issue detected');
       this.currentIssue = newIssue;
       this.currentProject = newIssue.project;
-      this.currentProjectName = newIssue.project.name;
+      this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
 
-      this.updateProject(this.currentProjectName);
+      this.updateIssueOptions(this.currentProject);
 
-      this.projectOptions.length = 0;
-      this.projectOptions.push(this.currentProjectName);
-
-      this.projectControl.setValue(this.currentProjectName);
-    } else {
-      console.log('Something went wrong');
+      this.projectControl.setValue(this.currentProject ? this.currentProject.name : '');
+    } else  {
+      console.log('No such issue!');
     }
     console.log(this.projectOptions);
   }
 
-  private updateProject(project) {
-    console.log('Project :', project);
-    const newProject = this.projects.find(entry => entry.name === project);
-    this.issueOptions.length = 0;
+  private selectProject(project) {
+    const newProject = this.projectOptions.find(entry => entry.id === project.id);
     if (newProject) {
-      console.log('New project detected');
+      console.log('New project detected', project);
       this.currentProject = newProject;
-      this.currentProjectName = project;
-      console.log('Project name: ', project);
-      this.issues.forEach(issue => {
-        if (issue.project.name === project) {
-          this.issueOptions.push(issue.subject);
-        }
-        this.issueControl.setValue('Dummy value');
-        this.issueControl.setValue(this.currentIssueSubject);
-      });
+      this.projectControl.setValue(project ? project.name : '');
+      this.updateIssueOptions(project);
+      this.issueControl.setValue('Dummy value');
+      this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
       console.log(this.issueOptions);
     } else {
       console.log('Something went wrong');
     }
-    console.log(this.projectOptions);
   }
 
   private updateComment(comment) {
     this.currentComment = comment;
   }
+
+  private searchIssueById(id): Issue {
+    this.issues.forEach(issue => {
+      if (issue.id === id) {
+        return issue;
+      }
+    });
+    console.log('No matching issue found');
+    return undefined;
+  }
+
+  private searchProjectById(id): Project {
+    this.projects.forEach(project => {
+      if (project.id === id) {
+        return project;
+      }
+    });
+    console.log('No matching project found');
+    return undefined;
+  }
+
 
   private updateForm() {
     console.log('OnSelectionChange');
