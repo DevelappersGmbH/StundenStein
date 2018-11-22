@@ -24,7 +24,7 @@ export class UserReportsComponent implements OnInit {
   width2 = [[],[],[]];
   actualSelect = 0;
   dwmArray = new Array(); //array for order of elements in periodArray
-  
+
   constructor(private dataService: DataService, private userService: UserService) { }
 
   ngOnInit() {
@@ -80,7 +80,7 @@ export class UserReportsComponent implements OnInit {
               //check if project already exists for the period
               if (this.periodArray != undefined){
                 for (let n = 0; n < this.periodArray[this.dwmArray[i][m]].length; n++){
-                  if (this.periodArray[this.dwmArray[i][m]][n][0] == res[i].issue.project.name){
+                  if (this.periodArray[this.dwmArray[i][m]][n][0] == res[i].project.name){
                     projEx = true;
                     projN = n;
                   }
@@ -96,7 +96,7 @@ export class UserReportsComponent implements OnInit {
               else{
                   //console.log('create new project ' + i + ' dwm: ' + this.dwmArray[i][m]);
                   //console.log(res[i].timeInHours);
-                  this.periodArray[this.dwmArray[i][m]][this.periodArray[this.dwmArray[i][m]].length] = [res[i].issue.project.name, res[i].issue.project.color, res[i].timeInHours];
+                  this.periodArray[this.dwmArray[i][m]][this.periodArray[this.dwmArray[i][m]].length] = [res[i].project.name, res[i].project.color, res[i].timeInHours];
               }
             }
             //same as above for unbooked project (without name)
@@ -144,7 +144,7 @@ export class UserReportsComponent implements OnInit {
         this.projectExists = true;
       }
       this.width = [[],[],[]]; //width for the stripe chart sequences
-      this.setWidth(); 
+      this.setWidth();
     })
     //console.log('ngOnInit finished');
   }
@@ -244,7 +244,7 @@ export class UserReportsComponent implements OnInit {
         else{
           s = ''+Math.floor(((temp % 1) * 60) % 1 * 60);
         }
-        return h+':'+m+':'+s; 
+        return h+':'+m+':'+s;
       }
     }
 
