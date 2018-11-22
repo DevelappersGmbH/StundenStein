@@ -66,6 +66,37 @@ export class TimeTrackerComponent implements OnInit {
       );
   }
 
+  updateTracker(): void {
+    if (isUndefined(this.timeTracker.id)) {
+      return;
+    }
+    let timeTracker: TimeTracker;
+    timeTracker = {
+      id: this.timeTracker.id,
+      timeStarted: this.timeTracker.timeStarted,
+      billable: this.timeTracker.billable,
+      comment: this.timeTracker.comment,
+      issue: this.timeTracker.issue,
+      project: this.timeTracker.project
+    };
+    this.dataService.updateTimeTracker(timeTracker).subscribe( t => {
+      if (!isNull(t) && !(isUndefined(t))) {
+        this.timeTracker = t;
+        this.extractFromTimeTracker();
+      } else {
+        this.timeTracker = {
+          billable: true,
+          comment: '',
+          issue: null,
+          project: null
+        };
+      }
+      this.updateAutoCompletes();
+    }, error => {
+      console.error('Couldn\'t update time tracker.');
+    });
+  }
+
   _getProjectColor(): string {
     if (!this.filteredObject) { return '#000'; }
     if (isNull(this.timeTracker) || isNull(this.timeTracker.project) || isUndefined(this.timeTracker.project)) { return '#000'; }
@@ -117,6 +148,7 @@ export class TimeTrackerComponent implements OnInit {
       this.ensureSelectedProjectIsFromProjectList();
       this.projectCtrl.setValue(this.timeTracker.project);
     }
+    this.updateTracker();
   }
 
   ensureSelectedProjectIsFromProjectList() {
@@ -144,6 +176,7 @@ export class TimeTrackerComponent implements OnInit {
     this.ensureSelectedProjectIsFromProjectList();
     this.timeTracker.issue = undefined;
     this.issueCtrl.setValue(undefined);
+    this.updateTracker();
   }
 
   loadProjects() {
