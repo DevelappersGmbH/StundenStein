@@ -360,6 +360,14 @@ export class DataService {
     );
   }
 
+  deleteTimeLog(timeLog: TimeLog): Observable<boolean> {
+      return this.hourglassService.deleteTimeLog(timeLog.id).pipe(
+        map(response => {
+          return response.status === 204;
+        })
+      );
+  }
+
   mapRedmineUserIdToCurrentUserOrNull(userId: number): User {
     return userId === this.userService.getUser().id
       ? this.userService.getUser()
