@@ -139,7 +139,7 @@ export class TimeLogComponent implements OnInit {
     );
   }
 
-  private updateIssue(issue) {
+  updateIssue(issue) {
     console.log('Issue: ', issue);
 
     const newIssue = this.issues.find(
@@ -164,7 +164,7 @@ export class TimeLogComponent implements OnInit {
     console.log(this.projectOptions);
   }
 
-  private updateProject(project) {
+  updateProject(project) {
     console.log('Project :', project);
     const newProject = this.projects.find(entry => entry.name === project);
     this.issueOptions.length = 0;
@@ -182,15 +182,15 @@ export class TimeLogComponent implements OnInit {
     console.log(this.projectOptions);
   }
 
-  private updateComment(comment) {
+  updateComment(comment) {
     this.currentComment = comment;
   }
 
-  private updateForm() {
+  updateForm() {
     console.log('OnSelectionChange');
   }
 
-  private startTracker() {
+  startTracker() {
     /*
     startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
     */
@@ -198,26 +198,26 @@ export class TimeLogComponent implements OnInit {
     this.active = true;
   }
 
-  private markBillable() {
+  markBillable() {
     /*
     send billable sign to TimeTracker
     */
     this.billable = !this.billable;
   }
 
-  private changeEndTime(time) {
+  changeEndTime(time) {
     this.endTime = time;
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
-  private changeStartTime(time) {
+  changeStartTime(time) {
     this.startTime = time;
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
-  private refreshTrackedTime() {
+  refreshTrackedTime() {
     // send tracked time to TimeTracker?
   }
 
@@ -238,7 +238,7 @@ export class TimeLogComponent implements OnInit {
     }
   }
 
-  private changeMode() {
+  changeMode() {
     if (this.isRunning()) {
       /*ERROR: stop the tracker first*/
     }
@@ -259,7 +259,7 @@ export class TimeLogComponent implements OnInit {
   }
 }
 
-/*  private blurIssue (input) {
+/*  blurIssue (input) {
     if (input === '') {
       this.issueOptions.length = 0;
       this.currentIssueSubject = '';
@@ -279,7 +279,7 @@ export class TimeLogComponent implements OnInit {
     }
   }
 
-  private blurProject (input) {
+blurProject (input) {
     if (input === '') {
       this.projectOptions.length = 0;
       if (this.currentIssueSubject !== '') {
