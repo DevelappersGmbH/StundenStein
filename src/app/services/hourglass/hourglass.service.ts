@@ -9,7 +9,7 @@ import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-track
 import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hourglass-time-tracker-request.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { HourGlassTimeTrackerStopResponse } from 'src/app/redmine-model/responses/hourglass-time-tracker-stop-response.interface';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
@@ -132,5 +132,21 @@ export class HourGlassService extends BaseDataService {
         return of(items);
       })
     );
+  }
+
+  deleteTimeLog(timeLogId: number): Observable<HttpResponse<any>> {
+    const query = this.getJsonEndpointUrl(this.timeLogsUrl + '/' + timeLogId);
+    return this.httpClient.delete<HttpResponse<any>>(query, {
+      observe: 'response'
+    });
+  }
+
+  deleteTimeBooking(timeLogId: number): Observable<HttpResponse<any>> {
+    const query = this.getJsonEndpointUrl(
+      this.timeBookingsUrl + '/' + timeLogId
+    );
+    return this.httpClient.delete<HttpResponse<any>>(query, {
+      observe: 'response'
+    });
   }
 }
