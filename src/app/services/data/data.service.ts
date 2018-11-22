@@ -178,7 +178,9 @@ export class DataService {
             this.mapTimeTrackerToHourGlassTimeTracker(timeTracker, results[0])
           )
           .pipe(
-            map(t => this.mapHourGlassTimeTrackerToTimeTracker(t, results[0]))
+            flatMap(r => {
+              return this.getTimeTrackerByUserId(this.userService.getUser().id);
+            })
           );
       })
     );
@@ -208,8 +210,12 @@ export class DataService {
         redmineTimeEntryActivities
       ),
       comments: timeTracker.comment,
-      issue_id: timeTracker.issue ? timeTracker.issue.id : undefined,
-      project_id: timeTracker.project ? timeTracker.project.id : undefined
+      issue_id:
+        timeTracker.issue && timeTracker.issue.id ? timeTracker.issue.id : null,
+      project_id:
+        timeTracker.project && timeTracker.project.id
+          ? timeTracker.project.id
+          : null
     };
     return hgtracker;
   }
