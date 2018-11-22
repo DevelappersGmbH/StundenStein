@@ -291,7 +291,20 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    this.trackedTime = this.endTime - this.startTime;
+    const seconds = (this.endTime - this.startTime) / 1000;
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds - hours * 3600) / 60)
+    const secs = seconds - hours * 3600 - mins * 60;
+
+    this.trackedTime = new Date(
+      1,
+      1,
+      1,
+      hours,
+      mins,
+      secs,
+      0
+    );
   }
 
   private toBooked() {
