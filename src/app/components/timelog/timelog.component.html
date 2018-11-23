@@ -22,7 +22,7 @@
           </mat-form-field>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input type="text" [style.color]="currentProject.color" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="auto" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
