@@ -22,15 +22,39 @@ export class RecentTimeLogsComponent implements OnInit {
   }
 
   timeLogList: TimeLog[];
+  dateList: Date[];
+  timeLogMap : Map<Date, TimeLog[]>;
 
   ngOnInit() {
+    this.timeLogMap = new Map();
     this.loadTimeLogs();
   }
 
-  clickedItem() { }
-
   loadTimeLogs() {
-    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { this.timeLogList = timeLogs });
+    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
+      this.timeLogList = timeLogs;
+      this.seperateDates();
+     });
+  }
 
+  seperateDates(){
+    let seperateDates: Date[] = new Array();
+    let dateExists: Boolean = false;
+    for(var i = 0;  i < this.timeLogList.length; i++ ){
+      var date = this.timeLogList[i].timeStopped;
+      for(var j = 0; j < seperateDates.length; j++){
+        dateExists = false;
+        var existingDate = seperateDates[j];
+        if(date.getDay() == existingDate.getDay() && date.getMonth() == existingDate.getMonth() && date.getFullYear() == existingDate.getFullYear()){
+          dateExists = true;
+          break;
+        }
+      }
+      if(!dateExists){
+        seperateDates.push(date);
+      }
+    }
+    this.dateList = seperateDates;
+    console.log(this.timeLogMap);
   }
 }
