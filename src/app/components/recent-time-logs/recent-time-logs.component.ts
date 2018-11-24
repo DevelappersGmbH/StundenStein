@@ -38,26 +38,30 @@ export class RecentTimeLogsComponent implements OnInit {
      });
   }
 
+  //pls dont try to understand what i do here thanks
   seperateDates(){
     let seperateDates: Date[] = new Array();
     let dateExists: Boolean = false;
     for(var i = 0;  i < this.timeLogList.length; i++ ){
       var date = this.timeLogList[i].timeStopped;
+      var matchingDate;
       for(var j = 0; j < seperateDates.length; j++){
         dateExists = false;
         var existingDate = seperateDates[j];
         if(this.compareDatesEqual(date, existingDate)){
+          matchingDate = existingDate;
           dateExists = true;
           break;
         }
       }
       if(!dateExists){
         seperateDates.push(date);
+        matchingDate = date;
+        this.timeLogMap.set(matchingDate, new Array());
       }
-
-    }
+      this.timeLogMap.get(matchingDate).push(this.timeLogList[i]);
+    } 
     this.dateList = seperateDates;
-    console.log(this.timeLogMap);
   }
 
   compareDatesEqual(d1: Date, d2: Date){
