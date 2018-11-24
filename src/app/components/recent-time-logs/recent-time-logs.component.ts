@@ -33,6 +33,7 @@ export class RecentTimeLogsComponent implements OnInit {
   loadTimeLogs() {
     this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
       this.timeLogList = timeLogs;
+      this.timeLogList.reverse();
       this.seperateDates();
      });
   }
@@ -45,7 +46,7 @@ export class RecentTimeLogsComponent implements OnInit {
       for(var j = 0; j < seperateDates.length; j++){
         dateExists = false;
         var existingDate = seperateDates[j];
-        if(date.getDay() == existingDate.getDay() && date.getMonth() == existingDate.getMonth() && date.getFullYear() == existingDate.getFullYear()){
+        if(this.compareDatesEqual(date, existingDate)){
           dateExists = true;
           break;
         }
@@ -53,8 +54,16 @@ export class RecentTimeLogsComponent implements OnInit {
       if(!dateExists){
         seperateDates.push(date);
       }
+
     }
     this.dateList = seperateDates;
     console.log(this.timeLogMap);
+  }
+
+  compareDatesEqual(d1: Date, d2: Date){
+    if(d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()){
+      return true;
+    }
+    return false;
   }
 }
