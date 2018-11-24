@@ -1,4 +1,9 @@
+<h1>
+  <span matBadge={{numberOfUnbookedTimeLogs}} matBadgeSize="large" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="numberOfUnbookedTimeLogs == 0">Recently tracked Times</span>
+</h1>
 <mat-list *ngFor="let date of dateList">
-  <h3 mat-subheader >{{ date | date : "fullDate" }}</h3>
-  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" [timeLog]="timeLog"></app-timelog>
+  <h3 mat-subheader >
+    <span matBadge={{unbookedTimeLogsMap.get(date)}} matBadgeColor="warn" matBadgeSize="large" matBadgeOverlap="false" [matBadgeHidden]="unbookedTimeLogsMap.get(date) == 0">{{ date | date : "fullDate" }}</span>
+  </h3>
+  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" [timeLog]="timeLog" ></app-timelog>
 </mat-list>

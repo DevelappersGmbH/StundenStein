@@ -24,9 +24,13 @@ export class RecentTimeLogsComponent implements OnInit {
   timeLogList: TimeLog[];
   dateList: Date[];
   timeLogMap : Map<Date, TimeLog[]>;
+  unbookedTimeLogsMap : Map<Date, number>;
+  numberOfUnbookedTimeLogs: number;
 
   ngOnInit() {
+    this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap = new Map();
+    this.unbookedTimeLogsMap = new Map();
     this.loadTimeLogs();
   }
 
@@ -35,6 +39,7 @@ export class RecentTimeLogsComponent implements OnInit {
       this.timeLogList = timeLogs;
       this.timeLogList.reverse();
       this.seperateDates();
+      this.countUnbookedTimeLogs();
      });
   }
 
@@ -69,5 +74,19 @@ export class RecentTimeLogsComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  countUnbookedTimeLogs(){
+    this.timeLogMap.forEach((timeLogs: TimeLog[], date: Date) => {
+      var unbookedTimeLogs = 0;
+      timeLogs.forEach((timeLog: TimeLog) =>{
+        if(!timeLog.booked){
+          unbookedTimeLogs++;
+          this.numberOfUnbookedTimeLogs++;
+        }
+      });
+      this.unbookedTimeLogsMap.set(date,unbookedTimeLogs);
+  });
+  
   }
 }
