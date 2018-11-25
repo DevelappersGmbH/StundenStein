@@ -10,6 +10,7 @@ export interface TimeLog {
   timeInHours: number;
   booked: boolean;
   hourGlassTimeBookingId: number;
+  redmineTimeEntryId: number;
   billable: boolean;
   issue: Issue;
   project: Project;
