@@ -49,9 +49,9 @@ export class TimeLogComponent implements OnInit {
 
   ngOnInit() {
     this.trackedTime = new Date(
-      1,
-      1,
-      1,
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
       Math.floor(this.timeLog.timeInHours),
       (this.timeLog.timeInHours * 60) % 60,
       0,
@@ -250,9 +250,9 @@ export class TimeLogComponent implements OnInit {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStopped = new Date(
-      1,
-      1,
-      1,
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
       hours,
       mins,
       0,
@@ -266,9 +266,9 @@ export class TimeLogComponent implements OnInit {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStarted = new Date(
-      1,
-      1,
-      1,
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
       hours,
       mins,
       0,
