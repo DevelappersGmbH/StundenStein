@@ -364,7 +364,7 @@ export class TimeLogComponent implements OnInit {
     return this.issueOptions.find(entry => entry.id === issue.id);
   }
 
-  private deleteWarning() {
+  deleteWarning() {
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.disableClose = true;
