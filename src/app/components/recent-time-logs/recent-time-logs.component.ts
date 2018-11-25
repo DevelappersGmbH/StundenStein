@@ -22,15 +22,71 @@ export class RecentTimeLogsComponent implements OnInit {
   }
 
   timeLogList: TimeLog[];
+  dateList: Date[];
+  timeLogMap: Map<Date, TimeLog[]>;
+  unbookedTimeLogsMap: Map<Date, number>;
+  numberOfUnbookedTimeLogs: number;
 
   ngOnInit() {
+    this.numberOfUnbookedTimeLogs = 0;
+    this.timeLogMap = new Map();
+    this.unbookedTimeLogsMap = new Map();
     this.loadTimeLogs();
   }
 
-  clickedItem() { }
-
   loadTimeLogs() {
-    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { this.timeLogList = timeLogs });
+    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => {
+      this.timeLogList = timeLogs;
+      this.timeLogList.reverse();
+      this.seperateDates();
+      this.countUnbookedTimeLogs();
+     });
+  }
+
+  // pls dont try to understand what i do here thanks
+  seperateDates() {
+    const seperateDates: Date[] = new Array();
+    let dateExists: Boolean = false;
+    for (let i = 0;  i < this.timeLogList.length; i++ ) {
+      const date = this.timeLogList[i].timeStopped;
+      let matchingDate;
+      for (let j = 0; j < seperateDates.length; j++) {
+        dateExists = false;
+        const existingDate = seperateDates[j];
+        if (this.compareDatesEqual(date, existingDate)) {
+          matchingDate = existingDate;
+          dateExists = true;
+          break;
+        }
+      }
+      if (!dateExists) {
+        seperateDates.push(date);
+        matchingDate = date;
+        this.timeLogMap.set(matchingDate, new Array());
+      }
+      this.timeLogMap.get(matchingDate).push(this.timeLogList[i]);
+    }
+    this.dateList = seperateDates;
+  }
+
+  compareDatesEqual(d1: Date, d2: Date) {
+    if (d1.getDay() === d2.getDay() && d1.getMonth() === d2.getMonth() && d1.getFullYear() === d2.getFullYear()) {
+      return true;
+    }
+    return false;
+  }
+
+  countUnbookedTimeLogs() {
+    this.timeLogMap.forEach((timeLogs: TimeLog[], date: Date) => {
+      let unbookedTimeLogs = 0;
+      timeLogs.forEach((timeLog: TimeLog) => {
+        if (!timeLog.booked) {
+          unbookedTimeLogs++;
+          this.numberOfUnbookedTimeLogs++;
+        }
+      });
+      this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
+  });
 
   }
 }

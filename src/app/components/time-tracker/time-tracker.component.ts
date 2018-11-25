@@ -21,9 +21,9 @@ export class TimeTrackerComponent implements OnInit {
     private userService: UserService
     ) { }
 
-  projects: Project[];
-  issues: Issue[];
-  // issueStrings: string[] = [];
+  projects: Project[] = [];
+  issues: Issue[] = [];
+  issueStrings: string[] = [];
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
@@ -33,22 +33,28 @@ export class TimeTrackerComponent implements OnInit {
     issue: null,
     project: null
   };
-  /*
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
-  */
+  filteredObject = false;
 
   ngOnInit() {
+    interval(1000).subscribe( val => {
+      if (!isUndefined(this.timeTracker.timeStarted)) {
+        this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+      } else {
+        this.currentTrackerTimeString  = '00:00:00';
+      }
+    });
     this.loadProjects();
     this.loadIssues();
-    this.loadTimeTracker();
     this.currentTrackerTimeString  = '00:00:00';
+    this.loadTimeTracker();
     this.automaticMode = true;
     // Block manual mode until implemented
     this.automaticLock = true;
-    /*this.filteredIssues = this.issueCtrl.valueChanges
+    this.filteredIssues = this.issueCtrl.valueChanges
       .pipe(
         startWith(''),
         map(issue => issue ? this._filterIssues(issue) : this.issues.slice())
@@ -57,49 +63,59 @@ export class TimeTrackerComponent implements OnInit {
       .pipe(
         startWith(''),
         map(project => project ? this._filterProjects(project) : this.projects.slice())
-      );*/
+      );
   }
 
-  /*
-
-  private _filterIssues(value: string): Issue[] {
-    const filterValue = value.toLowerCase().replace('#', '').trim();
-
-    return this.issues.filter(issue => issue.subject.toLowerCase().includes(filterValue) || issue.id.toString().includes(filterValue) );
+  _getProjectColor(): string {
+    if (!this.filteredObject) { return '#000'; }
+    if (isNull(this.timeTracker) || isNull(this.timeTracker.project) || isUndefined(this.timeTracker.project)) { return '#000'; }
+    return this.timeTracker.project.color;
   }
 
-  private _filterProjects(value: string): Project[] {
+  _displayIssue(issue: Issue): string {
+    if (isNull(issue) || isUndefined(issue)) { return ''; }
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
+  }
+
+  _displayProject(project: Project): string {
+    if (isNull(project) || isUndefined(project)) { return ''; }
+    return project.name;
+  }
+
+  private _filterIssues(value): Issue[] {
+    if (!this.isString(value)) { value = value.subject; }
+    const filterValue: string = value.toLowerCase().replace('#', '').trim();
+
+    return this.issues.filter(issue =>
+      issue.subject.toLowerCase().includes(filterValue) ||
+      issue.id.toString().includes(filterValue) ||
+      issue.subject.toLowerCase().includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
+    );
+  }
+
+  private isString(value): boolean {
+    return Object.prototype.toString.call(value) === '[object String]';
+  }
+
+  private _filterProjects(value): Project[] {
+    if (!this.isString(value)) {
+      value = value.name;
+      this.filteredObject = true;
+    } else {
+      this.filteredObject = false;
+    }
     const filterValue = value.toLowerCase().replace('#', '').trim();
 
     return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
   }
 
-  getIssueFromAutoSelectString(selector: string): Issue {
-    if (this.issueStrings.length !== this.issues.length) {
-      this.issues.forEach( issue => {
-        this.issueStrings.push(
-          issue.tracker + ' #' + issue.id + ': ' + issue.subject
-        );
-      });
-    }
-    for (let i = 0; i < this.issues.length; i++) {
-      if (this.issueStrings[i] === selector) {
-        return this.issues[i];
-      }
-    }
-    return undefined;
-  }
-
-  */
-
-  selectIssue() {
-    // console.log('issue string selected: ' + data);
-    // this.selectedIssue = this.getIssueFromAutoSelectString(data);
-    if (isUndefined(this.timeTracker.issue)) {
-      this.timeTracker.issue = undefined;
-    } else {
+  selectIssue(issue: Issue) {
+    this.timeTracker.issue = issue;
+    this.ensureSelectedIssueIsFromIssueList();
+    if (!isUndefined(this.timeTracker.issue)) {
       this.timeTracker.project = this.timeTracker.issue.project;
       this.ensureSelectedProjectIsFromProjectList();
+      this.projectCtrl.setValue(this.timeTracker.project);
     }
   }
 
@@ -123,8 +139,11 @@ export class TimeTrackerComponent implements OnInit {
     }
   }
 
-  selectProject() {
+  selectProject(project: Project) {
+    this.timeTracker.project = project;
+    this.ensureSelectedProjectIsFromProjectList();
     this.timeTracker.issue = undefined;
+    this.issueCtrl.setValue(undefined);
   }
 
   loadProjects() {
@@ -155,6 +174,11 @@ export class TimeTrackerComponent implements OnInit {
     this.currentTrackerTimeString = hrsStr + ':' + minStr + ':' + secStr;
   }
 
+  private updateAutoCompletes(): void {
+    this.issueCtrl.setValue(this.timeTracker.issue);
+    this.projectCtrl.setValue(this.timeTracker.project);
+  }
+
   loadTimeTracker() {
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
@@ -162,10 +186,18 @@ export class TimeTrackerComponent implements OnInit {
     ];
     forkJoin(calls).subscribe(x => {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
-        if (!isNull(t)) {
+        if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
           this.extractFromTimeTracker();
+        } else {
+          this.timeTracker = {
+            billable: true,
+            comment: '',
+            issue: null,
+            project: null
+          };
         }
+        this.updateAutoCompletes();
       });
     });
   }
@@ -173,9 +205,6 @@ export class TimeTrackerComponent implements OnInit {
   extractFromTimeTracker(): void {
     this.ensureSelectedIssueIsFromIssueList();
     this.ensureSelectedProjectIsFromProjectList();
-    interval(1000).subscribe( val => {
-      this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
-    });
   }
 
   startTimeTracker(): void {
@@ -188,7 +217,25 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   stopTimeTracker(): void {
-    console.error('Not implemented yet.');
+    let timeTracker: TimeTracker;
+    timeTracker = {
+      id: this.timeTracker.id,
+      timeStarted: this.timeTracker.timeStarted,
+      billable: this.timeTracker.billable,
+      comment: this.timeTracker.comment,
+      issue: this.timeTracker.issue,
+      project: this.timeTracker.project
+    };
+    this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
+      if (data === false) {
+        console.error('Couldn\'t stop time tracker');
+      } else {
+        this.loadTimeTracker();
+      }
+    }, error => {
+      console.error(error);
+    }
+    );
   }
 
 }
