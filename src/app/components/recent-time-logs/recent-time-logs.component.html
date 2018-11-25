@@ -1,4 +1,11 @@
-<mat-action-list>
-  <h3 mat-subheader>Recently added TimeLogs</h3>
-  <app-timelog *ngFor="let timeLog of timeLogList" [timeLog]="timeLog"></app-timelog>
-</mat-action-list>
+<h2 class="mat-headline" style="padding-top: 12px; margin-bottom: -5px">
+  <span matBadge="{{numberOfUnbookedTimeLogs}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="numberOfUnbookedTimeLogs == 0">Recently tracked</span>
+</h2>
+<mat-list *ngFor="let date of dateList">
+  <h3 mat-subheader>
+    <span matBadge="{{unbookedTimeLogsMap.get(date)}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="unbookedTimeLogsMap.get(date) == 0">{{
+      date | date: "fullDate"
+    }}</span>
+  </h3>
+  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" [timeLog]="timeLog"></app-timelog>
+</mat-list>

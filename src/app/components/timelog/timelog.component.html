@@ -44,13 +44,13 @@
             class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
 
           <mat-form-field class="field start-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel] ="timeLog.timeStarted | date:'HH:mm'" (ngModelChange)="changeStartTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           -
 
           <mat-form-field class="field end-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel] ="timeLog.timeStopped| date:'HH:mm'" (ngModelChange)="changeEndTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           <span class=" field tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>

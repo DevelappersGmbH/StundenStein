@@ -4,7 +4,8 @@ import {
   map,
   mapTo,
   switchMap,
-  tap
+  tap,
+  throttleTime
   } from 'rxjs/operators';
 import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
@@ -165,6 +166,26 @@ export class DataService {
     );
   }
 
+  updateTimeTracker(timeTracker: TimeTracker): Observable<TimeTracker> {
+    const calls: Observable<any>[] = [
+      this.redmineService.getTimeEntryActivities(),
+      this.redmineService.getIssues()
+    ];
+    return forkJoin(calls).pipe(
+      flatMap(results => {
+        return this.hourglassService
+          .updateTimeTracker(
+            this.mapTimeTrackerToHourGlassTimeTracker(timeTracker, results[0])
+          )
+          .pipe(
+            flatMap(r => {
+              return this.getTimeTrackerByUserId(this.userService.getUser().id);
+            })
+          );
+      })
+    );
+  }
+
   stopTimeTracker(timeTracker: TimeTracker): Observable<boolean> {
     return this.hourglassService.stopTimeTracker(timeTracker.id).pipe(
       map(hgTimeTrackerStopResponse => {
@@ -174,6 +195,29 @@ export class DataService {
         return false;
       })
     );
+  }
+
+  mapTimeTrackerToHourGlassTimeTracker(
+    timeTracker: TimeTracker,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): HourGlassTimeTracker {
+    const hgtracker: HourGlassTimeTracker = {
+      id: timeTracker.id,
+      user_id: this.userService.getUser().id,
+      start: timeTracker.timeStarted.toISOString(),
+      activity_id: this.mapBillableToRedmineTimeEntryActivityId(
+        timeTracker.billable,
+        redmineTimeEntryActivities
+      ),
+      comments: timeTracker.comment,
+      issue_id:
+        timeTracker.issue && timeTracker.issue.id ? timeTracker.issue.id : null,
+      project_id:
+        timeTracker.project && timeTracker.project.id
+          ? timeTracker.project.id
+          : null
+    };
+    return hgtracker;
   }
 
   mapPartialTimeTrackerToPartialHourGlassTimeTracker(
@@ -358,6 +402,14 @@ export class DataService {
         });
       })
     );
+  }
+
+  deleteTimeLog(timeLog: TimeLog): Observable<boolean> {
+      return this.hourglassService.deleteTimeLog(timeLog.id).pipe(
+        map(response => {
+          return response.status === 204;
+        })
+      );
   }
 
   mapRedmineUserIdToCurrentUserOrNull(userId: number): User {

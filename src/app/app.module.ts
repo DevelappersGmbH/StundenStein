@@ -8,6 +8,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { DataService } from './services/data/data.service';
+import { DeleteWarningComponent } from './components/delete-warning/delete-warning.component';
+import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
@@ -15,9 +17,11 @@ import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
 import {
   MatAutocompleteModule,
+  MatBadgeModule,
   MatButtonModule,
   MatCardModule,
-  MatCheckboxModule, MatDialogModule,
+  MatCheckboxModule,
+  MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
@@ -25,7 +29,7 @@ import {
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule
-} from '@angular/material';
+  } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
@@ -33,7 +37,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserService } from './services/user/user.service';
-import {DeleteWarningComponent} from './components/delete-warning/delete-warning.component';
 
 @NgModule({
   declarations: [
@@ -44,7 +47,8 @@ import {DeleteWarningComponent} from './components/delete-warning/delete-warning
     TimeLogComponent,
     TimeTrackerComponent,
     RecentTimeLogsComponent,
-    DeleteWarningComponent
+    DeleteWarningComponent,
+    EnforcedInputsDirective
   ],
   imports: [
     BrowserModule,
@@ -70,7 +74,8 @@ import {DeleteWarningComponent} from './components/delete-warning/delete-warning
     MatSlideToggleModule,
     MatAutocompleteModule,
     ReactiveFormsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatBadgeModule
   ],
   providers: [
     AuthenticationService,
