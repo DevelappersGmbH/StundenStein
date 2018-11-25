@@ -7,6 +7,8 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import { User } from '../../model/user.interface';
+import {MatDialog, MatDialogConfig} from '@angular/material';
+import {DeleteWarningComponent} from '../delete-warning/delete-warning.component';
 
 @Component({
   selector: 'app-timelog',
@@ -14,8 +16,8 @@ import { User } from '../../model/user.interface';
   styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit {
-  constructor(private dataService: DataService) {
-  }
+  constructor(private dataService: DataService,
+              private deleteDialog: MatDialog) {}
 
   @Input() timeLog: TimeLog;
 
@@ -339,8 +341,25 @@ export class TimeLogComponent implements OnInit {
     return this.issueOptions.find(entry => entry.id === issue.id);
   }
 
-  private deleteWarning(){
-    
+  private deleteWarning() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    dialogConfig.data = {
+      id: 1,
+      description: 'Delete time log?'
+    };
+
+    this.deleteDialog.open(DeleteWarningComponent, dialogConfig);
+
+    const dialogRef = this.deleteDialog.open(DeleteWarningComponent, dialogConfig);
+
+    dialogRef.afterClosed().subscribe(
+      data => data ? console.log('Delete') : console.log('Do NOT delete')
+    );
+
   }
 
   blurProject(input) {
