@@ -59,6 +59,12 @@
             <mat-icon class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
+
+          <button mat-icon-button class="field button" (click)="deleteWarning()">
+            <mat-icon class="icon">delete
+            </mat-icon>
+          </button>
+
         </div>
       </div>
     </form>

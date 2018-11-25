@@ -339,6 +339,10 @@ export class TimeLogComponent implements OnInit {
     return this.issueOptions.find(entry => entry.id === issue.id);
   }
 
+  private deleteWarning(){
+    
+  }
+
   blurProject(input) {
     console.log('blurProject' + input);
     let exists = false;
