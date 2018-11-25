@@ -112,6 +112,10 @@ export class TimeLogComponent implements OnInit {
       startWith(''),
       map(project => this.filterProjects(project))
     );
+
+    if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
+      this.editButton = 'playlist_add';
+    }
   }
 
   loadProjects() {
@@ -326,7 +330,7 @@ export class TimeLogComponent implements OnInit {
       this.isBooked();
       if (this.booked === false) {
         /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
-        this.editButton = 'assignment';
+        this.editButton = 'playlist_add';
       } else {
         /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'edit';
