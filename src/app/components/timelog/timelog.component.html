@@ -14,8 +14,8 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon warning" *ngIf="booked == false" matPrefix>warning</mat-icon>
-            <input type="text" [readonly]="!editMode" [(ngModel)]="currentComment" [ngModelOptions]="{ standalone: true }"
+            <mat-icon class="icon warning" *ngIf="timeLog.booked == false" matPrefix>warning</mat-icon>
+            <input type="text" [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
                    matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
                    (blur)="updateComment($event.target.value)"
             />
@@ -23,7 +23,7 @@
           </mat-form-field>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <input type="text" [style.color] = "currentProject? currentProject.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input type="text" [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="auto" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -41,16 +41,16 @@
             class="icon" [ngClass]="{ active: active }">play_arrow</mat-icon></button>
 
           <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
-            class="icon" [ngClass]="{ active: billable }">attach_money</mat-icon></button>
+            class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
 
           <mat-form-field class="field start-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel] ="startTime | date:'HH:mm'" (ngModelChange)="changeStartTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input [ngModel] ="timeLog.timeStarted | date:'HH:mm'" (ngModelChange)="changeStartTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           -
 
           <mat-form-field class="field end-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel] ="endTime| date:'HH:mm'" (ngModelChange)="changeEndTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+            <input [ngModel] ="timeLog.timeStopped| date:'HH:mm'" (ngModelChange)="changeEndTime($event)" [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput />
           </mat-form-field>
 
           <span class=" field tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>

@@ -48,12 +48,6 @@ export class TimeLogComponent implements OnInit {
   filteredObject = false;
 
   ngOnInit() {
-    this.currentIssue = this.timeLog.issue;
-    this.currentProject = this.timeLog.project;
-    this.currentComment = this.timeLog.comment;
-    this.startTime = this.timeLog.timeStarted;
-    this.endTime = this.timeLog.timeStopped;
-    this.billable = this.timeLog.billable;
     this.trackedTime = new Date(
       1,
       1,
@@ -63,8 +57,6 @@ export class TimeLogComponent implements OnInit {
       0,
       0
     );
-    this.booked = this.timeLog.booked;
-    this.currentUser = this.timeLog.user;
 
     this.issueControl.setValue(this.timeLog.issue ? this.timeLog.issue.subject : '');
     this.projectControl.setValue(this.timeLog.project ? this.timeLog.project.name : '');
@@ -75,13 +67,13 @@ export class TimeLogComponent implements OnInit {
     this.issueControl.valueChanges.subscribe(
       value => {
         if (value === '') {
-          if (this.currentProject && this.currentIssue) {
-            this.updateIssueOptions(this.currentProject);
-          } else if (this.currentIssue) {
+          if (this.timeLog.project && this.timeLog.issue) {
+            this.updateIssueOptions(this.timeLog.project);
+          } else if (this.timeLog.issue) {
             this.projectControl.setValue('');
           }
           this.projectOptions = this.projects;
-          this.currentIssue = null;
+          this.timeLog.issue = null;
         }
       }
     );
@@ -95,8 +87,8 @@ export class TimeLogComponent implements OnInit {
           this.projectOptions = this.projects;
           this.issueControl.setValue('Dummy value');
           this.issueControl.setValue('');
-          this.currentIssue = null;
-          this.currentProject = null;
+          this.timeLog.issue = null;
+          this.timeLog.project = null;
         }
       }
     );
@@ -113,7 +105,7 @@ export class TimeLogComponent implements OnInit {
       map(project => this.filterProjects(project))
     );
 
-    if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
+    if (!this.timeLog.issue || !this.timeLog.project || this.timeLog.project.name === '' || this.timeLog.issue.subject === '') {
       this.editButton = 'playlist_add';
     }
   }
@@ -182,13 +174,13 @@ export class TimeLogComponent implements OnInit {
 
     if (this.findIssue(issue)) {
       console.log('Existing issue detected');
-      this.currentIssue = issue;
-      this.currentProject = issue.project;
-      this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
+      this.timeLog.issue = issue;
+      this.timeLog.project = issue.project;
+      this.issueControl.setValue(this.timeLog.issue ? this.timeLog.issue.subject : '');
 
-      this.updateIssueOptions(this.currentProject);
+      this.updateIssueOptions(this.timeLog.project);
 
-      this.projectControl.setValue(this.currentProject ? this.currentProject.name : '');
+      this.projectControl.setValue(this.timeLog.project ? this.timeLog.project.name : '');
     } else {
       console.log('No such issue!');
     }
@@ -199,11 +191,11 @@ export class TimeLogComponent implements OnInit {
 
     if (this.findProject(project)) {
       console.log('New project detected', project);
-      this.currentProject = project;
+      this.timeLog.project = project;
       this.projectControl.setValue(project ? project.name : '');
       this.updateIssueOptions(project);
       this.issueControl.setValue('Dummy value');
-      this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
+      this.issueControl.setValue(this.timeLog.issue ? this.timeLog.issue.subject : '');
       console.log(this.issueOptions);
     } else {
       console.log('Something went wrong');
@@ -211,7 +203,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   updateComment(comment) {
-    this.currentComment = comment;
+    this.timeLog.comment = comment;
   }
 
   private searchIssueById(id): Issue {
@@ -251,13 +243,13 @@ export class TimeLogComponent implements OnInit {
     /*
     send billable sign to TimeTracker
     */
-    this.billable = !this.billable;
+    this.timeLog.billable = !this.timeLog.billable;
   }
 
   changeEndTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.endTime = new Date(
+    this.timeLog.timeStopped = new Date(
       1,
       1,
       1,
@@ -273,7 +265,7 @@ export class TimeLogComponent implements OnInit {
   changeStartTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.startTime = new Date(
+    this.timeLog.timeStarted = new Date(
       1,
       1,
       1,
@@ -295,7 +287,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    const seconds = (this.endTime - this.startTime) / 1000;
+    const seconds = (this.timeLog.timeStopped - this.timeLog.timeStarted) / 1000;
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds - hours * 3600) / 60);
     const secs = seconds - hours * 3600 - mins * 60;
@@ -312,10 +304,10 @@ export class TimeLogComponent implements OnInit {
   }
 
   private isBooked() {
-    if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
-      this.booked = false;
+    if (!this.timeLog.issue || !this.timeLog.project || this.timeLog.project.name === '' || this.timeLog.issue.subject === '') {
+      this.timeLog.booked = false;
     } else {
-      this.booked = true;
+      this.timeLog.booked = true;
     }
   }
 
@@ -328,7 +320,7 @@ export class TimeLogComponent implements OnInit {
       this.editButton = 'done';
     } else {
       this.isBooked();
-      if (this.booked === false) {
+      if (this.timeLog.booked === false) {
         /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'playlist_add';
       } else {
