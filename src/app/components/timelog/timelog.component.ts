@@ -352,8 +352,6 @@ export class TimeLogComponent implements OnInit {
       description: 'Delete time log?'
     };
 
-    this.deleteDialog.open(DeleteWarningComponent, dialogConfig);
-
     const dialogRef = this.deleteDialog.open(DeleteWarningComponent, dialogConfig);
 
     dialogRef.afterClosed().subscribe(
