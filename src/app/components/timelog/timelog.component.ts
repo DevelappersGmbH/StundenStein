@@ -1,8 +1,10 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
+import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
+import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
@@ -14,10 +16,14 @@ import { User } from '../../model/user.interface';
   styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit {
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private deleteDialog: MatDialog
+  ) {}
 
   @Input() timeLog: TimeLog;
 
+  currentColor = 'red';
   currentIssueSubject: string;
   currentProjectName: string;
   currentIssue: Issue;
@@ -33,65 +39,91 @@ export class TimeLogComponent implements OnInit {
   editMode = false;
   editButton = 'edit';
 
-  projects: Project[];
-  issues: Partial<Issue>[];
+  projects: Project[] = [];
+  issues: Issue[] = [];
 
   issueControl = new FormControl();
   projectControl = new FormControl();
-  issueOptions: string[] = [];
-  projectOptions: string[] = [];
-  filteredIssueOptions: Observable<string[]>;
-  filteredProjectOptions: Observable<string[]>;
+  issueOptions: Issue[] = [];
+  projectOptions: Project[] = [];
+  filteredIssues: Observable<Issue[]>;
+  filteredProjects: Observable<Project[]>;
+
+  filteredObject = false;
 
   ngOnInit() {
-    this.currentIssueSubject = this.timeLog.issue
-      ? this.timeLog.issue.subject
-      : '';
-    this.currentProjectName = this.timeLog.project
-      ? this.timeLog.project.name
-      : '';
-    this.currentIssue = this.timeLog.issue;
-    this.currentProject = this.timeLog.project;
-    this.currentComment = this.timeLog.comment;
-    this.startTime = this.timeLog.timeStarted;
-    this.endTime = this.timeLog.timeStopped;
-    this.billable = this.timeLog.billable;
     this.trackedTime = new Date(
-      1,
-      1,
-      1,
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
       Math.floor(this.timeLog.timeInHours),
       (this.timeLog.timeInHours * 60) % 60,
       0,
       0
     );
-    this.booked = this.timeLog.booked;
-    this.currentUser = this.timeLog.user;
 
-    this.issueControl.setValue(this.currentIssueSubject);
-    this.projectControl.setValue(this.currentProjectName);
+    this.issueControl.setValue(
+      this.timeLog.issue ? this.timeLog.issue.subject : ''
+    );
+    this.projectControl.setValue(
+      this.timeLog.project ? this.timeLog.project.name : ''
+    );
 
     this.loadIssues();
     this.loadProjects();
 
-    this.filteredIssueOptions = this.issueControl.valueChanges.pipe(
+    this.issueControl.valueChanges.subscribe(value => {
+      if (value === '') {
+        if (this.timeLog.project && this.timeLog.issue) {
+          this.updateIssueOptions(this.timeLog.project);
+        } else if (this.timeLog.issue) {
+          this.projectControl.setValue('');
+        }
+        this.projectOptions = this.projects;
+        this.timeLog.issue = null;
+      }
+    });
+
+    this.projectControl.valueChanges.subscribe(value => {
+      if (value === '') {
+        console.log('Here');
+        this.issueOptions = this.issues;
+        console.log('Length options: ', this.issueOptions.length);
+        this.projectOptions = this.projects;
+        this.issueControl.setValue('Dummy value');
+        this.issueControl.setValue('');
+        this.timeLog.issue = null;
+        this.timeLog.project = null;
+      }
+    });
+
+    this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
-      map(value =>
-        value ? this.filterIssues(value) : this.issueOptions.slice()
+      map(issue =>
+        issue ? this.filterIssues(issue) : this.issueOptions.slice()
       )
     );
 
-    this.filteredProjectOptions = this.projectControl.valueChanges.pipe(
+    this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(value => this.filterProjects(value))
+      map(project => this.filterProjects(project))
     );
+
+    if (
+      !this.timeLog.issue ||
+      !this.timeLog.project ||
+      this.timeLog.project.name === '' ||
+      this.timeLog.issue.subject === ''
+    ) {
+      this.editButton = 'playlist_add';
+    }
   }
 
   loadProjects() {
     this.dataService.getProjects().subscribe(
       data => {
         this.projects = data;
-        this.loadProjectOptions();
+        this.projectOptions = this.projects;
       },
       error => {
         console.error('Couldn\'t get projects from data service.');
@@ -103,7 +135,7 @@ export class TimeLogComponent implements OnInit {
     this.dataService.getIssues().subscribe(
       data => {
         this.issues = data;
-        this.loadIssueOptions();
+        this.issueOptions = this.issues;
       },
       error => {
         console.error('Couldn\'t get issues from data service.');
@@ -111,79 +143,115 @@ export class TimeLogComponent implements OnInit {
     );
   }
 
-  loadIssueOptions() {
-    this.issues.forEach(issue => {
-      this.issueOptions.push(issue.subject);
-    });
-  }
+  private filterIssues(value): Issue[] {
+    if (!this.isString(value)) {
+      value = value.subject;
+    }
+    const filterValue: string = value
+      .toLowerCase()
+      .replace('#', '')
+      .trim();
 
-  loadProjectOptions() {
-    this.projects.forEach(project => {
-      this.projectOptions.push(project.name);
-    });
-  }
-
-  private filterIssues(value: string): string[] {
-    const filterValue = value.toLowerCase();
-
-    return this.issueOptions.filter(issue =>
-      issue.toLowerCase().includes(filterValue)
+    return this.issueOptions.filter(
+      issue =>
+        issue.subject.toLowerCase().includes(filterValue) ||
+        issue.id.toString().includes(filterValue) ||
+        issue.subject
+          .toLowerCase()
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
     );
   }
 
-  private filterProjects(value: string): string[] {
-    const filterValue = value.toLowerCase();
+  private filterProjects(value): Project[] {
+    if (!this.isString(value)) {
+      value = value.name;
+      this.filteredObject = true;
+    } else {
+      this.filteredObject = false;
+    }
+    const filterValue = value
+      .toLowerCase()
+      .replace('#', '')
+      .trim();
 
     return this.projectOptions.filter(project =>
-      project.toLowerCase().includes(filterValue)
+      project.name.toLowerCase().includes(filterValue)
     );
   }
 
-  updateIssue(issue) {
+  private isString(value): boolean {
+    return Object.prototype.toString.call(value) === '[object String]';
+  }
+
+  updateIssueOptions(project) {
+    this.issueOptions = [];
+    this.issues.forEach(issue => {
+      if (issue.project.id === project.id) {
+        this.issueOptions.push(issue);
+      }
+    });
+  }
+
+  selectIssue(issue) {
     console.log('Issue: ', issue);
 
-    const newIssue = this.issues.find(
-      entry => entry.subject === issue
-    ) as Issue; // anything better?
+    if (this.findIssue(issue)) {
+      console.log('Existing issue detected');
+      this.timeLog.issue = issue;
+      this.timeLog.project = issue.project;
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue.subject : ''
+      );
 
-    if (newIssue) {
-      this.currentIssueSubject = issue;
-      this.currentIssue = newIssue;
-      this.currentProject = newIssue.project;
-      this.currentProjectName = newIssue.project.name;
+      this.updateIssueOptions(this.timeLog.project);
 
-      this.updateProject(this.currentProjectName);
-
-      this.projectOptions.length = 0;
-      this.projectOptions.push(this.currentProjectName);
-
-      this.projectControl.setValue(this.currentProjectName);
+      this.projectControl.setValue(
+        this.timeLog.project ? this.timeLog.project.name : ''
+      );
     } else {
-      console.log('Something went wrong');
+      console.log('No such issue!');
     }
     console.log(this.projectOptions);
   }
 
-  updateProject(project) {
-    console.log('Project :', project);
-    const newProject = this.projects.find(entry => entry.name === project);
-    this.issueOptions.length = 0;
-    if (newProject) {
-      this.currentProject = newProject;
-      this.currentProjectName = project;
-      this.issues.forEach(issue => {
-        if (issue.project.name === project) {
-          this.issueOptions.push(issue.subject);
-        }
-      });
+  selectProject(project) {
+    if (this.findProject(project)) {
+      console.log('New project detected', project);
+      this.timeLog.project = project;
+      this.projectControl.setValue(project ? project.name : '');
+      this.updateIssueOptions(project);
+      this.issueControl.setValue('Dummy value');
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue.subject : ''
+      );
+      console.log(this.issueOptions);
     } else {
       console.log('Something went wrong');
     }
-    console.log(this.projectOptions);
   }
 
   updateComment(comment) {
-    this.currentComment = comment;
+    this.timeLog.comment = comment;
+  }
+
+  private searchIssueById(id): Issue {
+    this.issues.forEach(issue => {
+      if (issue.id === id) {
+        return issue;
+      }
+    });
+    console.log('No matching issue found');
+    return undefined;
+  }
+
+  private searchProjectById(id): Project {
+    this.projects.forEach(project => {
+      if (project.id === id) {
+        return project;
+      }
+    });
+    console.log('No matching project found');
+    return undefined;
   }
 
   updateForm() {
@@ -202,17 +270,37 @@ export class TimeLogComponent implements OnInit {
     /*
     send billable sign to TimeTracker
     */
-    this.billable = !this.billable;
+    this.timeLog.billable = !this.timeLog.billable;
   }
 
   changeEndTime(time) {
-    this.endTime = time;
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.timeLog.timeStopped = new Date(
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
+      hours,
+      mins,
+      0,
+      0
+    );
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
   changeStartTime(time) {
-    this.startTime = time;
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.timeLog.timeStarted = new Date(
+      this.timeLog.timeStarted.getFullYear(),
+      this.timeLog.timeStarted.getMonth(),
+      this.timeLog.timeStarted.getDay(),
+      hours,
+      mins,
+      0,
+      0
+    );
     this.calculateTime();
     this.refreshTrackedTime();
   }
@@ -226,15 +314,25 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    // this.trackedTime = this.endTime - this.startTime;
+    const seconds =
+      (<any>this.timeLog.timeStopped - <any>this.timeLog.timeStarted) / 1000;
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds - hours * 3600) / 60);
+    const secs = seconds - hours * 3600 - mins * 60;
+
+    this.trackedTime = new Date(1, 1, 1, hours, mins, secs, 0);
   }
 
-  private toBooked() {
-    if (this.booked === false) {
-      if (this.currentIssueSubject === '' || this.currentProjectName === '') {
-      } else {
-        this.booked = true;
-      }
+  private isBooked() {
+    if (
+      !this.timeLog.issue ||
+      !this.timeLog.project ||
+      this.timeLog.project.name === '' ||
+      this.timeLog.issue.subject === ''
+    ) {
+      this.timeLog.booked = false;
+    } else {
+      this.timeLog.booked = true;
     }
   }
 
@@ -246,10 +344,10 @@ export class TimeLogComponent implements OnInit {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
     } else {
-      this.toBooked();
-      if (this.booked === false) {
+      this.isBooked();
+      if (this.timeLog.booked === false) {
         /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
-        this.editButton = 'assignment';
+        this.editButton = 'playlist_add';
       } else {
         /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'edit';
@@ -257,39 +355,69 @@ export class TimeLogComponent implements OnInit {
     }
     this.editMode = !this.editMode;
   }
-}
 
-/*  blurIssue (input) {
-    if (input === '') {
-      this.issueOptions.length = 0;
-      this.currentIssueSubject = '';
-      this.currentIssue = undefined;
-      if (this.currentProjectName !== '') {
-        this.issues.forEach(issue => {
-          if (issue.project.name === this.currentProjectName) {
-            this.issueOptions.push(issue.subject);
-          }
-          this.loadIssueOptions();
-        });
-      } else {
-        this.loadIssueOptions();
+  private findProject(project): Project {
+    return this.projectOptions.find(entry => entry.id === project.id);
+  }
+
+  private findIssue(issue): Issue {
+    return this.issueOptions.find(entry => entry.id === issue.id);
+  }
+
+  deleteWarning() {
+    const dialogConfig = new MatDialogConfig();
+
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+
+    dialogConfig.data = {
+      id: 1,
+      description: 'Delete time log?'
+    };
+
+    const dialogRef = this.deleteDialog.open(
+      DeleteWarningComponent,
+      dialogConfig
+    );
+
+    dialogRef
+      .afterClosed()
+      .subscribe(data =>
+        data ? console.log('Delete') : console.log('Do NOT delete')
+      );
+  }
+
+  blurProject(input) {
+    console.log('blurProject' + input);
+    let exists = false;
+    this.projectOptions.forEach(project => {
+      if (!exists) {
+        if (input === project.name) {
+          exists = true;
+        }
       }
+    });
+    if (exists) {
+      this.projectControl.setValue(input);
     } else {
-      console.log('Please select an issue');
+      this.projectControl.setValue('');
     }
   }
 
-blurProject (input) {
-    if (input === '') {
-      this.projectOptions.length = 0;
-      if (this.currentIssueSubject !== '') {
-        this.currentProjectName = this.currentIssue.project.name;
-      } else {
-        this.currentProjectName = '';
-        this.currentProject = undefined;
-        this.loadProjectOptions();
+  blurIssue(input) {
+    console.log('blurIssue' + input);
+    let exists = false;
+    this.issueOptions.forEach(issue => {
+      if (!exists) {
+        if (input === issue.subject) {
+          exists = true;
+        }
       }
+    });
+    if (exists) {
+      this.issueControl.setValue(input);
     } else {
-      console.log('Please select a project');
+      this.issueControl.setValue('');
     }
-  }*/
+  }
+}

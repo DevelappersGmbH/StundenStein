@@ -28,6 +28,11 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   color: orangered;
 }
 
+.icon.warning{
+  color: orangered;
+  margin-right: 5px;
+}
+
 ::ng-deep mat-form-field.edit .mat-form-field-underline {
   display: none;
 }

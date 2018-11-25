@@ -8,6 +8,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { DataService } from './services/data/data.service';
+import { DeleteWarningComponent } from './components/delete-warning/delete-warning.component';
+import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
@@ -15,17 +17,18 @@ import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
 import {
   MatAutocompleteModule,
+  MatBadgeModule,
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
   MatListModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule,
-  MatBadgeModule
+  MatToolbarModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -34,7 +37,6 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserService } from './services/user/user.service';
-import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 
 @NgModule({
   declarations: [
@@ -45,6 +47,7 @@ import { EnforcedInputsDirective } from './directives/enforced-inputs.directive'
     TimeLogComponent,
     TimeTrackerComponent,
     RecentTimeLogsComponent,
+    DeleteWarningComponent,
     EnforcedInputsDirective
   ],
   imports: [
@@ -71,6 +74,7 @@ import { EnforcedInputsDirective } from './directives/enforced-inputs.directive'
     MatSlideToggleModule,
     MatAutocompleteModule,
     ReactiveFormsModule,
+    MatDialogModule,
     MatBadgeModule
   ],
   providers: [
@@ -84,6 +88,7 @@ import { EnforcedInputsDirective } from './directives/enforced-inputs.directive'
     DataService,
     UserService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [DeleteWarningComponent]
 })
 export class AppModule {}
