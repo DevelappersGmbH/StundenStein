@@ -25,8 +25,8 @@ export class TimeLogComponent implements OnInit {
   currentIssue: Issue;
   currentProject: Project;
   currentComment: string;
-  startTime: string;
-  endTime: string;
+  startTime: Date;
+  endTime: Date;
   billable: boolean;
   trackedTime: Date;
   booked: boolean;
@@ -47,20 +47,12 @@ export class TimeLogComponent implements OnInit {
 
   filteredObject = false;
 
-  public static transformStringtoTimeString(string: string): string {
-    const time = string.split('T')[1];
-    const hours = time.split(':')[0];
-    const mins = time.split(':')[1];
-    const secs = (time.split(':')[2]).split('.')[0];
-    return hours + ':' + mins + ':' + secs;
-  }
-
-    ngOnInit() {
+  ngOnInit() {
     this.currentIssue = this.timeLog.issue;
     this.currentProject = this.timeLog.project;
     this.currentComment = this.timeLog.comment;
-    this.startTime = TimeLogComponent.transformStringtoTimeString(this.timeLog.timeStarted.toISOString());
-    this.endTime = TimeLogComponent.transformStringtoTimeString(this.timeLog.timeStopped.toISOString());
+    this.startTime = this.timeLog.timeStarted;
+    this.endTime = this.timeLog.timeStopped;
     this.billable = this.timeLog.billable;
     this.trackedTime = new Date(
       1,
@@ -97,7 +89,9 @@ export class TimeLogComponent implements OnInit {
     this.projectControl.valueChanges.subscribe(
       value => {
         if (value === '') {
+          console.log('Here');
           this.issueOptions = this.issues;
+          console.log('Length options: ', this.issueOptions.length);
           this.projectOptions = this.projects;
           this.issueControl.setValue('Dummy value');
           this.issueControl.setValue('');
@@ -180,6 +174,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   selectIssue(issue) {
+    console.log('Issue: ', issue);
 
     if (this.findIssue(issue)) {
       console.log('Existing issue detected');
@@ -193,6 +188,7 @@ export class TimeLogComponent implements OnInit {
     } else {
       console.log('No such issue!');
     }
+    console.log(this.projectOptions);
   }
 
   selectProject(project) {
@@ -204,6 +200,7 @@ export class TimeLogComponent implements OnInit {
       this.updateIssueOptions(project);
       this.issueControl.setValue('Dummy value');
       this.issueControl.setValue(this.currentIssue ? this.currentIssue.subject : '');
+      console.log(this.issueOptions);
     } else {
       console.log('Something went wrong');
     }
@@ -253,11 +250,37 @@ export class TimeLogComponent implements OnInit {
     this.billable = !this.billable;
   }
 
-  changeTime() {
+  changeEndTime(time) {
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.endTime = new Date(
+      1,
+      1,
+      1,
+      hours,
+      mins,
+      0,
+      0
+    );
     this.calculateTime();
     this.refreshTrackedTime();
   }
 
+  changeStartTime(time) {
+    const hours = parseInt(time.split(':')[0], 10);
+    const mins = parseInt(time.split(':')[1], 10);
+    this.startTime = new Date(
+      1,
+      1,
+      1,
+      hours,
+      mins,
+      0,
+      0
+    );
+    this.calculateTime();
+    this.refreshTrackedTime();
+  }
 
   refreshTrackedTime() {
     // send tracked time to TimeTracker?
@@ -268,34 +291,29 @@ export class TimeLogComponent implements OnInit {
   }
 
   private calculateTime() {
-    const endHours = parseInt(this.endTime.split(':')[0], 10);
-    const endMins = parseInt(this.endTime.split(':')[1], 10);
+    const seconds = (this.endTime - this.startTime) / 1000;
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds - hours * 3600) / 60);
+    const secs = seconds - hours * 3600 - mins * 60;
 
-    const startHours = parseInt(this.startTime.split(':')[0], 10);
-    const startMins = parseInt(this.startTime.split(':')[1], 10);
-
-    const total = endHours * 60.0 + endMins - startHours * 60.0 - startMins;
-    const hours = Math.floor(total / 60.0);
-    const mins = total - hours * 60.0;
-    
     this.trackedTime = new Date(
       1,
       1,
       1,
       hours,
       mins,
-      0,
+      secs,
       0
     );
   }
 
   private isBooked() {
-      if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
-        this.booked = false;
-      } else {
-        this.booked = true;
-      }
+    if (!this.currentIssue || !this.currentProject || this.currentProject.name === '' || this.currentIssue.subject === '') {
+      this.booked = false;
+    } else {
+      this.booked = true;
     }
+  }
 
   changeMode() {
     if (this.isRunning()) {
