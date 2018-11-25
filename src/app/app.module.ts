@@ -24,7 +24,8 @@ import {
   MatListModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatBadgeModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -69,7 +70,8 @@ import { EnforcedInputsDirective } from './directives/enforced-inputs.directive'
     MatCheckboxModule,
     MatSlideToggleModule,
     MatAutocompleteModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatBadgeModule
   ],
   providers: [
     AuthenticationService,
