@@ -17,7 +17,7 @@ import {
   MatAutocompleteModule,
   MatButtonModule,
   MatCardModule,
-  MatCheckboxModule,
+  MatCheckboxModule, MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
@@ -25,7 +25,7 @@ import {
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule
-  } from '@angular/material';
+} from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
@@ -33,6 +33,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserService } from './services/user/user.service';
+import {DeleteWarningComponent} from './components/delete-warning/delete-warning.component';
 
 @NgModule({
   declarations: [
@@ -42,7 +43,8 @@ import { UserService } from './services/user/user.service';
     NavbarComponent,
     TimeLogComponent,
     TimeTrackerComponent,
-    RecentTimeLogsComponent
+    RecentTimeLogsComponent,
+    DeleteWarningComponent
   ],
   imports: [
     BrowserModule,
@@ -67,7 +69,8 @@ import { UserService } from './services/user/user.service';
     MatCheckboxModule,
     MatSlideToggleModule,
     MatAutocompleteModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   providers: [
     AuthenticationService,
@@ -80,6 +83,7 @@ import { UserService } from './services/user/user.service';
     DataService,
     UserService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  entryComponents: [DeleteWarningComponent]
 })
 export class AppModule {}
