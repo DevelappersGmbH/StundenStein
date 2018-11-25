@@ -22,15 +22,52 @@ export class RecentTimeLogsComponent implements OnInit {
   }
 
   timeLogList: TimeLog[];
+  dateList: Date[];
+  timeLogMap : Map<Date, TimeLog[]>;
 
   ngOnInit() {
+    this.timeLogMap = new Map();
     this.loadTimeLogs();
   }
 
-  clickedItem() { }
-
   loadTimeLogs() {
-    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { this.timeLogList = timeLogs });
+    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
+      this.timeLogList = timeLogs;
+      this.timeLogList.reverse();
+      this.seperateDates();
+     });
+  }
 
+  //pls dont try to understand what i do here thanks
+  seperateDates(){
+    let seperateDates: Date[] = new Array();
+    let dateExists: Boolean = false;
+    for(var i = 0;  i < this.timeLogList.length; i++ ){
+      var date = this.timeLogList[i].timeStopped;
+      var matchingDate;
+      for(var j = 0; j < seperateDates.length; j++){
+        dateExists = false;
+        var existingDate = seperateDates[j];
+        if(this.compareDatesEqual(date, existingDate)){
+          matchingDate = existingDate;
+          dateExists = true;
+          break;
+        }
+      }
+      if(!dateExists){
+        seperateDates.push(date);
+        matchingDate = date;
+        this.timeLogMap.set(matchingDate, new Array());
+      }
+      this.timeLogMap.get(matchingDate).push(this.timeLogList[i]);
+    } 
+    this.dateList = seperateDates;
+  }
+
+  compareDatesEqual(d1: Date, d2: Date){
+    if(d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()){
+      return true;
+    }
+    return false;
   }
 }
