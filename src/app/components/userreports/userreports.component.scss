@@ -1,94 +1,101 @@
-mat-card{
-    margin: 5px 0 0 0;
+mat-card {
+  margin: 5px 0 0 0;
 }
-.chart{
-    height: 5px;
+.chart {
+  height: 5px;
 }
-.no_project{
-    font-size: 20px;
+.no_project {
+  font-size: 20px;
 }
-.divide_line{
-    margin: 5px 0 5px 0;
-    width: 100%;
-    height: 1px;
-    background-color: #ffffff;
+.divide_line {
+  margin: 5px 0 5px 0;
+  width: 100%;
+  height: 1px;
+  background-color: #ffffff;
 }
 table {
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
 }
-.helper{
-    width: 100%;
-    height: 100%;
+.helper {
+  width: 100%;
+  height: 100%;
 }
-.legend{
-    text-align: center;
-    word-break: break-word;
+.legend {
+  text-align: center;
+  word-break: break-word;
+  height: 10px;
 }
-.placeholder{
-    height: 5px;
+.placeholder {
+  height: 5px;
 }
-a{
-    text-decoration: none;
+a {
+  text-decoration: none;
 }
-.checkbox{
-    margin: 0 0 0 20px;
+.checkbox {
+  margin: 0 0 0 20px;
 }
 /* bubble style */
 .hoverBubble {
-    background: #333333;
-    color: #ffffff;
-    cursor: pointer;
-    opacity: 0;
-    padding: 20px;
-    position: absolute;
-    text-align: center;
-    visibility: hidden;
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    -o-border-radius: 3px;
-    border-radius: 3px;
-    -webkit-transition: all 0.25s;
-    -moz-transition: all 0.25s;
-    -ms-transition: all 0.25s;
-    -o-transition: all 0.25s;
-    transition: all 0.25s;
-  }
-  
-  .bubblePosition {
-    bottom: 45%;
-    height: inherit;
-    left: 0;
-    height: auto;
-    top: auto;
-    width: 15%;
-  }
-  
-  .hoverBubble:after,
-  .bubblePosition:after {
-    border: 8px solid transparent;
-    border-top-color: #333333;
-    bottom: -15px;
-    content: '';
-    height: 0px;
-    left: 0;
-    margin: 0 auto;
-    position: absolute;
-    right: 0;
-    width: 0px;
-  }
-  
-  /* bubble hover */
-  a:hover .hoverBubble {
-    opacity: 1;
-    visibility: visible;
-    -webkit-transition: all 0.25s;
-    -moz-transition: all 0.25s;
-    -ms-transition: all 0.25s;
-    -o-transition: all 0.25s;
-    transition: all 0.25s;
-  }
+  background: #333333;
+  color: #ffffff;
+  cursor: pointer;
+  opacity: 0;
+  padding: 1%;
+  position: absolute;
+  text-align: center;
+  visibility: hidden;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  -o-border-radius: 3px;
+  border-radius: 3px;
+  -webkit-transition: all 0.25s;
+  -moz-transition: all 0.25s;
+  -ms-transition: all 0.25s;
+  -o-transition: all 0.25s;
+  transition: all 0.25s;
+}
 
-  
-  
+.bubblePosition {
+  bottom: 45%;
+  height: inherit;
+  left: 0;
+  height: auto;
+  top: auto;
+  width: 15%;
+  max-width: 15%;
+}
+.hoverBubble:after,
+.bubblePosition:after {
+  border: 8px solid transparent;
+  border-top-color: #333333;
+  bottom: -15px;
+  content: "";
+  height: 0px;
+  left: 0;
+  margin: 0 auto;
+  position: absolute;
+  width: 0px;
+}
+.hoBu:after {
+  right: 0;
+  left: 0;
+}
+.hoBu1:after {
+  right: -90%;
+}
+.hoBu2:after {
+  right: 90%;
+}
+
+/* bubble hover */
+a:hover .hoverBubble {
+  opacity: 1;
+  visibility: visible;
+  -webkit-transition: all 0.25s;
+  -moz-transition: all 0.25s;
+  -ms-transition: all 0.25s;
+  -o-transition: all 0.25s;
+  transition: all 0.25s;
+}

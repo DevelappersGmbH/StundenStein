@@ -8,27 +8,29 @@
         <mat-option value="month">Month</mat-option>
       </mat-select>
     </mat-form-field>
-    <mat-checkbox class="checkbox" (change)="checkBox($event)">Show only billable</mat-checkbox>
+    <mat-checkbox class="checkbox" (change)="checkBox($event)" [ngModel]="bilCheck">Show only billable</mat-checkbox>
     <br /><br />
     <div *ngIf="projectExists">
    <table >
         <tr>
-          <td *ngFor="let arrays of tdArray; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}">
-            <a>{{getProjectData(i)}}
-            <div class="bubblePosition hoverBubble" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
+          <td *ngFor="let arrays of tdArray[actualSelect]; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}" (mouseover)="bubbleHover(1, i)" (mouseout)="bubbleHover(0, i)">
+            <a><div *ngIf="true">{{getProjectData(i)}}</div>
+            <div *ngIf="hoverBubbleRight === 0" class="bubblePosition hoverBubble hoBu" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
+            <div *ngIf="hoverBubbleRight === 1" class="bubblePosition hoverBubble hoBu1" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
+            <div *ngIf="hoverBubbleRight === 2" class="bubblePosition hoverBubble hoBu2" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
           </a>
           </td>
-        </tr> 
+        </tr>
       </table>
     </div>
       <div class="placeholder"></div>
-      <div *ngIf="!projectExists" class="no_project">No projects for this period.</div>
-      <div *ngIf="projectExists">
+      <div *ngIf="!projectExists()" class="no_project">No projects for this period.</div>
+      <div *ngIf="projectExists()">
     <table >
       <tr>
-        <td *ngFor="let arrays of tdArray; let i = index" class="chart" [ngStyle]="{'width': getWidth(i), 'background-color': getColor(i)}">
+        <td *ngFor="let arrays of tdArray[actualSelect]; let i = index" class="chart" [ngStyle]="{'width': getWidth(i), 'background-color': getColor(i)}">
         </td>
-      </tr> 
+      </tr>
     </table>
     </div>
   </mat-card-content>
