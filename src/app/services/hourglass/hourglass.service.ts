@@ -4,6 +4,7 @@ import { flatMap, map } from 'rxjs/operators';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-bookings.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
+import { HourGlassTimeLogRequest } from 'src/app/redmine-model/requests/hourglass-time-log-request.interface';
 import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.interface';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hourglass-time-tracker-request.interface';
@@ -39,9 +40,13 @@ export class HourGlassService extends BaseDataService {
     return this.httpClient.post<HourGlassTimeTracker>(endpoint, request);
   }
 
-  updateTimeTracker(timeTracker: HourGlassTimeTracker): Observable<HourGlassTimeTracker> {
-    const query = this.getJsonEndpointUrl(this.timeTrackersUrl + '/' + timeTracker.id);
-    const request: HourGlassTimeTrackerRequest = {time_tracker: timeTracker};
+  updateTimeTracker(
+    timeTracker: HourGlassTimeTracker
+  ): Observable<HourGlassTimeTracker> {
+    const query = this.getJsonEndpointUrl(
+      this.timeTrackersUrl + '/' + timeTracker.id
+    );
+    const request: HourGlassTimeTrackerRequest = { time_tracker: timeTracker };
     return this.httpClient.put<HourGlassTimeTracker>(query, request);
   }
 
@@ -146,6 +151,17 @@ export class HourGlassService extends BaseDataService {
       this.timeBookingsUrl + '/' + timeLogId
     );
     return this.httpClient.delete<HttpResponse<any>>(query, {
+      observe: 'response'
+    });
+  }
+
+  updateTimeLog(
+    timeLogRequest: HourGlassTimeLogRequest
+  ): Observable<HttpResponse<any>> {
+    const query = this.getJsonEndpointUrl(
+      this.timeLogsUrl + '/' + timeLogRequest.time_log.id
+    );
+    return this.httpClient.put<HttpResponse<any>>(query, {
       observe: 'response'
     });
   }
