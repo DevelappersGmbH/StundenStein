@@ -4,7 +4,7 @@ import { AuthenticationService } from './services/authentication/authentication.
 import { AuthGuard } from './services/authguard/authguard.service';
 import { AuthInterceptor } from './services/authguard/auth.interceptor';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { DataService } from './services/data/data.service';
@@ -88,6 +88,7 @@ import { UserService } from './services/user/user.service';
       multi: true
     },
     DataService,
+    Title,
     UserService
   ],
   bootstrap: [AppComponent],

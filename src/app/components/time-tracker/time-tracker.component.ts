@@ -8,6 +8,7 @@ import { map, startWith } from 'rxjs/operators';
 import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
+import { Title } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-time-tracker',
@@ -18,7 +19,8 @@ export class TimeTrackerComponent implements OnInit {
 
   constructor(
     private dataService: DataService ,
-    private userService: UserService
+    private userService: UserService ,
+    private titleService: Title
     ) { }
 
   projects: Project[] = [];
@@ -45,11 +47,13 @@ export class TimeTrackerComponent implements OnInit {
         this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
       } else {
         this.currentTrackerTimeString  = '00:00:00';
+        this.titleService.setTitle('StundenStein');
       }
     });
     this.loadProjects();
     this.loadIssues();
     this.currentTrackerTimeString  = '00:00:00';
+    this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
     this.automaticMode = true;
     // Block manual mode until implemented
@@ -210,6 +214,36 @@ export class TimeTrackerComponent implements OnInit {
     let minStr: string = min.toString(); if (minStr.length < 2) { minStr = '0' + minStr; }
     let hrsStr: string = hrs.toString(); if (hrsStr.length < 2) { hrsStr = '0' + hrsStr; }
     this.currentTrackerTimeString = prefix + hrsStr + ':' + minStr + ':' + secStr;
+    let shortForm: string;
+    if (hrs === 0) {
+      if (min === 0) {
+        shortForm = sec.toString() + ' sec';
+      } else {
+        shortForm =  min.toString() + ':' + secStr + ' min';
+      }
+    } else {
+      shortForm = hrs.toString() + ':' + minStr + ':' + secStr + ' hrs';
+    }
+    shortForm = prefix + shortForm;
+    let trackerInfo = '';
+    if (this.timeTracker.comment !== '' && !isUndefined(this.timeTracker.comment)) {
+      trackerInfo += '- ' + this.shorten(this.timeTracker.comment, 20) + ' ';
+    }
+    if (!(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue))) {
+      trackerInfo += '- #' + this.timeTracker.issue.id + ': ' +  this.shorten(this.timeTracker.issue.subject, 20) + ' ';
+    }
+    if (!(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project))) {
+      trackerInfo += '- ' + this.shorten(this.timeTracker.project.name, 20) + ' ';
+    }
+    this.titleService.setTitle(shortForm + ' ' + trackerInfo +   '• StundenStein');
+  }
+
+  private shorten(value: string, maxLength: number, abbr: string = '…'): string {
+    if (isUndefined(value)) { return ''; }
+    if (value.length > maxLength) {
+      value = value.substring(0, maxLength - abbr.length) + abbr;
+    }
+    return value;
   }
 
   private updateAutoCompletes(): void {
