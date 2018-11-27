@@ -4,7 +4,7 @@
       <div class="total-div">
         <div>
           <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
-            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="issue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
@@ -15,7 +15,7 @@
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
             <mat-icon class="icon warning" *ngIf="timeLog.booked == false" matPrefix>warning</mat-icon>
-            <input type="text" [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
+            <input type="text" appEnforcedInputs [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
                    matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
                    (blur)="updateComment($event.target.value)"
             />
@@ -23,7 +23,7 @@
           </mat-form-field>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <input type="text" [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="auto" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>

@@ -44,7 +44,7 @@ export class TimeLogComponent implements OnInit {
     this.trackedTime = new Date(
       this.timeLog.timeStarted.getFullYear(),
       this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
+      this.timeLog.timeStarted.getDate(),
       Math.floor(this.timeLog.timeInHours),
       (this.timeLog.timeInHours * 60) % 60,
       0,
@@ -269,7 +269,7 @@ export class TimeLogComponent implements OnInit {
     this.timeLog.timeStopped = new Date(
       this.timeLog.timeStarted.getFullYear(),
       this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
+      this.timeLog.timeStarted.getDate(),
       hours,
       mins,
       0,
@@ -287,7 +287,7 @@ export class TimeLogComponent implements OnInit {
     this.timeLog.timeStarted = new Date(
       this.timeLog.timeStarted.getFullYear(),
       this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
+      this.timeLog.timeStarted.getDate(),
       hours,
       mins,
       0,
