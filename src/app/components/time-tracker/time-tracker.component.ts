@@ -41,6 +41,8 @@ export class TimeTrackerComponent implements OnInit {
   filteredProjects: Observable<Project[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
+  startingBlockedByLoading = false;
+  stoppingBlockedByLoading = false;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -265,6 +267,7 @@ export class TimeTrackerComponent implements OnInit {
         if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
           this.extractFromTimeTracker();
+          this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
             billable: true,
@@ -272,8 +275,10 @@ export class TimeTrackerComponent implements OnInit {
             issue: null,
             project: null
           };
+          this.stoppingBlockedByLoading = false;
         }
         this.updateAutoCompletes();
+        this.stoppingBlockedByLoading = false;
       });
     });
   }
@@ -284,15 +289,18 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   startTimeTracker(): void {
+    this.startingBlockedByLoading = true;
     this.dataService.startTimeTracker(this.timeTracker).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
         this.extractFromTimeTracker();
+        this.startingBlockedByLoading = false;
       }
      );
   }
 
   stopTimeTracker(): void {
+    this.stoppingBlockedByLoading = true;
     let timeTracker: TimeTracker;
     timeTracker = {
       id: this.timeTracker.id,
@@ -305,11 +313,13 @@ export class TimeTrackerComponent implements OnInit {
     this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
       if (data === false) {
         console.error('Couldn\'t stop time tracker');
+        this.stoppingBlockedByLoading = false;
       } else {
         this.loadTimeTracker();
       }
     }, error => {
       console.error(error);
+      this.stoppingBlockedByLoading = true;
     }
     );
   }
