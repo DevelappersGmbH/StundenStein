@@ -4,7 +4,7 @@ export interface HourGlassTimeLog {
   stop: string;
   comments?: string;
   user_id: number;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
   hours: number;
 }

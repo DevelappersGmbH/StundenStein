@@ -1,5 +1,5 @@
 import { HourGlassTimeTracker } from '../hourglass-time-tracker.interface';
 
-export interface HourGlassTimeBookingsRequest {
+export interface HourGlassTimeBookingsResponse {
   time_bookings: Partial<HourGlassTimeTracker>[];
 }

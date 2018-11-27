@@ -11,8 +11,10 @@ import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
+import { HourGlassTimeLogRequest } from 'src/app/redmine-model/requests/hourglass-time-log-request.interface';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
+import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
@@ -22,6 +24,7 @@ import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interfac
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
 import { RedmineTimeEntryActivity } from 'src/app/redmine-model/redmine-time-entry-activity.interface';
+import { RedmineTimeEntryRequest } from 'src/app/redmine-model/requests/redmine-time-entry-request.interface';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { User } from 'src/app/model/user.interface';
@@ -377,7 +380,8 @@ export class DataService {
             ),
             user: this.mapRedmineUserIdToCurrentUserOrNull(
               hgbooking.time_entry.user_id
-            )
+            ),
+            redmineTimeEntryId: hgbooking.time_entry_id
           });
         });
         hourglassTimeLogs.forEach(hglog => {
@@ -393,7 +397,8 @@ export class DataService {
               timeStarted: new Date(hglog.start),
               timeStopped: new Date(hglog.stop),
               timeInHours: hglog.hours,
-              user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id)
+              user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id),
+              redmineTimeEntryId: null
             });
           }
         });
@@ -405,16 +410,69 @@ export class DataService {
   }
 
   deleteTimeLog(timeLog: TimeLog): Observable<boolean> {
-      return this.hourglassService.deleteTimeLog(timeLog.id).pipe(
-        map(response => {
-          return response.status === 204;
-        })
-      );
+    return this.hourglassService.deleteTimeLog(timeLog.id).pipe(
+      map(response => {
+        return response.status === 204;
+      })
+    );
   }
 
   mapRedmineUserIdToCurrentUserOrNull(userId: number): User {
     return userId === this.userService.getUser().id
       ? this.userService.getUser()
       : null;
+  }
+
+  updateTimeLog(timelog: TimeLog): Observable<boolean> {
+    this.redmineService.getTimeEntryActivities().pipe(
+      flatMap(timeEntryActivities => {
+        console.log(timeEntryActivities);
+
+        const hgLog: HourGlassTimeLog = {
+          id: timelog.id,
+          comments: timelog.comment,
+          start: timelog.timeStarted.toISOString(),
+          stop: timelog.timeStopped.toISOString(),
+          hours: timelog.timeInHours,
+          user_id: this.userService.getUser().id
+        };
+        const timeLogRequest: HourGlassTimeLogRequest = {
+          time_log: hgLog
+        };
+        const calls: Observable<HttpResponse<any>>[] = [
+          this.hourglassService.updateTimeLog(timeLogRequest)
+        ];
+        if (timelog.redmineTimeEntryId && timelog.redmineTimeEntryId != null) {
+          const timeEntryRequest: RedmineTimeEntryRequest = {
+            time_entry: {
+              id: timelog.redmineTimeEntryId,
+              comments: timelog.comment,
+              spent_on: timelog.timeStarted.toISOString(),
+              activity_id: this.mapBillableToRedmineTimeEntryActivityId(
+                timelog.billable,
+                timeEntryActivities
+              ),
+              issue_id:
+                timelog.issue && timelog.issue.id ? timelog.issue.id : null,
+              project_id:
+                timelog.project && timelog.project.id
+                  ? timelog.project.id
+                  : null,
+              hours: timelog.timeInHours
+            }
+          };
+          calls.push(this.redmineService.updateTimeEntry(timeEntryRequest));
+        }
+        console.log('before forkjoin');
+        return forkJoin(calls).pipe(
+          map(results => {
+            let result = false;
+            results.forEach(r => (result = result && r.ok));
+            return result;
+          })
+        );
+      })
+    );
+    return null;
   }
 }
