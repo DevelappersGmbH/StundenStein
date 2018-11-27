@@ -371,7 +371,6 @@ export class TimeLogComponent implements OnInit {
     dialogConfig.autoFocus = true;
 
     dialogConfig.data = {
-      id: 1,
       description: 'Delete time log?'
     };
 
@@ -383,8 +382,15 @@ export class TimeLogComponent implements OnInit {
     dialogRef
       .afterClosed()
       .subscribe(data =>
-        data ? console.log('Delete') : console.log('Do NOT delete')
+        data ? this.deleteTimeLog() : console.log('Do NOT delete')
       );
+  }
+
+  deleteTimeLog() {
+    this.dataService.deleteTimeLog(this.timeLog).subscribe({
+      next(deleteBoolean) { console.log(deleteBoolean); },
+      error(msg) { console.log('Error deleting: ', msg); }
+    });
   }
 
   blurProject(input) {
