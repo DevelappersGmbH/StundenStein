@@ -77,6 +77,7 @@ export class TimeTrackerComponent implements OnInit {
     if (isUndefined(this.timeTracker.id)) {
       return;
     }
+    this.stoppingBlockedByLoading = true;
     let timeTracker: TimeTracker;
     timeTracker = {
       id: this.timeTracker.id,
@@ -90,6 +91,7 @@ export class TimeTrackerComponent implements OnInit {
       if (!isNull(t) && !(isUndefined(t))) {
         this.timeTracker = t;
         this.extractFromTimeTracker();
+        this.stoppingBlockedByLoading = false;
       } else {
         this.timeTracker = {
           billable: true,
@@ -97,10 +99,12 @@ export class TimeTrackerComponent implements OnInit {
           issue: null,
           project: null
         };
+        this.stoppingBlockedByLoading = false;
       }
       this.updateAutoCompletes();
     }, error => {
       console.error('Couldn\'t update time tracker.');
+      this.stoppingBlockedByLoading = false;
     });
   }
 
