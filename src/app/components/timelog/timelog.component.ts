@@ -202,6 +202,7 @@ export class TimeLogComponent implements OnInit {
     }
     console.log(this.projectOptions);
     // TODO: update timelog
+    this.updateTimeLog();
   }
 
   selectProject(project) {
@@ -224,6 +225,7 @@ export class TimeLogComponent implements OnInit {
   updateComment(comment) {
     this.timeLog.comment = comment;
     // TODO: update timelog
+    this.updateTimeLog();
   }
 
   private searchIssueById(id): Issue {
@@ -257,7 +259,7 @@ export class TimeLogComponent implements OnInit {
   markBillable() {
     // TODO: update timelog
     this.timeLog.billable = !this.timeLog.billable;
-    this.dataService.updateTimeLog(this.timeLog);
+    this.updateTimeLog();
   }
 
   changeEndTime(time) {
@@ -274,6 +276,7 @@ export class TimeLogComponent implements OnInit {
       0
     );
     this.calculateTime();
+    this.updateTimeLog();
     this.refreshTrackedTime();
   }
 
@@ -291,11 +294,13 @@ export class TimeLogComponent implements OnInit {
       0
     );
     this.calculateTime();
+    this.updateTimeLog();
     this.refreshTrackedTime();
   }
 
   refreshTrackedTime() {
     // TODO: update timelog
+    this.updateTimeLog();
   }
 
   private isRunning() {
@@ -344,6 +349,7 @@ export class TimeLogComponent implements OnInit {
     }
     this.editMode = !this.editMode;
     // TODO: update timelog
+    this.updateTimeLog();
   }
 
   private findProject(project): Project {
@@ -378,7 +384,14 @@ export class TimeLogComponent implements OnInit {
 
   deleteTimeLog() {
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
-      next(deleteBoolean) { console.log(deleteBoolean); },
+      next(success) { console.log(success); },
+      error(msg) { console.log('Error deleting: ', msg); }
+    });
+  }
+
+  updateTimeLog() {
+    this.dataService.updateTimeLog(this.timeLog).subscribe({
+      next(success) { console.log(success); },
       error(msg) { console.log('Error deleting: ', msg); }
     });
   }
