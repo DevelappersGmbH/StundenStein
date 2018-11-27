@@ -164,6 +164,11 @@ export class TimeTrackerComponent implements OnInit {
 
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
+    let prefix = '';
+    if (sec < 0) {
+      sec = -sec;
+      prefix = '- ';
+    }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);
     sec = sec % 60;
@@ -171,7 +176,7 @@ export class TimeTrackerComponent implements OnInit {
     let secStr: string = sec.toString(); if (secStr.length < 2) { secStr = '0' + secStr; }
     let minStr: string = min.toString(); if (minStr.length < 2) { minStr = '0' + minStr; }
     let hrsStr: string = hrs.toString(); if (hrsStr.length < 2) { hrsStr = '0' + hrsStr; }
-    this.currentTrackerTimeString = hrsStr + ':' + minStr + ':' + secStr;
+    this.currentTrackerTimeString = prefix + hrsStr + ':' + minStr + ':' + secStr;
   }
 
   private updateAutoCompletes(): void {
