@@ -36,6 +36,7 @@ import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-ti
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
+import { UserReportsComponent } from './components/userreports/userreports.component';
 import { UserService } from './services/user/user.service';
 
 @NgModule({
@@ -46,6 +47,7 @@ import { UserService } from './services/user/user.service';
     NavbarComponent,
     TimeLogComponent,
     TimeTrackerComponent,
+    UserReportsComponent,
     RecentTimeLogsComponent,
     DeleteWarningComponent,
     EnforcedInputsDirective

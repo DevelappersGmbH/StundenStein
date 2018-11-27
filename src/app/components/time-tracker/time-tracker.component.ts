@@ -66,6 +66,37 @@ export class TimeTrackerComponent implements OnInit {
       );
   }
 
+  updateTracker(): void {
+    if (isUndefined(this.timeTracker.id)) {
+      return;
+    }
+    let timeTracker: TimeTracker;
+    timeTracker = {
+      id: this.timeTracker.id,
+      timeStarted: this.timeTracker.timeStarted,
+      billable: this.timeTracker.billable,
+      comment: this.timeTracker.comment,
+      issue: this.timeTracker.issue,
+      project: this.timeTracker.project
+    };
+    this.dataService.updateTimeTracker(timeTracker).subscribe( t => {
+      if (!isNull(t) && !(isUndefined(t))) {
+        this.timeTracker = t;
+        this.extractFromTimeTracker();
+      } else {
+        this.timeTracker = {
+          billable: true,
+          comment: '',
+          issue: null,
+          project: null
+        };
+      }
+      this.updateAutoCompletes();
+    }, error => {
+      console.error('Couldn\'t update time tracker.');
+    });
+  }
+
   _getProjectColor(): string {
     if (!this.filteredObject) { return '#000'; }
     if (isNull(this.timeTracker) || isNull(this.timeTracker.project) || isUndefined(this.timeTracker.project)) { return '#000'; }
@@ -117,6 +148,7 @@ export class TimeTrackerComponent implements OnInit {
       this.ensureSelectedProjectIsFromProjectList();
       this.projectCtrl.setValue(this.timeTracker.project);
     }
+    this.updateTracker();
   }
 
   ensureSelectedProjectIsFromProjectList() {
@@ -144,6 +176,7 @@ export class TimeTrackerComponent implements OnInit {
     this.ensureSelectedProjectIsFromProjectList();
     this.timeTracker.issue = undefined;
     this.issueCtrl.setValue(undefined);
+    this.updateTracker();
   }
 
   loadProjects() {
@@ -164,6 +197,11 @@ export class TimeTrackerComponent implements OnInit {
 
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
+    let prefix = '';
+    if (sec < 0) {
+      sec = -sec;
+      prefix = '- ';
+    }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);
     sec = sec % 60;
@@ -171,7 +209,7 @@ export class TimeTrackerComponent implements OnInit {
     let secStr: string = sec.toString(); if (secStr.length < 2) { secStr = '0' + secStr; }
     let minStr: string = min.toString(); if (minStr.length < 2) { minStr = '0' + minStr; }
     let hrsStr: string = hrs.toString(); if (hrsStr.length < 2) { hrsStr = '0' + hrsStr; }
-    this.currentTrackerTimeString = hrsStr + ':' + minStr + ':' + secStr;
+    this.currentTrackerTimeString = prefix + hrsStr + ':' + minStr + ':' + secStr;
   }
 
   private updateAutoCompletes(): void {
