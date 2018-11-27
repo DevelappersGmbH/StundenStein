@@ -102,7 +102,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
             }
             let timeInHoursMod;
             if (this.dwmArray[i][m] === 0) {
-            } else if (this.dwmArray[i][m] === 1) {
               timeInHoursMod = this.checkSameDay(
                 res[i].timeStarted,
                 res[i].timeStopped,
