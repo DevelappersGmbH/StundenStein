@@ -197,7 +197,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   }
   // checks if timelog is started and stopped at the same week
   checkSameWeek(start: Date, stop: Date, time: number) {
-    console.log(start.getDate() + ' ' + stop.getDate());
     if (this.getWeekNumber(start) === this.getWeekNumber(stop)) {
       return time;
     } else {
