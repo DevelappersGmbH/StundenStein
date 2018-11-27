@@ -102,7 +102,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
             }
             let timeInHoursMod;
             if (this.dwmArray[i][m] === 0) {
-            } else if (this.dwmArray[i][m] === 1) {
               timeInHoursMod = this.checkSameDay(
                 res[i].timeStarted,
                 res[i].timeStopped,
@@ -171,7 +170,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         }
         this.width = []; // width for the stripe chart sequences
         this.setWidth();
-        console.log(date.getMonth());
       });
   }
   ngAfterViewInit() {
@@ -199,7 +197,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   }
   // checks if timelog is started and stopped at the same week
   checkSameWeek(start: Date, stop: Date, time: number) {
-    console.log(start.getDate() + ' ' + stop.getDate());
     if (this.getWeekNumber(start) === this.getWeekNumber(stop)) {
       return time;
     } else {
