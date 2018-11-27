@@ -33,6 +33,7 @@
         </div>
         <div class="field">
           <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock" color="accent">Manual Mode</button>
+          <button mat-stroked-button *ngIf="!automaticMode" [disabled]="automaticLock" color="accent">Automatic Mode</button>
         </div>
       </div>
   </form>
