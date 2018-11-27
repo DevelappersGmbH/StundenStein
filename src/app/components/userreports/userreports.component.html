@@ -15,9 +15,9 @@
         <tr>
           <td *ngFor="let arrays of tdArray[actualSelect]; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}" (mouseover)="bubbleHover(1, i)" (mouseout)="bubbleHover(0, i)">
             <a><div *ngIf="true">{{getProjectData(i)}}</div>
-            <div *ngIf="hoverBubbleRight === 0" class="bubblePosition hoverBubble hoBu" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
-            <div *ngIf="hoverBubbleRight === 1" class="bubblePosition hoverBubble hoBu1" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
-            <div *ngIf="hoverBubbleRight === 2" class="bubblePosition hoverBubble hoBu2" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time</div>
+            <div *ngIf="hoverBubbleRight === 0" class="bubblePosition hoverBubble hoBu" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
+            <div *ngIf="hoverBubbleRight === 1" class="bubblePosition hoverBubble hoBu1" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
+            <div *ngIf="hoverBubbleRight === 2" class="bubblePosition hoverBubble hoBu2" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
           </a>
           </td>
         </tr>

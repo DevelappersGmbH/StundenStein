@@ -100,17 +100,39 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
                 }
               }
             }
+            let timeInHoursMod;
+            if (this.dwmArray[i][m] === 0) {
+            } else if (this.dwmArray[i][m] === 1) {
+              timeInHoursMod = this.checkSameDay(
+                res[i].timeStarted,
+                res[i].timeStopped,
+                res[i].timeInHours
+              );
+            } else if (this.dwmArray[i][m] === 1) {
+              timeInHoursMod = this.checkSameWeek(
+                res[i].timeStarted,
+                res[i].timeStopped,
+                res[i].timeInHours
+              );
+            } else if (this.dwmArray[i][m] === 2) {
+              timeInHoursMod = this.checkSameMonth(
+                res[i].timeStarted,
+                res[i].timeStopped,
+                res[i].timeInHours
+              );
+            }
             // add to suitable period and project
             if (projEx) {
-              this.periodArray[this.dwmArray[i][m]][projN][2] +=
-                res[i].timeInHours;
+              this.periodArray[this.dwmArray[i][m]][projN][2] += timeInHoursMod;
               if (!res[i].billable) {
                 if (this.periodArray[this.dwmArray[i][m]][projN].length === 4) {
-                  this.periodArray[this.dwmArray[i][m]][projN][3] +=
-                    res[i].timeInHours;
+                  this.periodArray[this.dwmArray[i][m]][
+                    projN
+                  ][3] += timeInHoursMod;
                 } else {
-                  this.periodArray[this.dwmArray[i][m]][projN][3] =
-                    res[i].timeInHours;
+                  this.periodArray[this.dwmArray[i][m]][
+                    projN
+                  ][3] = timeInHoursMod;
                 }
               }
             } else {
@@ -118,15 +140,11 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
               if (res[i].booked) {
                 this.periodArray[this.dwmArray[i][m]][
                   this.periodArray[this.dwmArray[i][m]].length
-                ] = [
-                  res[i].project.name,
-                  res[i].project.color,
-                  res[i].timeInHours
-                ];
+                ] = [res[i].project.name, res[i].project.color, timeInHoursMod];
               } else {
                 this.periodArray[this.dwmArray[i][m]][
                   this.periodArray[this.dwmArray[i][m]].length
-                ] = [null, '#585a5e', res[i].timeInHours];
+                ] = [null, '#585a5e', timeInHoursMod];
               }
               if (!res[i].billable) {
                 if (
@@ -136,11 +154,11 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
                 ) {
                   this.periodArray[this.dwmArray[i][m]][
                     this.periodArray[this.dwmArray[i][m]].length - 1
-                  ][3] += res[i].timeInHours;
+                  ][3] += timeInHoursMod;
                 }
                 this.periodArray[this.dwmArray[i][m]][
                   this.periodArray[this.dwmArray[i][m]].length - 1
-                ][3] = res[i].timeInHours;
+                ][3] = timeInHoursMod;
               }
             }
           }
@@ -153,6 +171,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         }
         this.width = []; // width for the stripe chart sequences
         this.setWidth();
+        console.log(date.getMonth());
       });
   }
   ngAfterViewInit() {
@@ -164,6 +183,47 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     this.setWidth();
     for (let x = 0; x < this.width.length; x++) {
       this.tdArray[this.actualSelect][x] = x;
+    }
+  }
+  // checks if timelog is started and stopped at the same day
+  checkSameDay(start: Date, stop: Date, time: number) {
+    if (
+      start.getDate() === stop.getDate() &&
+      start.getMonth() === stop.getMonth() &&
+      start.getFullYear() === stop.getFullYear()
+    ) {
+      return time;
+    } else {
+      return stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
+    }
+  }
+  // checks if timelog is started and stopped at the same week
+  checkSameWeek(start: Date, stop: Date, time: number) {
+    console.log(start.getDate() + ' ' + stop.getDate());
+    if (this.getWeekNumber(start) === this.getWeekNumber(stop)) {
+      return time;
+    } else {
+      let temp = 0;
+      let stop0 = stop.getDay();
+      if (stop.getDay() === 0) {
+        stop0 = 7;
+      }
+      for (let i = 1; i < stop0; i++) {
+        temp += 24;
+      }
+      return temp + stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
+    }
+  }
+  // checks if timelog is started and stopped in the same month
+  checkSameMonth(start: Date, stop: Date, time: number) {
+    if (start.getMonth() === stop.getMonth()) {
+      return time;
+    } else {
+      let temp = 0;
+      for (let i = 1; i < stop.getDate() + 1; i++) {
+        temp += 24;
+      }
+      return temp + stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
     }
   }
   // change period for stripe chart view
@@ -303,6 +363,23 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
       return this.getWidth(i);
     }
   }
+  // get percentage of billable/non billable of a project
+  getBillPercent(i) {
+    if (this.periodArray[this.actualSelect][i].length < 4) {
+      return '100 % billable';
+    } else {
+      const temp =
+        this.periodArray[this.actualSelect][i][2] +
+        this.periodArray[this.actualSelect][i][3];
+      return (
+        Math.round((this.periodArray[this.actualSelect][i][2] / temp) * 100) +
+        '% billable' +
+        ', ' +
+        Math.round((this.periodArray[this.actualSelect][i][3] / temp) * 100) +
+        '% non billable'
+      );
+    }
+  }
   // get percential width of billable project issues for stripe chart
   checkBox(event) {
     if (event.checked) {
@@ -329,8 +406,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     this.tdArray = [[], [], []];
     this.ngAfterViewInit();
   }
-  // set billable/non width array
-
   // set positin of bubble arrow
   bubbleHover(a, i) {
     if (a === 1 && this.hoverTemp[i] > 82) {
@@ -348,7 +423,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
       counter += this.width[i];
     }
     const temp = this.width[a] / 2;
-    let temp2 = counter + temp - 8 - a;
+    let temp2 = counter + temp - 7 - a;
     this.hoverTemp[a] = temp2;
     if (temp2 > 82) {
       temp2 = 82;

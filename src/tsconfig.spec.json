@@ -14,8 +14,6 @@
   "include": [
     "**/*.spec.ts",
     "**/*.d.ts",
-    "**/*.ts",
-    "./app/services/color/color.service.ts",
-    ".app/components/timelog/timelog.component.ts"
+    "**/*.ts"
   ]
 }
