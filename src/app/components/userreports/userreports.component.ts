@@ -171,7 +171,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         }
         this.width = []; // width for the stripe chart sequences
         this.setWidth();
-        console.log(date.getMonth());
       });
   }
   ngAfterViewInit() {
