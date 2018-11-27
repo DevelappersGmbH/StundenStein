@@ -40,6 +40,7 @@ export class TimeTrackerComponent implements OnInit {
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
   filteredObject = false;
+  stoppingBlockedByNegativeTime = true;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -205,6 +206,9 @@ export class TimeTrackerComponent implements OnInit {
     if (sec < 0) {
       sec = -sec;
       prefix = '- ';
+      this.stoppingBlockedByNegativeTime = true;
+    } else {
+      this.stoppingBlockedByNegativeTime = false;
     }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);

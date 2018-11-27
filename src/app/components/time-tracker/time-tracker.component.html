@@ -29,7 +29,7 @@
         <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
         <div class="field">
           <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary">Start</button>
-          <button *ngIf="this.timeTracker.id !== undefined" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+          <button *ngIf="this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
         </div>
         <div class="field">
           <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock" color="accent">Manual Mode</button>
