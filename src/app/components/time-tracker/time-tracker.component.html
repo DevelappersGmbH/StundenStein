@@ -1,31 +1,40 @@
 <mat-card>
   <form>
-      <mat-form-field class="field field-small">
-        <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
-        <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"  autoActiveFirstOption #autoIssue="matAutocomplete">
-          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
-            {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
-          </mat-option>
-        </mat-autocomplete>
-      </mat-form-field>
-      <mat-form-field class="field field-large">
-          <input matInput type="text" placeholder="Task description" (change)="updateTracker()" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
-          <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="this.timeTracker.comment=''">
-            <mat-icon>close</mat-icon>
-          </button>
+      <div class="field-container">
+        <mat-form-field class="field field-large">
+          <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
+          <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"  autoActiveFirstOption #autoIssue="matAutocomplete">
+            <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
+              {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
+            </mat-option>
+          </mat-autocomplete>
         </mat-form-field>
-      <mat-form-field class="field field-small">
-          <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
-            <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
-              <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
-                {{project.name}}
-              </mat-option>
-            </mat-autocomplete>
+        <mat-form-field class="field field-small">
+            <input matInput type="text" placeholder="Task description" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
+            <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="this.timeTracker.comment=''">
+              <mat-icon>close</mat-icon>
+            </button>
+          </mat-form-field>
+        <mat-form-field class="field field-small">
+            <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
+              <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
+                <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
+                  {{project.name}}
+                </mat-option>
+              </mat-autocomplete>
         </mat-form-field>
-      <span class="field">{{ currentTrackerTimeString }}</span>
-      <mat-checkbox name="billable" (change)="updateTracker()" [(ngModel)]="timeTracker.billable" class="field">Billable</mat-checkbox>
-      <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary">Start</button>
-      <button *ngIf="this.timeTracker.id !== undefined" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
-      <mat-slide-toggle [checked]="automaticMode" [disabled]="automaticLock" class="field">Automatic mode</mat-slide-toggle>
+      </div>
+      <div class="field-container">
+        <span class="field">{{ currentTrackerTimeString }}</span>
+        <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
+        <div class="field">
+          <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary">Start</button>
+          <button *ngIf="this.timeTracker.id !== undefined" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+        </div>
+        <div class="field">
+          <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock" color="accent">Manual Mode</button>
+          <button mat-stroked-button *ngIf="!automaticMode" [disabled]="automaticLock" color="accent">Automatic Mode</button>
+        </div>
+      </div>
   </form>
 </mat-card>

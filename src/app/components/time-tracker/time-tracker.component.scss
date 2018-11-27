@@ -1,16 +1,35 @@
+$break-small: 700px;
+$break-large: 1240px;
 .field {
   padding-left: 10px;
   padding-right: 10px;
-}
-.field:first-child {
-  padding-right: 10px;
-}
-.field-right:last-child {
-  padding-left: 10px;
+  display: inline-block;
 }
 .field-large {
   width: 30%;
+  @media screen and (max-width: $break-large) {
+    width: 40%;
+  }
 }
 .field-small {
   width: 15%;
+  @media screen and (max-width: $break-large) {
+    width: 25%;
+  }
+}
+.field-container {
+  display: inline;
+  @media screen and (max-width: $break-large) {
+    display: block;
+  }
+  @media screen and (max-width: $break-small) {
+    &:first-child .field {
+      display: block;
+      width: 100%;
+      padding: 0;
+    }
+    &:last-child {
+      line-height: 50px;
+    }
+  }
 }
