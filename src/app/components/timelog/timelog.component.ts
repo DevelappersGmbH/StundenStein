@@ -23,18 +23,7 @@ export class TimeLogComponent implements OnInit {
 
   @Input() timeLog: TimeLog;
 
-  currentColor = 'red';
-  currentIssueSubject: string;
-  currentProjectName: string;
-  currentIssue: Issue;
-  currentProject: Project;
-  currentComment: string;
-  startTime: Date;
-  endTime: Date;
-  billable: boolean;
   trackedTime: Date;
-  booked: boolean;
-  currentUser: User;
   active = false;
   editMode = false;
   editButton = 'edit';
@@ -212,6 +201,7 @@ export class TimeLogComponent implements OnInit {
       console.log('No such issue!');
     }
     console.log(this.projectOptions);
+    // TODO: update timelog
   }
 
   selectProject(project) {
@@ -228,10 +218,12 @@ export class TimeLogComponent implements OnInit {
     } else {
       console.log('Something went wrong');
     }
+    // TODO: update timelog
   }
 
   updateComment(comment) {
     this.timeLog.comment = comment;
+    // TODO: update timelog
   }
 
   private searchIssueById(id): Issue {
@@ -254,10 +246,6 @@ export class TimeLogComponent implements OnInit {
     return undefined;
   }
 
-  updateForm() {
-    console.log('OnSelectionChange');
-  }
-
   startTracker() {
     /*
     startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
@@ -267,13 +255,13 @@ export class TimeLogComponent implements OnInit {
   }
 
   markBillable() {
-    /*
-    send billable sign to TimeTracker
-    */
+    // TODO: update timelog
     this.timeLog.billable = !this.timeLog.billable;
+    this.dataService.updateTimeLog(this.timeLog);
   }
 
   changeEndTime(time) {
+    // TODO: update timelog
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStopped = new Date(
@@ -290,6 +278,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeStartTime(time) {
+    // TODO: update timelog
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStarted = new Date(
@@ -306,7 +295,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   refreshTrackedTime() {
-    // send tracked time to TimeTracker?
+    // TODO: update timelog
   }
 
   private isRunning() {
@@ -354,6 +343,7 @@ export class TimeLogComponent implements OnInit {
       }
     }
     this.editMode = !this.editMode;
+    // TODO: update timelog
   }
 
   private findProject(project): Project {
