@@ -21,6 +21,7 @@ steps:
   - script: |
       cd dist/StundenStein
       npm install express
+    displayName: "Install express webserver"
 
   - task: ArchiveFiles@2
     inputs:
