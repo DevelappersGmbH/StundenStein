@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -22,6 +22,10 @@ export class TimeLogComponent implements OnInit {
   ) {}
 
   @Input() timeLog: TimeLog;
+  @ViewChild('hiddenStart') textStart: ElementRef;
+  @ViewChild('hiddenEnd') textEnd: ElementRef;
+  minWidth = 45;
+  width: number = this.minWidth;
 
   trackedTime: Date;
   active = false;
@@ -374,5 +378,16 @@ export class TimeLogComponent implements OnInit {
       error(msg) { console.log('Error updating: ', msg); }
     });
   }
+
+  resizeStart() {
+    console.log('resizeStart');
+    setTimeout(() => this.width = Math.max(this.minWidth, this.textStart.nativeElement.offsetWidth + 5));
+  }
+
+  resizeEnd() {
+    console.log('resizeEnd');
+    setTimeout(() => this.width = Math.max(this.minWidth, this.textEnd.nativeElement.offsetWidth + 5));
+  }
+
 
 }

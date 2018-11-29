@@ -43,16 +43,16 @@
           <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
             class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
 
-          <mat-form-field class="field start-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
-          </mat-form-field>
+          <mat-form-field [ngStyle]="{'width.px': width}" class="field start-time" [ngClass]="{ edit: !editMode }">
+            <input #elasticStart [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
+                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time"  matInput (input)="resizeStart()"/>
+        </mat-form-field>
 
           -
 
-          <mat-form-field class="field end-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
+          <mat-form-field [ngStyle]="{'width.px': width}" class="field end-time" [ngClass]="{ edit: !editMode }">
+            <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput (input)="resizeEnd()"/>
           </mat-form-field>
 
           <span class=" field tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
@@ -72,3 +72,5 @@
     </form>
   </mat-card-content>
 </mat-card>
+<span #hiddenStart style="visibility: hidden; white-space: pre;">{{elasticStart.value}}</span>
+<span #hiddenEnd style="visibility: hidden; white-space: pre;">{{elasticEnd.value}}</span>
