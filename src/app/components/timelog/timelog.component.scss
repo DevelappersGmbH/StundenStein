@@ -2,9 +2,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: none;
 }
 
-input[type="time"]::-ms-clear {
-  display: none;
-}
 
 .total-div{
   display: flex;
