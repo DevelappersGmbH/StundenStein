@@ -420,7 +420,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
       counter += this.width[i];
     }
     const temp = this.width[a] / 2;
-    let temp2 = counter + temp - 7 - a;
+    let temp2 = counter + temp - 8 - a;
     this.hoverTemp[a] = temp2;
     if (temp2 > 82) {
       temp2 = 82;

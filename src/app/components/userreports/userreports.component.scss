@@ -24,7 +24,8 @@ table {
 }
 .legend {
   text-align: center;
-  word-break: break-word;
+  word-break: keep-all;
+  overflow: hidden;
   height: 10px;
 }
 .placeholder {
