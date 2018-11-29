@@ -9,6 +9,7 @@ import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
+import { TrackerService } from 'src/app/services/tracker/tracker.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -20,7 +21,8 @@ export class TimeTrackerComponent implements OnInit {
   constructor(
     private dataService: DataService ,
     private userService: UserService ,
-    private titleService: Title
+    private titleService: Title ,
+    private trackerService: TrackerService
     ) { }
 
   projects: Project[] = [];
@@ -51,6 +53,11 @@ export class TimeTrackerComponent implements OnInit {
       } else {
         this.currentTrackerTimeString  = '00:00:00';
         this.titleService.setTitle('StundenStein');
+      }
+      if (this.trackerService.reloadNeeded) {
+        this.trackerService.reloadNeeded = false;
+        this.stoppingBlockedByLoading = true;
+        this.loadTimeTracker();
       }
     });
     this.loadProjects();
