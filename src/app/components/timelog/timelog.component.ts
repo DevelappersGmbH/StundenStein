@@ -306,12 +306,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private isBooked() {
-    if (
-      !this.timeLog.issue ||
-      !this.timeLog.project ||
-      this.timeLog.project.name === '' ||
-      this.timeLog.issue.subject === ''
-    ) {
+    if (!this.timeLog.issue || !this.timeLog.project || this.timeLog.project.name === '' || this.timeLog.issue.subject === '') {
       this.timeLog.booked = false;
     } else {
       this.timeLog.booked = true;
@@ -376,7 +371,7 @@ export class TimeLogComponent implements OnInit {
   updateTimeLog() {
     this.dataService.updateTimeLog(this.timeLog).subscribe({
       next(success) { console.log(success); },
-      error(msg) { console.log('Error deleting: ', msg); }
+      error(msg) { console.log('Error updating: ', msg); }
     });
   }
 

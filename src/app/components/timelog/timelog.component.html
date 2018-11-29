@@ -14,7 +14,6 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon warning" *ngIf="timeLog.booked == false" matPrefix>warning</mat-icon>
             <input type="text" [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
                    matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
                    (blur)="updateComment($event.target.value)"
@@ -23,6 +22,7 @@
           </mat-form-field>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
+            <mat-icon class="icon warning" *ngIf="timeLog.booked == false" matPrefix>warning</mat-icon>
             <input type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="auto" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
