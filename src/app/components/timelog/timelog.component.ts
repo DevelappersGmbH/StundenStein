@@ -201,7 +201,6 @@ export class TimeLogComponent implements OnInit {
       console.log('No such issue!');
     }
     console.log(this.projectOptions);
-    // TODO: update timelog
     this.updateTimeLog();
   }
 
@@ -219,12 +218,11 @@ export class TimeLogComponent implements OnInit {
     } else {
       console.log('Something went wrong');
     }
-    // TODO: update timelog
+    this.updateTimeLog();
   }
 
   updateComment(comment) {
     this.timeLog.comment = comment;
-    // TODO: update timelog
     this.updateTimeLog();
   }
 
@@ -257,13 +255,11 @@ export class TimeLogComponent implements OnInit {
   }
 
   markBillable() {
-    // TODO: update timelog
     this.timeLog.billable = !this.timeLog.billable;
     this.updateTimeLog();
   }
 
   changeEndTime(time) {
-    // TODO: update timelog
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStopped = new Date(
@@ -277,11 +273,9 @@ export class TimeLogComponent implements OnInit {
     );
     this.calculateTime();
     this.updateTimeLog();
-    this.refreshTrackedTime();
   }
 
   changeStartTime(time) {
-    // TODO: update timelog
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
     this.timeLog.timeStarted = new Date(
@@ -294,12 +288,6 @@ export class TimeLogComponent implements OnInit {
       0
     );
     this.calculateTime();
-    this.updateTimeLog();
-    this.refreshTrackedTime();
-  }
-
-  refreshTrackedTime() {
-    // TODO: update timelog
     this.updateTimeLog();
   }
 
@@ -348,7 +336,6 @@ export class TimeLogComponent implements OnInit {
       }
     }
     this.editMode = !this.editMode;
-    // TODO: update timelog
     this.updateTimeLog();
   }
 
@@ -366,9 +353,6 @@ export class TimeLogComponent implements OnInit {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
-    dialogConfig.data = {
-      description: 'Delete time log?'
-    };
 
     const dialogRef = this.deleteDialog.open(
       DeleteWarningComponent,
@@ -396,37 +380,4 @@ export class TimeLogComponent implements OnInit {
     });
   }
 
-  blurProject(input) {
-    console.log('blurProject' + input);
-    let exists = false;
-    this.projectOptions.forEach(project => {
-      if (!exists) {
-        if (input === project.name) {
-          exists = true;
-        }
-      }
-    });
-    if (exists) {
-      this.projectControl.setValue(input);
-    } else {
-      this.projectControl.setValue('');
-    }
-  }
-
-  blurIssue(input) {
-    console.log('blurIssue' + input);
-    let exists = false;
-    this.issueOptions.forEach(issue => {
-      if (!exists) {
-        if (input === issue.subject) {
-          exists = true;
-        }
-      }
-    });
-    if (exists) {
-      this.issueControl.setValue(input);
-    } else {
-      this.issueControl.setValue('');
-    }
-  }
 }
