@@ -21,6 +21,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDatepickerModule,
   MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
@@ -28,7 +29,8 @@ import {
   MatListModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatNativeDateModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -77,7 +79,9 @@ import { UserService } from './services/user/user.service';
     MatAutocompleteModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [
     AuthenticationService,
