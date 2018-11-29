@@ -30,6 +30,7 @@
         <div class="field">
           <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary" [disabled]="startingBlockedByLoading">Start</button>
           <button *ngIf="automaticMode && this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+          <button *ngIf="!automaticMode" (click)="createLog()" class="field" mat-flat-button color="primary">Book</button>
         </div>
         <div class="field">
           <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock || this.timeTracker.id !== undefined" color="accent">Manual Mode</button>

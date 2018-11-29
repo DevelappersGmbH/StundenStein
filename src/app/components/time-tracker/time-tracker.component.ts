@@ -328,4 +328,8 @@ export class TimeTrackerComponent implements OnInit {
     );
   }
 
+  createLog(): void {
+
+  }
+
 }
