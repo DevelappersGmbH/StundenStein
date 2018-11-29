@@ -60,7 +60,7 @@ export class TimeTrackerComponent implements OnInit {
     this.loadTimeTracker();
     this.automaticMode = true;
     // Block manual mode until implemented
-    this.automaticLock = true;
+    // this.automaticLock = true;
     this.filteredIssues = this.issueCtrl.valueChanges
       .pipe(
         startWith(''),
