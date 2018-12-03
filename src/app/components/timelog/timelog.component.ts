@@ -333,9 +333,9 @@ export class TimeLogComponent implements OnInit {
         /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'edit';
       }
+      this.updateTimeLog();
     }
     this.editMode = !this.editMode;
-    this.updateTimeLog();
   }
 
   private findProject(project): Project {
