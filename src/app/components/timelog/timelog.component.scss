@@ -2,7 +2,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: none;
 }
 
-
 .total-div{
   display: flex;
   justify-content: space-between;
@@ -21,13 +20,32 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   color: limegreen;
 }
 
+.icon.transparent {
+  position:relative;
+  bottom:-5px;
+  color: transparent;
+  margin-right: 5px;
+}
+
 .icon.attention {
   color: orangered;
 }
 
 .icon.warning{
+  position:relative;
+  bottom:-5px;
   color: orangered;
   margin-right: 5px;
+}
+
+.field.end-time, .start-time {
+  position:relative;
+  bottom:-2px;
+}
+
+.field.tracked-time {
+  position:relative;
+  bottom:-1px;
 }
 
 ::ng-deep mat-form-field.edit .mat-form-field-underline {

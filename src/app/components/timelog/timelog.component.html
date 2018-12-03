@@ -5,11 +5,11 @@
         <div>
           <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
             <input type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
-                   [formControl]="issueControl" [matAutocomplete]="issue" />
+                   [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
 
-          <mat-autocomplete #issue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)">
+          <mat-autocomplete #autoIssue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)" [displayWith]="displayIssue" >
             <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.id}}: {{issue.subject}} </mat-option>
           </mat-autocomplete>
 
@@ -22,13 +22,13 @@
           </mat-form-field>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon warning" *ngIf="timeLog.booked == false" matPrefix>warning</mat-icon>
+            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
             <input type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
-                   [formControl]="projectControl" [matAutocomplete]="auto" />
+                   [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
 
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectProject($event.option.value)">
+          <mat-autocomplete #autoProject="matAutocomplete" (optionSelected)="selectProject($event.option.value)" [displayWith]="displayProject">
             <mat-option *ngFor="let project of (filteredProjects| async)" [style.color]="project.color" [value]="project"> {{project.name}}
             </mat-option>
           </mat-autocomplete>

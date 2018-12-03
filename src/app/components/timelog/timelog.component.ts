@@ -3,8 +3,8 @@ import {
   ElementRef,
   Input,
   OnInit,
-  ViewChild
-  } from '@angular/core';
+  ViewChild, ViewEncapsulation
+} from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -15,6 +15,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import { User } from '../../model/user.interface';
+import {isNull, isUndefined} from 'util';
 
 @Component({
   selector: 'app-timelog',
@@ -62,39 +63,14 @@ export class TimeLogComponent implements OnInit {
     );
 
     this.issueControl.setValue(
-      this.timeLog.issue ? this.timeLog.issue.subject : ''
+      this.timeLog.issue ? this.timeLog.issue : undefined
     );
     this.projectControl.setValue(
-      this.timeLog.project ? this.timeLog.project.name : ''
+      this.timeLog.project ? this.timeLog.project : undefined
     );
 
     this.loadIssues();
     this.loadProjects();
-
-    this.issueControl.valueChanges.subscribe(value => {
-      if (value === '') {
-        if (this.timeLog.project && this.timeLog.issue) {
-          this.updateIssueOptions(this.timeLog.project);
-        } else if (this.timeLog.issue) {
-          this.projectControl.setValue('');
-        }
-        this.projectOptions = this.projects;
-        this.timeLog.issue = null;
-      }
-    });
-
-    this.projectControl.valueChanges.subscribe(value => {
-      if (value === '') {
-        console.log('Here');
-        this.issueOptions = this.issues;
-        console.log('Length options: ', this.issueOptions.length);
-        this.projectOptions = this.projects;
-        this.issueControl.setValue('Dummy value');
-        this.issueControl.setValue('');
-        this.timeLog.issue = null;
-        this.timeLog.project = null;
-      }
-    });
 
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
@@ -105,7 +81,7 @@ export class TimeLogComponent implements OnInit {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => this.filterProjects(project))
+      map(project => project ? this.filterProjects(project) : this.projectOptions.slice())
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -135,6 +111,16 @@ export class TimeLogComponent implements OnInit {
         console.error('Couldn\'t get issues from data service.');
       }
     );
+  }
+
+  displayIssue(issue: Issue): string {
+    if (!issue) { return ''; }
+    return issue.id.toString() + ': ' + issue.subject;
+  }
+
+  displayProject(project: Project): string {
+    if (!project) { return ''; }
+    return project.name;
   }
 
   private filterIssues(value): Issue[] {
@@ -193,36 +179,47 @@ export class TimeLogComponent implements OnInit {
       console.log('Existing issue detected');
       this.timeLog.issue = issue;
       this.timeLog.project = issue.project;
-      this.issueControl.setValue(
-        this.timeLog.issue ? this.timeLog.issue.subject : ''
-      );
 
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue : undefined
+      );
       this.updateIssueOptions(this.timeLog.project);
 
       this.projectControl.setValue(
-        this.timeLog.project ? this.timeLog.project.name : ''
+        this.timeLog.project ? this.timeLog.project: undefined
       );
     } else {
-      console.log('No such issue!');
+      if (this.timeLog.project && this.timeLog.issue) {
+        this.updateIssueOptions(this.timeLog.project);
+      } else if (this.timeLog.issue) {
+        this.projectControl.setValue(undefined);
+      }
+      this.projectOptions = this.projects;
+      this.timeLog.issue = null;
     }
-    console.log(this.projectOptions);
+    console.log('Timelog', this.timeLog);
     this.updateTimeLog();
   }
 
   selectProject(project) {
     if (this.findProject(project)) {
-      console.log('New project detected', project);
       this.timeLog.project = project;
-      this.projectControl.setValue(project ? project.name : '');
+      console.log('New project detected', project.name);
+      this.projectControl.setValue(project ? project : undefined);
       this.updateIssueOptions(project);
-      this.issueControl.setValue('Dummy value');
-      this.issueControl.setValue(
-        this.timeLog.issue ? this.timeLog.issue.subject : ''
-      );
+      this.issueControl.setValue(undefined);
+      this.timeLog.issue = null;
       console.log(this.issueOptions);
     } else {
-      console.log('Something went wrong');
+      this.issueOptions = this.issues;
+      this.projectOptions = this.projects;
+      this.timeLog.issue = null;
+      this.timeLog.project = null;
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue : undefined
+      );
     }
+    console.log('Timelog', this.timeLog);
     this.updateTimeLog();
   }
 
@@ -340,11 +337,17 @@ export class TimeLogComponent implements OnInit {
   }
 
   private findProject(project): Project {
+    if (project) {
     return this.projectOptions.find(entry => entry.id === project.id);
+    }
+    return undefined;
   }
 
   private findIssue(issue): Issue {
-    return this.issueOptions.find(entry => entry.id === issue.id);
+    if (issue) {
+      return this.issueOptions.find(entry => entry.id === issue.id);
+    }
+    return undefined;
   }
 
   deleteWarning() {
