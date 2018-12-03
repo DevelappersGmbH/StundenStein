@@ -46,7 +46,7 @@ export class RedmineService extends BaseDataService {
     const query = this.getJsonEndpointUrl(
       this.timeEntriesUrl + '/' + timeEntryRequest.time_entry.id
     );
-    return this.httpClient.put<HttpResponse<any>>(query, {
+    return this.httpClient.put<HttpResponse<any>>(query, timeEntryRequest, {
       observe: 'response'
     });
   }

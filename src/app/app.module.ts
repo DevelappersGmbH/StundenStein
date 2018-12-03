@@ -8,6 +8,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { DataService } from './services/data/data.service';
+import { DatePipe } from '@angular/common';
 import { DeleteWarningComponent } from './components/delete-warning/delete-warning.component';
 import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -86,7 +87,8 @@ import { UserService } from './services/user/user.service';
       multi: true
     },
     DataService,
-    UserService
+    UserService,
+    DatePipe
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent]

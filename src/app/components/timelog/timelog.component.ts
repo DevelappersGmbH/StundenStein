@@ -1,4 +1,10 @@
-import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnInit,
+  ViewChild
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -310,7 +316,12 @@ export class TimeLogComponent implements OnInit {
   }
 
   private isBooked() {
-    if (!this.timeLog.issue || !this.timeLog.project || this.timeLog.project.name === '' || this.timeLog.issue.subject === '') {
+    if (
+      !this.timeLog.issue ||
+      !this.timeLog.project ||
+      this.timeLog.project.name === '' ||
+      this.timeLog.issue.subject === ''
+    ) {
       this.timeLog.booked = false;
     } else {
       this.timeLog.booked = true;
@@ -352,7 +363,6 @@ export class TimeLogComponent implements OnInit {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
 
-
     const dialogRef = this.deleteDialog.open(
       DeleteWarningComponent,
       dialogConfig
@@ -367,27 +377,45 @@ export class TimeLogComponent implements OnInit {
 
   deleteTimeLog() {
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
-      next(success) { console.log(success); },
-      error(msg) { console.log('Error deleting: ', msg); }
+      next(success) {
+        console.log(success);
+      },
+      error(msg) {
+        console.log('Error deleting: ', msg);
+      }
     });
   }
 
   updateTimeLog() {
     this.dataService.updateTimeLog(this.timeLog).subscribe({
-      next(success) { console.log(success); },
-      error(msg) { console.log('Error updating: ', msg); }
+      next(success) {
+        console.log(success);
+      },
+      error(msg) {
+        console.log('Error updating: ', msg);
+      }
     });
   }
 
   resizeStart() {
     console.log('resizeStart');
-    setTimeout(() => this.width = Math.max(this.minWidth, this.textStart.nativeElement.offsetWidth + 5));
+    setTimeout(
+      () =>
+        (this.width = Math.max(
+          this.minWidth,
+          this.textStart.nativeElement.offsetWidth + 5
+        ))
+    );
   }
 
   resizeEnd() {
     console.log('resizeEnd');
-    setTimeout(() => this.width = Math.max(this.minWidth, this.textEnd.nativeElement.offsetWidth + 5));
+    setTimeout(
+      () =>
+        (this.width = Math.max(
+          this.minWidth,
+          this.textEnd.nativeElement.offsetWidth + 5
+        ))
+    );
   }
-
-
 }
