@@ -108,12 +108,7 @@ export class TimeLogComponent implements OnInit {
       map(project => this.filterProjects(project))
     );
 
-    if (
-      !this.timeLog.issue ||
-      !this.timeLog.project ||
-      this.timeLog.project.name === '' ||
-      this.timeLog.issue.subject === ''
-    ) {
+    if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
   }
@@ -316,12 +311,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private isBooked() {
-    if (
-      !this.timeLog.issue ||
-      !this.timeLog.project ||
-      this.timeLog.project.name === '' ||
-      this.timeLog.issue.subject === ''
-    ) {
+    if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.timeLog.booked = false;
     } else {
       this.timeLog.booked = true;
