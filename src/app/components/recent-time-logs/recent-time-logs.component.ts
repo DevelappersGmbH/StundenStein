@@ -48,7 +48,7 @@ export class RecentTimeLogsComponent implements OnInit {
     let seperateDates: Date[] = new Array();
     let dateExists: Boolean = false;
     for(var i = 0;  i < this.timeLogList.length; i++ ){
-      var date = this.timeLogList[i].timeStopped;
+      var date = this.timeLogList[i].timeStarted;
       var matchingDate;
       for(var j = 0; j < seperateDates.length; j++){
         dateExists = false;
