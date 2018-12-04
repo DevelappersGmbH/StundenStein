@@ -1,6 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
+import { ErrorService } from 'src/app/services/error/error.service';
 
 @Component({
   selector: 'app-userreports',
@@ -27,10 +28,12 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
 
   constructor(
     private dataService: DataService,
-    private userService: UserService
+    private userService: UserService,
+    private errorSerice: ErrorService
   ) {}
 
   ngOnInit() {
+    this.errorSerice.openDialog('hey');
     this.tdArray = [[], [], []];
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component

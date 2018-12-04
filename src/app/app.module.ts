@@ -38,6 +38,7 @@ import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserReportsComponent } from './components/userreports/userreports.component';
 import { UserService } from './services/user/user.service';
+import { ErrorService } from './services/error/error.service';
 
 @NgModule({
   declarations: [
@@ -50,7 +51,7 @@ import { UserService } from './services/user/user.service';
     UserReportsComponent,
     RecentTimeLogsComponent,
     DeleteWarningComponent,
-    EnforcedInputsDirective
+    EnforcedInputsDirective,
   ],
   imports: [
     BrowserModule,
@@ -89,7 +90,8 @@ import { UserService } from './services/user/user.service';
     },
     DataService,
     Title,
-    UserService
+    UserService,
+    ErrorService
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent]
