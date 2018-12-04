@@ -1,12 +1,16 @@
+declare var require: any;
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
+import { HostListener } from '@angular/core';
+// import { pixelWidth } from 'string-pixel-width';
 
 @Component({
   selector: 'app-userreports',
   templateUrl: './userreports.component.html',
   styleUrls: ['./userreports.component.scss']
 })
+@HostListener('window:resize', ['$event'])
 export class UserReportsComponent implements OnInit, AfterViewInit {
   tdArray = [[], [], []];
   projectData = []; // data for project names
@@ -23,20 +27,30 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   hoverBubbleRight = 0;
   hoverTemp = new Array();
   bilCheck = false;
-  projDataCount = 0;
+  pixelWidth;
+  screenHeight;
+  screenWidth;
 
   constructor(
     private dataService: DataService,
     private userService: UserService
-  ) {}
+  ) {
+    this.onResize();
+  }
+  onResize(event?) {
+    this.screenHeight = window.innerHeight;
+    this.screenWidth = window.innerWidth;
+  }
 
   ngOnInit() {
+    this.pixelWidth = require('string-pixel-width');
     this.tdArray = [[], [], []];
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component
     this.dataService
       .getTimeLogs(this.userService.getUser().id)
       .subscribe(res => {
+        console.log(res);
         // fill dmwArray
         const date = new Date();
         this.dwmArray = [];
@@ -71,8 +85,12 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
               this.dwmArray[i][this.dwmArray[i].length] = 1;
             }
           }
+          if (this.dwmArray[i] === undefined) {
+            this.dwmArray[i] = [];
+          }
         }
         // fill periodArray
+        console.log(this.dwmArray);
         for (let i = 0; i < res.length; i++) {
           for (let m = 0; m < this.dwmArray[i].length; m++) {
             let projEx = false;
@@ -173,7 +191,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
       });
   }
   ngAfterViewInit() {
-    this.projDataCount = 0;
     if (this.ob) {
       this.ob = false;
       this.periodArray = this.periodArrayOB;
@@ -319,7 +336,10 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     }
   }
   // get name of Project
-  getProjectData(i) {
+  getProjectData(i, bool) {
+    let pixelTemp = this.screenWidth - 20;
+    pixelTemp = pixelTemp * (this.width[i] / 100);
+    // console.log(i + ' ' + this.pixelWidth(this.periodArray[this.actualSelect][i][0], {size: 14}));
     if (this.periodArray[this.actualSelect][i][0] == null) {
       return 'No project assigned';
     } else {
@@ -328,9 +348,25 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         while (this.periodArray[this.actualSelect][count][2] === 0) {
           count++;
         }
-        return this.periodArray[this.actualSelect][count][0];
+        if (
+          this.pixelWidth(this.periodArray[this.actualSelect][count][0], {
+            size: 14
+          }) <= pixelTemp
+        || bool) {
+          return this.periodArray[this.actualSelect][count][0];
+        } else {
+          return this.periodArray[this.actualSelect][count][0].charAt(0);
+        }
       }
+    }
+    if (
+      this.pixelWidth(this.periodArray[this.actualSelect][i][0], {
+        size: 14
+      }) <= pixelTemp
+    || bool) {
       return this.periodArray[this.actualSelect][i][0];
+    } else {
+      return this.periodArray[this.actualSelect][i][0].charAt(0);
     }
   }
   // get duration of project work
@@ -419,11 +455,15 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < a; i++) {
       counter += this.width[i];
     }
+    counter += 2;
     const temp = this.width[a] / 2;
-    let temp2 = counter + temp - 8 - a;
+    let temp2 = counter + temp - 8 - a * 0.2;
     this.hoverTemp[a] = temp2;
     if (temp2 > 82) {
       temp2 = 82;
+    }
+    if (temp2 < 18) {
+      temp2 = 18;
     }
     return temp2 + '%';
   }
