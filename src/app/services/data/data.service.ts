@@ -53,7 +53,7 @@ export class DataService {
     const expired = timeDifferenceInMin > environment.projectsExpireAfterMin;
     if (this.projects && this.projects.length > 0 && !expired) {
       return of(this.projects);
-    } else if (this.projectsObservable && !expired) {
+    } else if (this.projectsObservable) {
       return this.projectsObservable;
     } else {
       this.projectsObservable = this.redmineService.getProjects().pipe(
@@ -77,7 +77,7 @@ export class DataService {
     if (this.issues && this.issues.length > 0 && !expired) {
       console.log('returning cached data');
       return of(this.issues);
-    } else if (this.issuesObservable && !expired) {
+    } else if (this.issuesObservable) {
       return this.issuesObservable;
     } else {
       const calls: Observable<any>[] = [
