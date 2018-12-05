@@ -59,8 +59,8 @@ export class DataService {
       this.projectsObservable = this.redmineService.getProjects().pipe(
         map(data => {
           this.projects = this.mapRedmineProjectArrayToProjectArray(data);
-          this.projectsObservable = null;
           this.projectsRecentlyCached = new Date();
+          this.projectsObservable = null;
           return this.projects;
         }),
         share()
@@ -73,9 +73,7 @@ export class DataService {
     const timeDifferenceInMin =
       (new Date().valueOf() - this.issuesRecentlyCached.valueOf()) / 60000;
     const expired = timeDifferenceInMin > environment.issuesExpireAfterMin;
-    console.log(expired);
     if (this.issues && this.issues.length > 0 && !expired) {
-      console.log('returning cached data');
       return of(this.issues);
     } else if (this.issuesObservable) {
       return this.issuesObservable;
@@ -90,8 +88,8 @@ export class DataService {
             results[0],
             results[1]
           );
-          this.issuesObservable = null;
           this.issuesRecentlyCached = new Date();
+          this.issuesObservable = null;
           return this.issues;
         }),
         share()
@@ -408,7 +406,7 @@ export class DataService {
           }
         });
         return timelogs.sort((a, b) => {
-          return <any>new Date(a.timeStarted) - <any>new Date(b.timeStopped);
+          return <any>new Date(a.timeStarted) - <any>new Date(b.timeStarted);
         });
       })
     );
