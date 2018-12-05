@@ -1,14 +1,6 @@
 import { ColorService } from '../color/color.service';
 import { environment } from 'src/environments/environment';
-import {
-  flatMap,
-  map,
-  mapTo,
-  share,
-  switchMap,
-  tap,
-  throttleTime
-  } from 'rxjs/operators';
+import { flatMap, map, share } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
@@ -20,9 +12,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
-import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
+import { RedmineIssue } from 'src/app/redmine-model/redmine-issue.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
-import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
 import { RedmineTimeEntryActivity } from 'src/app/redmine-model/redmine-time-entry-activity.interface';
@@ -67,7 +58,7 @@ export class DataService {
     } else {
       this.projectsObservable = this.redmineService.getProjects().pipe(
         map(data => {
-          this.projects = this.mapRedmineProjectsToProjectArray(data);
+          this.projects = this.mapRedmineProjectArrayToProjectArray(data);
           this.projectsObservable = null;
           this.projectsRecentlyCached = new Date();
           return this.projects;
@@ -95,7 +86,7 @@ export class DataService {
       ];
       this.issuesObservable = forkJoin(calls).pipe(
         map(results => {
-          this.issues = this.mapRedmineIssuesToIssueArray(
+          this.issues = this.mapRedmineIssueArrayToIssueArray(
             results[0],
             results[1]
           );
@@ -109,11 +100,11 @@ export class DataService {
     }
   }
 
-  mapRedmineProjectsToProjectArray(
-    redmineProjects: RedmineProjects
+  mapRedmineProjectArrayToProjectArray(
+    redmineProjects: RedmineProject[]
   ): Project[] {
     const projects: Project[] = [];
-    redmineProjects.projects.forEach(project => {
+    redmineProjects.forEach(project => {
       projects.push(this.mapRedmineProjectToProject(project));
     });
     return projects;
@@ -127,12 +118,12 @@ export class DataService {
     };
   }
 
-  mapRedmineIssuesToIssueArray(
-    redmineIssues: RedmineIssues,
+  mapRedmineIssueArrayToIssueArray(
+    redmineIssues: RedmineIssue[],
     projects: Project[]
   ): Issue[] {
     const issues = [];
-    redmineIssues.issues.forEach(redmineIssue => {
+    redmineIssues.forEach(redmineIssue => {
       const issue: Issue = {
         id: redmineIssue.id,
         subject: redmineIssue.subject,
