@@ -94,22 +94,28 @@ export class TimeTrackerComponent implements OnInit {
     if (isUndefined(this.manualStopTime)) {
       this.manualStopTimeIllegal = true;
     }
-    if (this.manualStartTimeIllegal || this.manualStopTimeIllegal) { return false; }
-    if (this.sameday(this.manualStartDate, this.manualStopDate)) {
-      if (this.isLater(this.manualStopTime, this.manualStartTime)) {
+    if (!isUndefined(this.manualStartTime) && !isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStartDate, this.manualStopDate)) {
+      if (this.isLater(this.manualStartTime, this.manualStopTime)) {
         // FAIL: stop before start
         this.manualStopTimeIllegal = true;
       }
+      if ( JSON.stringify(this.manualStartTime) === JSON.stringify(this.manualStopTime)) {
+        // FAIL: stop and start equal
+        this.manualStopTimeIllegal = true;
+      }
     }
-    if (this.sameday(this.manualStartDate, this.now())) {
+    if (!isUndefined(this.manualStartTime) &&
+    this.sameday(this.manualStartDate, this.now())) {
       if (this.isLater(this.manualStartTime, this.currentTime())) {
         // FAIL: starts before now
         this.manualStartTimeIllegal = true;
       }
     }
-    if (this.sameday(this.manualStopDate, this.now())) {
+    if (!isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStopDate, this.now())) {
       if (this.isLater(this.manualStopTime, this.currentTime())) {
-        // FAIL: starts before now
+        // FAIL: ends before now
         this.manualStopTimeIllegal = true;
       }
     }

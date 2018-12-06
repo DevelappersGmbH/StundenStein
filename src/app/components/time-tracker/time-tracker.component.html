@@ -32,7 +32,7 @@
             <mat-datepicker #picker1></mat-datepicker>
         </mat-form-field>
         <mat-form-field class="field field-small time">
-          <input placeholder="Choose start time" [ngModel]="timeToString(manualStartTime)" (ngModelChange)="manualStartTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+          <input [style.color]="manualStartTimeIllegal ? 'red' : 'black'" placeholder="Choose start time" [ngModel]="timeToString(manualStartTime)" (ngModelChange)="manualStartTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
         </mat-form-field>
       </div>
       <div class="field-container" *ngIf="!automaticMode">
@@ -42,7 +42,7 @@
             <mat-datepicker #picker2></mat-datepicker>
         </mat-form-field>
         <mat-form-field class="field field-small time">
-          <input placeholder="Choose end time" [(ngModel)]="manualStopTime" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+          <input [style.color]="manualStopTimeIllegal ? 'red' : 'black'" placeholder="Choose end time" [ngModel]="timeToString(manualStopTime)" (ngModelChange)="manualStopTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
         </mat-form-field>
       </div>
       <br *ngIf="!automaticMode"/>
