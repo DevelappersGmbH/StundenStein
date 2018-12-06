@@ -66,6 +66,8 @@ export class TimeTrackerComponent implements OnInit {
     this.automaticMode = true;
     // Block manual mode until implemented
     // this.automaticLock = true;
+    this.manualStartDate = this.today();
+    this.manualStopDate = this.today();
     this.filteredIssues = this.issueCtrl.valueChanges
       .pipe(
         startWith(''),
@@ -84,6 +86,13 @@ export class TimeTrackerComponent implements OnInit {
    */
   validateStartStop(unsetFields = false): void {
     console.log('validate');
+  }
+
+  /**
+   * Returns a new Date object which is todays date
+   */
+  today(): Date {
+    return new Date();
   }
 
   updateTracker(): void {
