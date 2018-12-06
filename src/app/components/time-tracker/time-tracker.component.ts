@@ -47,7 +47,9 @@ export class TimeTrackerComponent implements OnInit {
   manualStartDate: Date;
   manualStopDate: Date;
   manualStartTime: Time;
+  manualStartTimeIllegal = true;
   manualStopTime: Time;
+  manualStopTimeIllegal = true;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -66,8 +68,8 @@ export class TimeTrackerComponent implements OnInit {
     this.automaticMode = false;
     // Block manual mode until implemented
     // this.automaticLock = true;
-    this.manualStartDate = this.today();
-    this.manualStopDate = this.today();
+    this.manualStartDate = this.now();
+    this.manualStopDate = this.now();
     this.filteredIssues = this.issueCtrl.valueChanges
       .pipe(
         startWith(''),
@@ -83,9 +85,56 @@ export class TimeTrackerComponent implements OnInit {
   /**
    * Validates start and end time selected in manual mode
    */
-  validateStartStop(): void {
-    console.log('validate');
-    console.log(this.manualStartTime);
+  validateStartStop(): boolean {
+    this.manualStartTimeIllegal = false;
+    this.manualStopTimeIllegal = false;
+    if (isUndefined(this.manualStartTime)) {
+      this.manualStartTimeIllegal = true;
+    }
+    if (isUndefined(this.manualStopTime)) {
+      this.manualStopTimeIllegal = true;
+    }
+    if (this.manualStartTimeIllegal || this.manualStopTimeIllegal) { return false; }
+    if (this.sameday(this.manualStartDate, this.manualStopDate)) {
+      if (this.isLater(this.manualStopTime, this.manualStartTime)) {
+        // FAIL: stop before start
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (this.sameday(this.manualStartDate, this.now())) {
+      if (this.isLater(this.manualStartTime, this.currentTime())) {
+        // FAIL: starts before now
+        this.manualStartTimeIllegal = true;
+      }
+    }
+    if (this.sameday(this.manualStopDate, this.now())) {
+      if (this.isLater(this.manualStopTime, this.currentTime())) {
+        // FAIL: starts before now
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (this.manualStartTimeIllegal || this.manualStopTimeIllegal) { return false; }
+    return true;
+  }
+
+  /**
+   * Compares if two Date objects represent the same day
+   * @param date1 first date
+   * @param date2 second date
+   */
+  sameday(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate();
+  }
+
+  /**
+   * Tells if a time is later than another one
+   * @param reference time to check
+   * @param compareTo time to compare against
+   */
+  isLater(reference: Time, compareTo: Time): boolean {
+    if (reference.hours > compareTo.hours) { return true; }
+    if (reference.hours === compareTo.hours && reference.minutes > compareTo.minutes) { return true; }
+    return false;
   }
 
   /**
@@ -115,10 +164,21 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   /**
-   * Returns a new Date object which is todays date
+   * Returns a new Date object which is the current date
    */
-  today(): Date {
+  now(): Date {
     return new Date();
+  }
+
+  /**
+   * Returns the current time
+   */
+  currentTime(): Time {
+    const dateObj = this.now();
+    return {
+      hours: dateObj.getHours(),
+      minutes: dateObj.getMinutes()
+    };
   }
 
   updateTracker(): void {

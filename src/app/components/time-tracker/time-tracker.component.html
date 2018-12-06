@@ -27,7 +27,7 @@
       <br *ngIf="!automaticMode"/>
       <div class="field-container" *ngIf="!automaticMode">
         <mat-form-field class="field field-small date">
-          <input [max]="today()" matInput [matDatepicker]="picker1" placeholder="Choose start date" [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
+          <input [max]="now()" matInput [matDatepicker]="picker1" placeholder="Choose start date" [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
         </mat-form-field>
@@ -37,7 +37,7 @@
       </div>
       <div class="field-container" *ngIf="!automaticMode">
         <mat-form-field class="field field-small date">
-          <input [min]="manualStartDate" [max]="today()" matInput [matDatepicker]="picker2" placeholder="Choose end date" [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
+          <input [min]="manualStartDate" [max]="now()" matInput [matDatepicker]="picker2" placeholder="Choose end date" [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
             <mat-datepicker #picker2></mat-datepicker>
         </mat-form-field>
