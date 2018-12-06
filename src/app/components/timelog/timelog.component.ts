@@ -32,8 +32,8 @@ export class TimeLogComponent implements OnInit {
   @ViewChild('hiddenStart') textStart: ElementRef;
   @ViewChild('hiddenEnd') textEnd: ElementRef;
   minWidth = 45;
-  startWidth: number = this.textStart.nativeElement.offsetWidth + 5;
-  endWidth: number = this.textEnd.nativeElement.offsetWidth + 5;
+  startWidth: number = this.minWidth;
+  endWidth: number = this.minWidth;
 
   trackedTime: Date;
   active = false;
