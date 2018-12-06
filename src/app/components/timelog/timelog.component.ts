@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -22,6 +22,7 @@ export class TimeLogComponent implements OnInit {
   ) {}
 
   @Input() timeLog: TimeLog;
+  @Output() deleted : EventEmitter<number> = new EventEmitter<number>();
 
   currentColor = 'red';
   currentIssueSubject: string;
@@ -382,9 +383,16 @@ export class TimeLogComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .subscribe(data =>
-        data ? console.log('Delete') : console.log('Do NOT delete')
-      );
+      .subscribe(data =>{
+        if(data){
+          this.deleted.emit(this.timeLog.id);
+          console.log('Delete')
+        }
+        else{
+          console.log('Do NOT delete')
+        }
+        //data ? console.log('Delete') : console.log('Do NOT delete')
+      });
   }
 
   blurProject(input) {

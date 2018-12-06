@@ -34,6 +34,11 @@ export class RecentTimeLogsComponent implements OnInit {
     this.loadTimeLogs();
   }
 
+  onDelete(deleted: number) {
+    this.removeTimeLogFromList(deleted);
+    console.log(deleted + " got deleted");
+  }
+
   loadTimeLogs() {
     this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
       this.timeLogList = timeLogs;
@@ -74,6 +79,15 @@ export class RecentTimeLogsComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  removeTimeLogFromList(id: number){
+    this.timeLogMap.forEach((value: TimeLog[], key: Date) => {
+      const index = value.findIndex(entry => entry.id == id);
+      if (index >= 0) {
+        value.splice(index, 1);
+      }
+    });
   }
 
   countUnbookedTimeLogs(){

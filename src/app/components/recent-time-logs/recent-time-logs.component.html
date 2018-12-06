@@ -7,5 +7,5 @@
       date | date: "fullDate"
     }}</span>
   </h3>
-  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" [timeLog]="timeLog"></app-timelog>
+  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" (deleted)="onDelete($event)" [timeLog]="timeLog"></app-timelog>
 </mat-list>
