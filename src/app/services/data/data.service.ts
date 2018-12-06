@@ -1,4 +1,5 @@
 import { ColorService } from '../color/color.service';
+import { DatePipe } from '@angular/common';
 import {
   flatMap,
   map,
@@ -41,7 +42,8 @@ export class DataService {
     private redmineService: RedmineService,
     private hourglassService: HourGlassService,
     private userService: UserService,
-    private colorService: ColorService
+    private colorService: ColorService,
+    private datePipe: DatePipe
   ) {
     this.cachedProjects = [];
     this.cachedIssues = [];
@@ -424,10 +426,8 @@ export class DataService {
   }
 
   updateTimeLog(timelog: TimeLog): Observable<boolean> {
-    this.redmineService.getTimeEntryActivities().pipe(
+    return this.redmineService.getTimeEntryActivities().pipe(
       flatMap(timeEntryActivities => {
-        console.log(timeEntryActivities);
-
         const hgLog: HourGlassTimeLog = {
           id: timelog.id,
           comments: timelog.comment,
@@ -447,7 +447,11 @@ export class DataService {
             time_entry: {
               id: timelog.redmineTimeEntryId,
               comments: timelog.comment,
-              spent_on: timelog.timeStarted.toISOString(),
+              spent_on: this.datePipe.transform(
+                timelog.timeStarted,
+                'yyyy-MM-dd',
+                'utc'
+              ),
               activity_id: this.mapBillableToRedmineTimeEntryActivityId(
                 timelog.billable,
                 timeEntryActivities
@@ -463,16 +467,17 @@ export class DataService {
           };
           calls.push(this.redmineService.updateTimeEntry(timeEntryRequest));
         }
-        console.log('before forkjoin');
+
         return forkJoin(calls).pipe(
           map(results => {
-            let result = false;
-            results.forEach(r => (result = result && r.ok));
+            let result = true;
+            results.forEach(r => {
+              result = result && r.ok;
+            });
             return result;
           })
         );
       })
     );
-    return null;
   }
 }

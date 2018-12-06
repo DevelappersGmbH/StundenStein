@@ -10,10 +10,7 @@ export class DeleteWarningComponent implements OnInit {
 
   title: string;
 
-  constructor(private dialogRef: MatDialogRef<DeleteWarningComponent>,
-              @Inject(MAT_DIALOG_DATA) data) {
-
-    this.title = data.description;
+  constructor(private dialogRef: MatDialogRef<DeleteWarningComponent>) {
   }
 
   ngOnInit() {

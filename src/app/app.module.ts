@@ -9,6 +9,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
 import { CookieService } from 'ngx-cookie-service';
 import { DataService } from './services/data/data.service';
+import { DatePipe } from '@angular/common';
 import { DeleteWarningComponent } from './components/delete-warning/delete-warning.component';
 import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -93,7 +94,8 @@ import { UserService } from './services/user/user.service';
     DataService,
     Title,
     UserService,
-    CookieService
+    CookieService,
+    DatePipe
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent]
