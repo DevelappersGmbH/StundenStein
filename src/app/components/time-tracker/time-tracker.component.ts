@@ -44,6 +44,7 @@ export class TimeTrackerComponent implements OnInit {
   stoppingBlockedByNegativeTime = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
+  loggingBlockedByLoading = false;
   manualStartDate: Date;
   manualStopDate: Date;
   manualStartTime: Time;
@@ -443,7 +444,56 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   createLog(): void {
-
+    if (this.validateStartStop()) {
+      this.loggingBlockedByLoading = true;
+      this.automaticLock = true;
+      this.dataService.startTimeTracker(this.timeTracker).subscribe(
+        returnedTracker => {
+          this.dataService.stopTimeTracker(returnedTracker).subscribe(
+            stopped => {
+              // Time log created, try to find it now
+              this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(
+                timeLogs => {
+                  const log = timeLogs.find(x => x.timeStarted.toISOString() === returnedTracker.timeStarted.toISOString());
+                  this.manualStartDate.setHours(this.manualStartTime.hours);
+                  this.manualStartDate.setMinutes(this.manualStartTime.minutes);
+                  this.manualStopDate.setHours(this.manualStopTime.hours);
+                  this.manualStopDate.setMinutes(this.manualStopTime.minutes);
+                  log.timeStarted = this.manualStartDate;
+                  log.timeStopped = this.manualStopDate;
+                  console.log(log);
+                  this.dataService.updateTimeLog(log).subscribe(
+                    updated => {
+                      if (updated === false) {
+                        console.error('Create Time Log: Can\'t update time log.');
+                        // DELETE IT INSTEAD
+                      } else {
+                        // SUCCESS
+                        this.loggingBlockedByLoading = false;
+                        this.automaticLock = false;
+                      }
+                    },
+                    error => {
+                      console.error('Create Time Log: Error while trying to update time log.');
+                      // DELETE IT INSTEAD
+                    }
+                  );
+                },
+                error => {
+                  console.error('Create Time Log: Error while trying to get time logs.');
+                }
+               );
+            },
+            error => {
+              console.error('Create Time Log: Error while trying to stop tracker.');
+            }
+          );
+        },
+        error => {
+          console.error('Create Time Log: Error while trying to start tracker.');
+        }
+       );
+    }
   }
 
 }
