@@ -46,8 +46,8 @@ export class TimeTrackerComponent implements OnInit {
   stoppingBlockedByLoading = false;
   manualStartDate: Date;
   manualStopDate: Date;
-  manualStartTime: string;
-  manualStopTime: string;
+  manualStartTime: Time;
+  manualStopTime: Time;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -82,10 +82,36 @@ export class TimeTrackerComponent implements OnInit {
 
   /**
    * Validates start and end time selected in manual mode
-   * @param unsetFields defines if unset start/stop fields should be validated as well
    */
-  validateStartStop(unsetFields = false): void {
+  validateStartStop(): void {
     console.log('validate');
+    console.log(this.manualStartTime);
+  }
+
+  /**
+   * Converts a 24hr time string to Time Object
+   * @param value time string (24hr format)
+   */
+  stringToTime(value: string): Time {
+    return {
+      hours: parseInt(value.substring(0, 2), 10) ,
+      minutes: parseInt(value.substring(3, 5), 10)
+    };
+  }
+
+  /**
+   * Converts a Time Object to 24hr time string
+   * @param value time object
+   */
+  timeToString(value: Time): string {
+    if (isUndefined(value) || isUndefined(value.hours)) {
+      return '';
+    }
+    let hrs = value.hours.toString();
+    if (hrs.length < 2) { hrs = '0' + hrs; }
+    let min = value.minutes.toString();
+    if (min.length < 2) { min = '0' + min; }
+    return hrs + ':' + min;
   }
 
   /**
