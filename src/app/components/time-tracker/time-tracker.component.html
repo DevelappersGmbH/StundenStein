@@ -24,26 +24,28 @@
               </mat-autocomplete>
         </mat-form-field>
       </div>
+      <br *ngIf="!automaticMode"/>
       <div class="field-container" *ngIf="!automaticMode">
-        <mat-form-field class="field date">
+        <mat-form-field class="field field-small date">
           <input matInput [matDatepicker]="picker1" placeholder="Choose start date" [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
             <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
             <mat-datepicker #picker1></mat-datepicker>
         </mat-form-field>
-        <mat-form-field class="field time">
-          <input [(ngModel)]="manualStartTime" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+        <mat-form-field class="field field-small time">
+          <input placeholder="Choose start time" [(ngModel)]="manualStartTime" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
         </mat-form-field>
       </div>
       <div class="field-container" *ngIf="!automaticMode">
-        <mat-form-field class="field date">
+        <mat-form-field class="field field-small date">
           <input matInput [matDatepicker]="picker2" placeholder="Choose end date" [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
             <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
             <mat-datepicker #picker2></mat-datepicker>
         </mat-form-field>
-        <mat-form-field class="field time">
-          <input [(ngModel)]="manualStopTime" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+        <mat-form-field class="field field-small time">
+          <input placeholder="Choose end time" [(ngModel)]="manualStopTime" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
         </mat-form-field>
       </div>
+      <br *ngIf="!automaticMode"/>
       <div class="field-container">
         <span *ngIf="automaticMode" class="field">{{ currentTrackerTimeString }}</span>
         <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
