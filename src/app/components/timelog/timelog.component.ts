@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import { User } from '../../model/user.interface';
+import {TrackerService} from '../../services/tracker/tracker.service';
 
 @Component({
   selector: 'app-timelog',
@@ -18,7 +19,8 @@ import { User } from '../../model/user.interface';
 export class TimeLogComponent implements OnInit {
   constructor(
     private dataService: DataService,
-    private deleteDialog: MatDialog
+    private deleteDialog: MatDialog,
+    private trackerService: TrackerService
   ) {}
 
   @Input() timeLog: TimeLog;
@@ -259,11 +261,8 @@ export class TimeLogComponent implements OnInit {
   }
 
   startTracker() {
-    /*
-    startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
-    */
-    /*make the trackedTime change according to timetracker*/
     this.active = true;
+    this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment });
   }
 
   markBillable() {
