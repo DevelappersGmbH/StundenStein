@@ -9,6 +9,7 @@ import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
+import { Time } from '@angular/common';
 
 @Component({
   selector: 'app-time-tracker',
@@ -43,6 +44,10 @@ export class TimeTrackerComponent implements OnInit {
   stoppingBlockedByNegativeTime = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
+  manualStartDate: Date;
+  manualStopDate: Date;
+  manualStartTime: string;
+  manualStopTime: string;
 
   ngOnInit() {
     interval(1000).subscribe( val => {
@@ -71,6 +76,14 @@ export class TimeTrackerComponent implements OnInit {
         startWith(''),
         map(project => project ? this._filterProjects(project) : this.projects.slice())
       );
+  }
+
+  /**
+   * Validates start and end time selected in manual mode
+   * @param unsetFields defines if unset start/stop fields should be validated as well
+   */
+  validateStartStop(unsetFields = false): void {
+    console.log('validate');
   }
 
   updateTracker(): void {
