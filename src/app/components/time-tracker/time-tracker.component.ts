@@ -63,7 +63,7 @@ export class TimeTrackerComponent implements OnInit {
     this.currentTrackerTimeString  = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
-    this.automaticMode = true;
+    this.automaticMode = false;
     // Block manual mode until implemented
     // this.automaticLock = true;
     this.manualStartDate = this.today();
