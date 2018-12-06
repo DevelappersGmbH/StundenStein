@@ -50,7 +50,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     this.dataService
       .getTimeLogs(this.userService.getUser().id)
       .subscribe(res => {
-        console.log(res);
         // fill dmwArray
         const date = new Date();
         this.dwmArray = [];
@@ -90,7 +89,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
           }
         }
         // fill periodArray
-        console.log(this.dwmArray);
         for (let i = 0; i < res.length; i++) {
           for (let m = 0; m < this.dwmArray[i].length; m++) {
             let projEx = false;
@@ -339,7 +337,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   getProjectData(i, bool) {
     let pixelTemp = this.screenWidth - 20;
     pixelTemp = pixelTemp * (this.width[i] / 100);
-    // console.log(i + ' ' + this.pixelWidth(this.periodArray[this.actualSelect][i][0], {size: 14}));
     if (this.periodArray[this.actualSelect][i][0] == null) {
       return 'No project assigned';
     } else {
@@ -351,8 +348,9 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         if (
           this.pixelWidth(this.periodArray[this.actualSelect][count][0], {
             size: 14
-          }) <= pixelTemp
-        || bool) {
+          }) <= pixelTemp ||
+          bool
+        ) {
           return this.periodArray[this.actualSelect][count][0];
         } else {
           return this.periodArray[this.actualSelect][count][0].charAt(0);
@@ -362,8 +360,9 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     if (
       this.pixelWidth(this.periodArray[this.actualSelect][i][0], {
         size: 14
-      }) <= pixelTemp
-    || bool) {
+      }) <= pixelTemp ||
+      bool
+    ) {
       return this.periodArray[this.actualSelect][i][0];
     } else {
       return this.periodArray[this.actualSelect][i][0].charAt(0);
@@ -455,7 +454,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     for (let i = 0; i < a; i++) {
       counter += this.width[i];
     }
-    counter += 2;
     const temp = this.width[a] / 2;
     let temp2 = counter + temp - 8 - a * 0.2;
     this.hoverTemp[a] = temp2;

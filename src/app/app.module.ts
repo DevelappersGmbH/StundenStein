@@ -77,7 +77,7 @@ import { UserService } from './services/user/user.service';
     MatAutocompleteModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatBadgeModule
+    MatBadgeModule,
   ],
   providers: [
     AuthenticationService,
@@ -89,7 +89,7 @@ import { UserService } from './services/user/user.service';
     },
     DataService,
     Title,
-    UserService
+    UserService,
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent]
