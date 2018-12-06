@@ -32,7 +32,8 @@ export class TimeLogComponent implements OnInit {
   @ViewChild('hiddenStart') textStart: ElementRef;
   @ViewChild('hiddenEnd') textEnd: ElementRef;
   minWidth = 45;
-  width: number = this.minWidth;
+  startWidth: number = this.textStart.nativeElement.offsetWidth + 5;
+  endWidth: number = this.textEnd.nativeElement.offsetWidth + 5;
 
   trackedTime: Date;
   active = false;
@@ -394,7 +395,7 @@ export class TimeLogComponent implements OnInit {
     console.log('resizeStart');
     setTimeout(
       () =>
-        (this.width = Math.max(
+        (this.startWidth = Math.max(
           this.minWidth,
           this.textStart.nativeElement.offsetWidth + 5
         ))
@@ -405,7 +406,7 @@ export class TimeLogComponent implements OnInit {
     console.log('resizeEnd');
     setTimeout(
       () =>
-        (this.width = Math.max(
+        (this.endWidth = Math.max(
           this.minWidth,
           this.textEnd.nativeElement.offsetWidth + 5
         ))
