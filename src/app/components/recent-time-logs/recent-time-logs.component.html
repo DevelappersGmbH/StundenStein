@@ -1,4 +1,12 @@
-<h2 class="mat-headline" style="padding-top: 12px; margin-bottom: -5px">
+<div *ngIf="listLoading"> 
+ <mat-progress-spinner
+        layout-align="center center"
+        color="primary"
+        mode="indeterminate"
+        value="50">
+</mat-progress-spinner>
+</div>
+<h2 *ngIf="!listLoading" class="mat-headline" style="padding-top: 12px; margin-bottom: -5px">
   <span matBadge="{{numberOfUnbookedTimeLogs}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="numberOfUnbookedTimeLogs == 0">Recently tracked</span>
 </h2>
 <mat-list *ngFor="let date of dateList">

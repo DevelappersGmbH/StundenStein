@@ -29,7 +29,8 @@ import {
   MatListModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatProgressSpinnerModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -78,7 +79,8 @@ import { UserService } from './services/user/user.service';
     MatAutocompleteModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     AuthenticationService,
