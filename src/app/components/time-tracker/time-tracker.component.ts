@@ -9,6 +9,7 @@ import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
+import { TimeLog } from 'src/app/model/time-log.interface';
 
 @Component({
   selector: 'app-time-tracker',
@@ -23,6 +24,7 @@ export class TimeTrackerComponent implements OnInit {
     private titleService: Title
     ) { }
 
+  logs: TimeLog[] = [];
   projects: Project[] = [];
   issues: Issue[] = [];
   issueStrings: string[] = [];
@@ -37,8 +39,10 @@ export class TimeTrackerComponent implements OnInit {
   };
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
+  logCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredLogs: Observable<TimeLog[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
   startingBlockedByLoading = false;
@@ -55,6 +59,7 @@ export class TimeTrackerComponent implements OnInit {
     });
     this.loadProjects();
     this.loadIssues();
+    this.loadLogs();
     this.currentTrackerTimeString  = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
@@ -70,6 +75,11 @@ export class TimeTrackerComponent implements OnInit {
       .pipe(
         startWith(''),
         map(project => project ? this._filterProjects(project) : this.projects.slice())
+      );
+    this.filteredLogs = this.logCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(log => log ? this._filterLogs(log) : this.logs.slice())
       );
   }
 
@@ -124,6 +134,11 @@ export class TimeTrackerComponent implements OnInit {
     return project.name;
   }
 
+  _displayLog(log: TimeLog): string {
+    if (isNull(log) || isUndefined(log)) { return ''; }
+    return log.comment;
+  }
+
   private _filterIssues(value): Issue[] {
     if (!this.isString(value)) { value = value.subject; }
     const filterValue: string = value.toLowerCase().replace('#', '').trim();
@@ -151,6 +166,14 @@ export class TimeTrackerComponent implements OnInit {
     return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
   }
 
+  private _filterLogs(value): TimeLog[] {
+    if (!this.isString(value)) { value = value.comment; }
+    const filterValue: string = value.toLowerCase().replace('#', '').trim();
+
+    return this.logs.filter(log =>
+      log.comment.toLowerCase().includes(filterValue));
+  }
+
   selectIssue(issue: Issue) {
     this.timeTracker.issue = issue;
     this.ensureSelectedIssueIsFromIssueList();
@@ -160,6 +183,17 @@ export class TimeTrackerComponent implements OnInit {
       this.projectCtrl.setValue(this.timeTracker.project);
     }
     this.updateTracker();
+  }
+
+  selectLog(log: TimeLog) {
+    if (isUndefined(log.project)) {
+      return;
+    }
+    if (isUndefined(log.issue)) {
+      this.selectProject(log.project);
+    } else {
+      this.selectIssue(log.issue);
+    }
   }
 
   ensureSelectedProjectIsFromProjectList() {
@@ -203,6 +237,14 @@ export class TimeTrackerComponent implements OnInit {
       this.issues = data;
     }, error => {
       console.error('Couldn\'t get issues from data service.');
+    });
+  }
+
+  loadLogs() {
+    this.dataService.getTimeLogs().subscribe( data => {
+      this.logs = data;
+    }, error => {
+      console.error('Couldn\'t get time logs from data service.');
     });
   }
 

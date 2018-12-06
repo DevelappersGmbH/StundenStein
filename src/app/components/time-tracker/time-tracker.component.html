@@ -10,11 +10,13 @@
           </mat-autocomplete>
         </mat-form-field>
         <mat-form-field class="field field-small">
-            <input matInput type="text" placeholder="Task description" [(ngModel)]="timeTracker.comment"  [ngModelOptions]="{standalone: true}" >
-            <button mat-button *ngIf="timeTracker.comment" matSuffix mat-icon-button aria-label="Clear" (click)="this.timeTracker.comment=''">
-              <mat-icon>close</mat-icon>
-            </button>
-          </mat-form-field>
+          <input type="text" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
+          <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
+            <mat-option *ngFor="let log of filteredLogs | async" [value]="log">
+              {{log.comment}}
+            </mat-option>
+          </mat-autocomplete>
+        </mat-form-field>
         <mat-form-field class="field field-small">
             <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
               <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
