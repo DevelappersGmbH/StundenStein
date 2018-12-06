@@ -36,7 +36,6 @@ export class RecentTimeLogsComponent implements OnInit {
 
   onDelete(deleted: number) {
     this.removeTimeLogFromList(deleted);
-    console.log(deleted + " got deleted");
   }
 
   loadTimeLogs() {
