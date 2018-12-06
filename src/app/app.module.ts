@@ -28,10 +28,10 @@ import {
   MatIconModule,
   MatInputModule,
   MatListModule,
+  MatProgressSpinnerModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule,
-  MatProgressSpinnerModule
+  MatToolbarModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
