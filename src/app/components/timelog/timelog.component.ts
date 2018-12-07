@@ -375,9 +375,11 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteTimeLog() {
+    var that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
         console.log(success);
+        that.deleted.emit(that.timeLog.id);
       },
       error(msg) {
         console.log('Error deleting: ', msg);

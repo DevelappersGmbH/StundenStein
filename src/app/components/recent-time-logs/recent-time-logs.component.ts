@@ -1,10 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { DataService } from 'src/app/services/data/data.service';
-import { Issue } from 'src/app/model/issue.interface';
-import { Project } from 'src/app/model/project.interface';
-import { User } from 'src/app/model/user.interface';
-import { Observable, forkJoin } from 'rxjs';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -21,7 +17,7 @@ export class RecentTimeLogsComponent implements OnInit {
     ) {
   }
 
-  timeLogList: TimeLog[];
+  timeLogObservablesList: TimeLog[];
   dateList: Date[];
   timeLogMap : Map<Date, TimeLog[]>;
   unbookedTimeLogsMap : Map<Date, number>;
@@ -35,15 +31,15 @@ export class RecentTimeLogsComponent implements OnInit {
     this.loadTimeLogs();
   }
 
-  onDelete(deleted: number) {
+
+  onTimeLogDelete(deleted: number) {
     this.removeTimeLogFromList(deleted);
   }
 
   loadTimeLogs() {
     this.listLoading = true;
     this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
-      this.timeLogList = timeLogs;
-      this.timeLogList.reverse();
+      this.timeLogObservablesList = timeLogs.reverse();
       this.seperateDates();
       this.countUnbookedTimeLogs();
       this.listLoading = false;
@@ -54,8 +50,8 @@ export class RecentTimeLogsComponent implements OnInit {
   seperateDates(){
     let seperateDates: Date[] = new Array();
     let dateExists: Boolean = false;
-    for(var i = 0;  i < this.timeLogList.length; i++ ){
-      var date = this.timeLogList[i].timeStopped;
+    for(var i = 0;  i < this.timeLogObservablesList.length; i++ ){
+      var date = this.timeLogObservablesList[i].timeStopped;
       var matchingDate;
       for(var j = 0; j < seperateDates.length; j++){
         dateExists = false;
@@ -71,7 +67,7 @@ export class RecentTimeLogsComponent implements OnInit {
         matchingDate = date;
         this.timeLogMap.set(matchingDate, new Array());
       }
-      this.timeLogMap.get(matchingDate).push(this.timeLogList[i]);
+      this.timeLogMap.get(matchingDate).push(this.timeLogObservablesList[i]);
     } 
     this.dateList = seperateDates;
   }
@@ -89,12 +85,20 @@ export class RecentTimeLogsComponent implements OnInit {
       if (index >= 0) {
         value.splice(index, 1);
       }
+      if(value.length == 0){
+        const dateIndex = this.dateList.findIndex(date => date == key);
+        if(index >= 0){
+          this.dateList.splice(dateIndex, 1);
+        }
+      }
     });
+    this.countUnbookedTimeLogs();
   }
 
   countUnbookedTimeLogs(){
+    this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap.forEach((timeLogs: TimeLog[], date: Date) => {
-      var unbookedTimeLogs = 0;
+      let unbookedTimeLogs = 0;
       timeLogs.forEach((timeLog: TimeLog) =>{
         if(!timeLog.booked){
           unbookedTimeLogs++;
@@ -103,6 +107,5 @@ export class RecentTimeLogsComponent implements OnInit {
       });
       this.unbookedTimeLogsMap.set(date,unbookedTimeLogs);
   });
-  
   }
 }
