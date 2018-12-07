@@ -2,6 +2,7 @@ import { ColorService } from '../color/color.service';
 import { environment } from 'src/environments/environment';
 import { flatMap, map, share } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
+import { DatePipe } from '@angular/common';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
@@ -39,7 +40,8 @@ export class DataService {
     private redmineService: RedmineService,
     private hourglassService: HourGlassService,
     private userService: UserService,
-    private colorService: ColorService
+    private colorService: ColorService,
+    private datePipe: DatePipe
   ) {
     this.projects = [];
     this.projectsRecentlyCached = new Date(0);
@@ -427,10 +429,8 @@ export class DataService {
   }
 
   updateTimeLog(timelog: TimeLog): Observable<boolean> {
-    this.redmineService.getTimeEntryActivities().pipe(
+    return this.redmineService.getTimeEntryActivities().pipe(
       flatMap(timeEntryActivities => {
-        console.log(timeEntryActivities);
-
         const hgLog: HourGlassTimeLog = {
           id: timelog.id,
           comments: timelog.comment,
@@ -450,7 +450,11 @@ export class DataService {
             time_entry: {
               id: timelog.redmineTimeEntryId,
               comments: timelog.comment,
-              spent_on: timelog.timeStarted.toISOString(),
+              spent_on: this.datePipe.transform(
+                timelog.timeStarted,
+                'yyyy-MM-dd',
+                'utc'
+              ),
               activity_id: this.mapBillableToRedmineTimeEntryActivityId(
                 timelog.billable,
                 timeEntryActivities
@@ -466,16 +470,17 @@ export class DataService {
           };
           calls.push(this.redmineService.updateTimeEntry(timeEntryRequest));
         }
-        console.log('before forkjoin');
+
         return forkJoin(calls).pipe(
           map(results => {
-            let result = false;
-            results.forEach(r => (result = result && r.ok));
+            let result = true;
+            results.forEach(r => {
+              result = result && r.ok;
+            });
             return result;
           })
         );
       })
     );
-    return null;
   }
 }

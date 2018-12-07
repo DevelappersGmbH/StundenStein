@@ -161,7 +161,7 @@ export class HourGlassService extends BaseDataService {
     const query = this.getJsonEndpointUrl(
       this.timeLogsUrl + '/' + timeLogRequest.time_log.id
     );
-    return this.httpClient.put<HttpResponse<any>>(query, {
+    return this.httpClient.put<HttpResponse<any>>(query, timeLogRequest, {
       observe: 'response'
     });
   }

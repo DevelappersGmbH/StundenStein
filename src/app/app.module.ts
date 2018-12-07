@@ -7,7 +7,9 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule, Title } from '@angular/platform-browser';
 import { CdkTableModule } from '@angular/cdk/table';
 import { CdkTreeModule } from '@angular/cdk/tree';
+import { CookieService } from 'ngx-cookie-service';
 import { DataService } from './services/data/data.service';
+import { DatePipe } from '@angular/common';
 import { DeleteWarningComponent } from './components/delete-warning/delete-warning.component';
 import { EnforcedInputsDirective } from './directives/enforced-inputs.directive';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -26,6 +28,7 @@ import {
   MatIconModule,
   MatInputModule,
   MatListModule,
+  MatProgressSpinnerModule,
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule
@@ -77,7 +80,8 @@ import { UserService } from './services/user/user.service';
     MatAutocompleteModule,
     ReactiveFormsModule,
     MatDialogModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatProgressSpinnerModule
   ],
   providers: [
     AuthenticationService,
@@ -89,7 +93,9 @@ import { UserService } from './services/user/user.service';
     },
     DataService,
     Title,
-    UserService
+    UserService,
+    CookieService,
+    DatePipe
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent]
