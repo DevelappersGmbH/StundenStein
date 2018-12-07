@@ -1,13 +1,17 @@
 import {
   Component,
-  ElementRef, EventEmitter,
+  ElementRef,
+  EventEmitter,
   Input,
-  OnInit, Output,
-  ViewChild, ViewEncapsulation
-} from '@angular/core';
+  OnInit,
+  Output,
+  ViewChild,
+  ViewEncapsulation
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material';
@@ -15,7 +19,6 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import { User } from '../../model/user.interface';
-import {isNull, isUndefined} from 'util';
 
 @Component({
   selector: 'app-timelog',
@@ -84,7 +87,9 @@ export class TimeLogComponent implements OnInit {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => project ? this.filterProjects(project) : this.projectOptions.slice())
+      map(project =>
+        project ? this.filterProjects(project) : this.projectOptions.slice()
+      )
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -117,12 +122,16 @@ export class TimeLogComponent implements OnInit {
   }
 
   displayIssue(issue: Issue): string {
-    if (!issue) { return ''; }
+    if (!issue) {
+      return '';
+    }
     return issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject(project: Project): string {
-    if (!project) { return ''; }
+    if (!project) {
+      return '';
+    }
     return project.name;
   }
 
@@ -367,16 +376,19 @@ export class TimeLogComponent implements OnInit {
     dialogRef
       .afterClosed()
       .subscribe(data =>
-        data ? this.deleteTimeLog(this.deleted, this.timeLog) : console.log('Do NOT delete')
+        data
+          ? this.deleteTimeLog(this.deleted, this.timeLog)
+          : console.log('Do NOT delete')
       );
   }
 
   deleteTimeLog(deleted, timeLog) {
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(result) {
-        console.log(result);
         if (result) {
           deleted.emit(timeLog.id);
+        } else {
+          console.error('Could not delete timelog!');
         }
       },
       error(msg) {
