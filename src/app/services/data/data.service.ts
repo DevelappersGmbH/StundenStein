@@ -1,14 +1,8 @@
 import { ColorService } from '../color/color.service';
+import { environment } from 'src/environments/environment';
+import { flatMap, map, share } from 'rxjs/operators';
+import { forkJoin, Observable, of } from 'rxjs';
 import { DatePipe } from '@angular/common';
-import {
-  flatMap,
-  map,
-  mapTo,
-  switchMap,
-  tap,
-  throttleTime
-  } from 'rxjs/operators';
-import { forkJoin, Observable } from 'rxjs';
 import { HourGlassService } from '../hourglass/hourglass.service';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
@@ -19,9 +13,8 @@ import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
-import { RedmineIssues } from 'src/app/redmine-model/redmine-issues.interface';
+import { RedmineIssue } from 'src/app/redmine-model/redmine-issue.interface';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
-import { RedmineProjects } from 'src/app/redmine-model/redmine-projects.interface';
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
 import { RedmineTimeEntryActivity } from 'src/app/redmine-model/redmine-time-entry-activity.interface';
@@ -35,8 +28,13 @@ import { UserService } from '../user/user.service';
   providedIn: 'root'
 })
 export class DataService {
-  private cachedProjects: Project[];
-  private cachedIssues: Issue[];
+  private projects: Project[];
+  private projectsRecentlyCached: Date;
+  private projectsObservable: Observable<Project[]>;
+
+  private issues: Issue[];
+  private issuesRecentlyCached: Date;
+  private issuesObservable: Observable<Issue[]>;
 
   constructor(
     private redmineService: RedmineService,
@@ -45,30 +43,68 @@ export class DataService {
     private colorService: ColorService,
     private datePipe: DatePipe
   ) {
-    this.cachedProjects = [];
-    this.cachedIssues = [];
+    this.projects = [];
+    this.projectsRecentlyCached = new Date(0);
+    this.issues = [];
+    this.issuesRecentlyCached = new Date(0);
   }
 
   getProjects(): Observable<Project[]> {
-    return this.redmineService
-      .getProjects()
-      .pipe(map(p => this.mapRedmineProjectsToProjectArrayAndStore(p)));
+    const timeDifferenceInMin =
+      (new Date().valueOf() - this.projectsRecentlyCached.valueOf()) / 60000;
+    const expired = timeDifferenceInMin > environment.projectsExpireAfterMin;
+    if (this.projects && this.projects.length > 0 && !expired) {
+      return of(this.projects);
+    } else if (this.projectsObservable) {
+      return this.projectsObservable;
+    } else {
+      this.projectsObservable = this.redmineService.getProjects().pipe(
+        map(data => {
+          this.projects = this.mapRedmineProjectArrayToProjectArray(data);
+          this.projectsRecentlyCached = new Date();
+          this.projectsObservable = null;
+          return this.projects;
+        }),
+        share()
+      );
+      return this.projectsObservable;
+    }
   }
 
-  mapRedmineProjectsToProjectArrayAndStore(
-    redmineProjects: RedmineProjects
-  ): Project[] {
-    this.cachedProjects = this.mapRedmineProjectsToProjectArray(
-      redmineProjects
-    );
-    return this.cachedProjects;
+  getIssues(): Observable<Issue[]> {
+    const timeDifferenceInMin =
+      (new Date().valueOf() - this.issuesRecentlyCached.valueOf()) / 60000;
+    const expired = timeDifferenceInMin > environment.issuesExpireAfterMin;
+    if (this.issues && this.issues.length > 0 && !expired) {
+      return of(this.issues);
+    } else if (this.issuesObservable) {
+      return this.issuesObservable;
+    } else {
+      const calls: Observable<any>[] = [
+        this.redmineService.getIssues(),
+        this.getProjects()
+      ];
+      this.issuesObservable = forkJoin(calls).pipe(
+        map(results => {
+          this.issues = this.mapRedmineIssueArrayToIssueArray(
+            results[0],
+            results[1]
+          );
+          this.issuesRecentlyCached = new Date();
+          this.issuesObservable = null;
+          return this.issues;
+        }),
+        share()
+      );
+      return this.issuesObservable;
+    }
   }
 
-  mapRedmineProjectsToProjectArray(
-    redmineProjects: RedmineProjects
+  mapRedmineProjectArrayToProjectArray(
+    redmineProjects: RedmineProject[]
   ): Project[] {
     const projects: Project[] = [];
-    redmineProjects.projects.forEach(project => {
+    redmineProjects.forEach(project => {
       projects.push(this.mapRedmineProjectToProject(project));
     });
     return projects;
@@ -82,43 +118,12 @@ export class DataService {
     };
   }
 
-  getIssues(): Observable<Issue[]> {
-    const calls: Observable<any>[] = [];
-    if (!this.cachedProjects || this.cachedProjects.length === 0) {
-      calls.push(this.redmineService.getProjects());
-    }
-    calls.push(this.redmineService.getIssues());
-    return forkJoin(calls).pipe(
-      map(results => this.mapRedmineIssuesToIssueArrayAndStore(results))
-    );
-  }
-
-  mapRedmineIssuesToIssueArrayAndStore(results: any[]): Issue[] {
-    this.cachedIssues = this.mapRedmineIssuesToIssueArray(results);
-    return this.cachedIssues;
-  }
-
-  mapRedmineIssuesToIssueArray(results: any[]): Issue[] {
-    let redmineIssues: RedmineIssues;
-    if (!results || results.length === 0) {
-      console.error(
-        'IssuesConversion: No input parameters, Array is empty or null'
-      );
-    }
-    if (results.length === 1 && !(<RedmineIssues>results[0]).issues) {
-      console.error(
-        'IssuesConversion the only parameter in Array is not RedmineIssues!'
-      );
-    } else {
-      redmineIssues = results[0];
-    }
-    if (results.length === 2 && (<RedmineProjects>results[0]).projects) {
-      this.cachedProjects = this.mapRedmineProjectsToProjectArray(results[0]);
-      redmineIssues = results[1];
-    }
-
+  mapRedmineIssueArrayToIssueArray(
+    redmineIssues: RedmineIssue[],
+    projects: Project[]
+  ): Issue[] {
     const issues = [];
-    redmineIssues.issues.forEach(redmineIssue => {
+    redmineIssues.forEach(redmineIssue => {
       const issue: Issue = {
         id: redmineIssue.id,
         subject: redmineIssue.subject,
@@ -133,9 +138,7 @@ export class DataService {
         issue.tracker = redmineIssue.tracker.name;
       }
       if (redmineIssue.project) {
-        issue.project = this.cachedProjects.find(
-          p => p.id === redmineIssue.project.id
-        );
+        issue.project = projects.find(p => p.id === redmineIssue.project.id);
       }
       issues.push(issue);
     });
@@ -265,12 +268,12 @@ export class DataService {
       billable: true
     };
     if (hourglassTimeTracker.issue_id) {
-      timeTracker.issue = this.cachedIssues.find(
+      timeTracker.issue = this.issues.find(
         i => i.id === hourglassTimeTracker.issue_id
       );
     }
     if (hourglassTimeTracker.project_id) {
-      timeTracker.project = this.cachedProjects.find(
+      timeTracker.project = this.projects.find(
         p => p.id === hourglassTimeTracker.project_id
       );
     }
@@ -374,10 +377,10 @@ export class DataService {
             timeStarted: new Date(hgbooking.start),
             timeStopped: new Date(hgbooking.stop),
             timeInHours: hgbooking.time_entry.hours,
-            project: this.cachedProjects.find(
+            project: this.projects.find(
               entry => entry.id === hgbooking.time_entry.project_id
             ),
-            issue: this.cachedIssues.find(
+            issue: this.issues.find(
               entry => entry.id === hgbooking.time_entry.issue_id
             ),
             user: this.mapRedmineUserIdToCurrentUserOrNull(
@@ -405,7 +408,7 @@ export class DataService {
           }
         });
         return timelogs.sort((a, b) => {
-          return <any>new Date(a.timeStarted) - <any>new Date(b.timeStopped);
+          return <any>new Date(a.timeStarted) - <any>new Date(b.timeStarted);
         });
       })
     );
