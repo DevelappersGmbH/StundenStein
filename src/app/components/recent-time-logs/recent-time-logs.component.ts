@@ -26,6 +26,7 @@ export class RecentTimeLogsComponent implements OnInit {
   timeLogMap : Map<Date, TimeLog[]>;
   unbookedTimeLogsMap : Map<Date, number>;
   numberOfUnbookedTimeLogs: number;
+  listLoading : boolean;
 
   ngOnInit() {
     this.numberOfUnbookedTimeLogs = 0;
@@ -39,11 +40,13 @@ export class RecentTimeLogsComponent implements OnInit {
   }
 
   loadTimeLogs() {
+    this.listLoading = true;
     this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
       this.timeLogList = timeLogs;
       this.timeLogList.reverse();
       this.seperateDates();
       this.countUnbookedTimeLogs();
+      this.listLoading = false;
      });
   }
 

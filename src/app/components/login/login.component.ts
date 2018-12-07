@@ -20,7 +20,9 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private userService: UserService
   ) {
-    this.isLoggedIn = this.authenticationService.isExpirationDateValid();
+    this.isLoggedIn =
+      this.authenticationService.checkIfRedmineUrlExist() &&
+      this.authenticationService.checkIfAuthTokenExist();
   }
 
   ngOnInit() {}
@@ -29,18 +31,13 @@ export class LoginComponent implements OnInit {
     if (this.redmineUrl && this.apiKey) {
       this.authenticationService
         .login(this.redmineUrl, this.apiKey, this.rememberMe)
-        .subscribe(
-          result => {
-            this.userService.setUser(result);
-            const redirect = this.authenticationService.redirectUrl
-              ? this.authenticationService.redirectUrl
-              : '/';
-            this.router.navigate([redirect]);
-          },
-          error => {
-            console.log(error);
-          }
-        );
+        .subscribe(result => {
+          this.userService.setUser(result);
+          const redirect = this.authenticationService.redirectUrl
+            ? this.authenticationService.redirectUrl
+            : '/';
+          this.router.navigate([redirect]);
+        });
     }
   }
 
