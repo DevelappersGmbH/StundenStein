@@ -307,7 +307,7 @@ export class TimeTrackerComponent implements OnInit {
     this.titleService.setTitle(shortForm + ' ' + trackerInfo +   '• StundenStein');
   }
 
-  private shorten(value: string, maxLength: number, abbr: string = '…'): string {
+  shorten(value: string, maxLength: number, abbr: string = '…'): string {
     if (isUndefined(value)) { return ''; }
     if (value.length > maxLength) {
       value = value.substring(0, maxLength - abbr.length) + abbr;
