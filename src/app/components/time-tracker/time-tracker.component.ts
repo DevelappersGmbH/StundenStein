@@ -169,15 +169,20 @@ export class TimeTrackerComponent implements OnInit {
   private _filterLogs(value): TimeLog[] {
     if (!this.isString(value)) { value = value.comment; }
     const filterValue: string = value.toLowerCase().replace('#', '').trim();
-
     return this.logs.filter(log =>
+      !isUndefined(log.comment) &&
+      !isNull(log.comment) &&
+      !isUndefined(log.comment) &&
+      !isNull(log.comment) &&
+      log.comment.length > 0 &&
+      filterValue.length > 0 &&
       log.comment.toLowerCase().includes(filterValue));
   }
 
   selectIssue(issue: Issue) {
     this.timeTracker.issue = issue;
     this.ensureSelectedIssueIsFromIssueList();
-    if (!isUndefined(this.timeTracker.issue)) {
+    if (!isUndefined(this.timeTracker.issue) && !isNull(this.timeTracker.issue)) {
       this.timeTracker.project = this.timeTracker.issue.project;
       this.ensureSelectedProjectIsFromProjectList();
       this.projectCtrl.setValue(this.timeTracker.project);
@@ -186,20 +191,26 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   selectLog(log: TimeLog) {
-    if (isUndefined(log.project)) {
+    if (isUndefined(log.project) || isNull(log.project)) {
+      this.timeTracker.project = undefined;
+      this.projectCtrl.setValue(undefined);
+      this.timeTracker.issue = undefined;
+      this.issueCtrl.setValue(undefined);
       return;
     }
-    if (isUndefined(log.issue)) {
+    if (isUndefined(log.issue) || isNull(log.issue)) {
       this.selectProject(log.project);
+      this.projectCtrl.setValue(this.timeTracker.project);
     } else {
       this.selectIssue(log.issue);
+      this.issueCtrl.setValue(this.timeTracker.issue);
     }
   }
 
   ensureSelectedProjectIsFromProjectList() {
     if (!this.projects.includes(this.timeTracker.project)) {
       this.projects.forEach( project => {
-        if (JSON.stringify(project) === JSON.stringify(this.timeTracker.project)) {
+        if (!isUndefined(this.timeTracker.project) && project.id === this.timeTracker.project.id) {
           this.timeTracker.project = project;
         }
       });
@@ -209,7 +220,7 @@ export class TimeTrackerComponent implements OnInit {
   ensureSelectedIssueIsFromIssueList() {
     if (!this.issues.includes(this.timeTracker.issue)) {
       this.issues.forEach( issue => {
-        if (JSON.stringify(issue) === JSON.stringify(this.timeTracker.issue)) {
+        if (!isUndefined(this.timeTracker.issue) && issue.id === this.timeTracker.issue.id) {
           this.timeTracker.issue = issue;
         }
       });
@@ -242,7 +253,13 @@ export class TimeTrackerComponent implements OnInit {
 
   loadLogs() {
     this.dataService.getTimeLogs().subscribe( data => {
-      this.logs = data;
+      this.logs = [];
+      // filter through logs and remove those without a comment
+      data.forEach( log => {
+        if (!isUndefined(log.comment) && !isNull(log.comment) && log.comment.length > 0) {
+          this.logs.unshift(log);
+        }
+      });
     }, error => {
       console.error('Couldn\'t get time logs from data service.');
     });
