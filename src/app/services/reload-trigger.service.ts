@@ -4,5 +4,13 @@ import { EventEmitter, Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ReloadTriggerService {
-  constructor() {}
+  public timeLogDeleted: EventEmitter<number>;
+
+  constructor() {
+    this.timeLogDeleted = new EventEmitter();
+  }
+
+  public triggerTimeLogDeleted(id: number = -1) {
+    this.timeLogDeleted.emit(id);
+  }
 }
