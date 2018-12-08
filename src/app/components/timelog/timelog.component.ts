@@ -1,10 +1,13 @@
 import {
   Component,
   ElementRef,
+  EventEmitter,
   Input,
   OnInit,
-  ViewChild, ViewEncapsulation
-} from '@angular/core';
+  Output,
+  ViewChild,
+  ViewEncapsulation
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -29,6 +32,8 @@ export class TimeLogComponent implements OnInit {
   ) {}
 
   @Input() timeLog: TimeLog;
+  @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
+
   @ViewChild('hiddenStart') textStart: ElementRef;
   @ViewChild('hiddenEnd') textEnd: ElementRef;
   minWidth = 45;
@@ -370,9 +375,11 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteTimeLog() {
+    var that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
         console.log(success);
+        that.deleted.emit(that.timeLog.id);
       },
       error(msg) {
         console.log('Error deleting: ', msg);
