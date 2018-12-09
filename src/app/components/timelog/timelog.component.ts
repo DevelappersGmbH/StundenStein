@@ -23,7 +23,8 @@ import {isNull, isUndefined} from 'util';
 @Component({
   selector: 'app-timelog',
   templateUrl: './timelog.component.html',
-  styleUrls: ['./timelog.component.scss']
+  styleUrls: ['./timelog.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class TimeLogComponent implements OnInit {
   constructor(
@@ -44,6 +45,7 @@ export class TimeLogComponent implements OnInit {
   active = false;
   editMode = false;
   editButton = 'edit';
+  loading = false;
 
   projects: Project[] = [];
   issues: Issue[] = [];
@@ -192,7 +194,7 @@ export class TimeLogComponent implements OnInit {
       this.updateIssueOptions(this.timeLog.project);
 
       this.projectControl.setValue(
-        this.timeLog.project ? this.timeLog.project: undefined
+        this.timeLog.project ? this.timeLog.project : undefined
       );
     } else {
       if (this.timeLog.project && this.timeLog.issue) {
@@ -322,9 +324,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
-    if (this.isRunning()) {
-      /*ERROR: stop the tracker first*/
-    }
+    this.loading = true;
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -340,6 +340,7 @@ export class TimeLogComponent implements OnInit {
       this.updateTimeLog();
     }
     this.editMode = !this.editMode;
+    this.loading = false;
   }
 
   private findProject(project): Project {
@@ -375,7 +376,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteTimeLog() {
-    var that = this;
+    const that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
         console.log(success);

@@ -37,35 +37,66 @@
         <div><!-- empty space --></div>
 
         <div>
-          <button mat-icon-button class="field button_play" [disabled]="editMode" (click)="startTracker()"><mat-icon
-            class="icon" [ngClass]="{ active: active }">play_arrow</mat-icon></button>
+          <div class="oneline">
+          <button mat-icon-button class="button_play" [disabled]="editMode" (click)="startTracker()"><mat-icon
+            class="icon">play_arrow</mat-icon></button>
+            </div>
 
-          <button mat-icon-button class="field button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
+          <div class="oneline">
+          <button mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
             class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
+          </div>
 
-          <mat-form-field [ngStyle]="{'width.px': startWidth}" class="field start-time" [ngClass]="{ edit: !editMode }">
+          <div class="oneline">
+          <mat-form-field [ngStyle]="{'width.px': startWidth}" class="start-time" [ngClass]="{ edit: !editMode }">
             <input #elasticStart [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time"  matInput (input)="resizeStart()"/>
         </mat-form-field>
+          </div>
 
           -
-
-          <mat-form-field [ngStyle]="{'width.px': endWidth}" class="field end-time" [ngClass]="{ edit: !editMode }">
+          <div class="oneline">
+          <mat-form-field [ngStyle]="{'width.px': endWidth}" class="end-time" [ngClass]="{ edit: !editMode }">
             <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput (input)="resizeEnd()"/>
           </mat-form-field>
+          </div>
 
-          <span class=" field tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
+          <span class="tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
-          <button mat-icon-button class="field button" (click)="changeMode()">
-            <mat-icon class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
+            <div class="oneline spinner">
+            <mat-spinner
+              *ngIf="loading"
+              [strokeWidth]="3"
+              [diameter]="20"
+              color="primary"
+              mode="indeterminate">
+            </mat-spinner>
+            </div>
+
+            <div class="oneline">
+          <button mat-icon-button class="button" (click)="changeMode()">
+            <mat-icon *ngIf="!loading" class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
+            </div>
 
-          <button mat-icon-button class="field button" (click)="deleteWarning()">
+          <div class="oneline spinner">
+            <mat-spinner
+              *ngIf="loading"
+              [strokeWidth]="3"
+              [diameter]="20"
+              color="primary"
+              mode="indeterminate">
+            </mat-spinner>
+          </div>
+
+              <div class="oneline">
+          <button mat-icon-button class="button" *ngIf="!loading" (click)="deleteWarning()">
             <mat-icon class="icon">delete
             </mat-icon>
           </button>
+              </div>
 
         </div>
       </div>
