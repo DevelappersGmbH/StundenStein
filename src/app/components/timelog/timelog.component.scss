@@ -50,7 +50,8 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 .spinner{
   position:relative;
   bottom:-5px;
-  padding-left: 5px;
+  margin-left: 9px;
+  margin-right: 9px;
 }
 
 .tracked-time {

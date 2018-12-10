@@ -64,11 +64,12 @@
 
           <span class="tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
-            <div class="oneline spinner">
+            <div class="oneline">
             <mat-spinner
+              class = "spinner"
               *ngIf="loading"
               [strokeWidth]="3"
-              [diameter]="20"
+              [diameter]="22"
               color="primary"
               mode="indeterminate">
             </mat-spinner>
@@ -81,18 +82,19 @@
           </button>
             </div>
 
-          <div class="oneline spinner">
+          <div class="oneline">
             <mat-spinner
-              *ngIf="loading"
+              class = "spinner"
+              *ngIf="loadingDel"
               [strokeWidth]="3"
-              [diameter]="20"
+              [diameter]="22"
               color="primary"
               mode="indeterminate">
             </mat-spinner>
           </div>
 
               <div class="oneline">
-          <button mat-icon-button class="button" *ngIf="!loading" (click)="deleteWarning()">
+          <button mat-icon-button class="button" *ngIf="!loadingDel" (click)="deleteWarning()">
             <mat-icon class="icon">delete
             </mat-icon>
           </button>

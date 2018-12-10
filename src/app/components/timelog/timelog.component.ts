@@ -46,6 +46,7 @@ export class TimeLogComponent implements OnInit {
   editMode = false;
   editButton = 'edit';
   loading = false;
+  loadingDel = false;
 
   projects: Project[] = [];
   issues: Issue[] = [];
@@ -358,6 +359,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteWarning() {
+    this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.disableClose = true;
@@ -370,8 +372,10 @@ export class TimeLogComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .subscribe(data =>
-        data ? this.deleteTimeLog() : console.log('Do NOT delete')
+      .subscribe((data) => {
+        data ? this.deleteTimeLog() : console.log('Do NOT delete');
+          this.loadingDel = false;
+      }
       );
   }
 
@@ -386,6 +390,7 @@ export class TimeLogComponent implements OnInit {
         console.log('Error deleting: ', msg);
       }
     });
+    this.loadingDel = false;
   }
 
   updateTimeLog() {
