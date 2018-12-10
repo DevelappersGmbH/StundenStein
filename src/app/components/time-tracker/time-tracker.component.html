@@ -13,9 +13,9 @@
           <input type="text" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
           <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
             <mat-option *ngFor="let log of filteredLogs | async" [value]="log">
-              <span class="log-comment">{{log.comment}}</span>
-              <span class="log-issue" *ngIf="log.issue">#{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</span>
-              <span class="log-project" *ngIf="log.project" [style.color]="log.project.color">{{log.project.name}}</span>
+              <span>{{shorten(log.comment, 25)}}</span>
+              <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
+              <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
             </mat-option>
           </mat-autocomplete>
         </mat-form-field>
