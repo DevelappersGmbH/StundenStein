@@ -325,7 +325,6 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
-    this.loading = true;
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -341,7 +340,6 @@ export class TimeLogComponent implements OnInit {
       this.updateTimeLog();
     }
     this.editMode = !this.editMode;
-    this.loading = false;
   }
 
   private findProject(project): Project {
@@ -394,6 +392,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   updateTimeLog() {
+    this.loading = true;
     this.dataService.updateTimeLog(this.timeLog).subscribe({
       next(success) {
         console.log(success);
@@ -402,6 +401,7 @@ export class TimeLogComponent implements OnInit {
         console.log('Error updating: ', msg);
       }
     });
+    this.loading = false;
   }
 
   resizeStart() {
