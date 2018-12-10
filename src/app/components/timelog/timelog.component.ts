@@ -191,7 +191,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     console.log('Issue: ', issue);
 
     if (this.findIssue(issue)) {
-      console.log('Existing issue detected');
       this.timeLog.issue = issue;
       this.timeLog.project = issue.project;
 
@@ -212,19 +211,16 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       this.projectOptions = this.projects;
       this.timeLog.issue = null;
     }
-    console.log('Timelog', this.timeLog);
     this.updateTimeLog();
   }
 
   selectProject(project) {
     if (this.findProject(project)) {
       this.timeLog.project = project;
-      console.log('New project detected', project.name);
       this.projectControl.setValue(project ? project : undefined);
       this.updateIssueOptions(project);
       this.issueControl.setValue(undefined);
       this.timeLog.issue = null;
-      console.log(this.issueOptions);
     } else {
       this.issueOptions = this.issues;
       this.projectOptions = this.projects;
@@ -234,7 +230,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         this.timeLog.issue ? this.timeLog.issue : undefined
       );
     }
-    console.log('Timelog', this.timeLog);
     this.updateTimeLog();
   }
 
@@ -379,8 +374,10 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     dialogRef
       .afterClosed()
       .subscribe((data) => {
-        data ? this.deleteTimeLog() : console.log('Do NOT delete');
-          this.loadingDel = false;
+        if (data) {
+          this.deleteTimeLog();
+        }
+        this.loadingDel = false;
       }
       );
   }
@@ -389,7 +386,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     const that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
-        console.log(success);
         that.deleted.emit(that.timeLog.id);
       },
       error(msg) {
@@ -403,7 +399,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.dataService.updateTimeLog(this.timeLog).subscribe({
       next(success) {
-        console.log(success);
       },
       error(msg) {
         console.log('Error updating: ', msg);
@@ -413,7 +408,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   resizeStart() {
-    console.log('resizeStart');
     setTimeout(
       () =>
         (this.startWidth = Math.max(
@@ -424,7 +418,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   resizeEnd() {
-    console.log('resizeEnd');
     setTimeout(
       () =>
         (this.endWidth = Math.max(
