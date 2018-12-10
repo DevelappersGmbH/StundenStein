@@ -37,7 +37,7 @@ export class TimeLogComponent implements OnInit {
 
   @ViewChild('hiddenStart') textStart: ElementRef;
   @ViewChild('hiddenEnd') textEnd: ElementRef;
-  minWidth = 15;
+  minWidth = 45;
   startWidth: number = this.minWidth;
   endWidth: number = this.minWidth;
 
