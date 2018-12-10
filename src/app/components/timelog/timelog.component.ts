@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -7,7 +8,7 @@ import {
   Output,
   ViewChild,
   ViewEncapsulation
-  } from '@angular/core';
+} from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -26,7 +27,7 @@ import {isNull, isUndefined} from 'util';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit {
+export class TimeLogComponent implements OnInit, AfterViewInit {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog
@@ -96,6 +97,11 @@ export class TimeLogComponent implements OnInit {
     if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
+  }
+
+  ngAfterViewInit() {
+    this.resizeEnd();
+    this.resizeStart();
   }
 
   loadProjects() {
