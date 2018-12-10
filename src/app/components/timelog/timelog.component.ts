@@ -37,7 +37,7 @@ export class TimeLogComponent implements OnInit {
 
   @ViewChild('hiddenStart') textStart: ElementRef;
   @ViewChild('hiddenEnd') textEnd: ElementRef;
-  minWidth = 45;
+  minWidth = 15;
   startWidth: number = this.minWidth;
   endWidth: number = this.minWidth;
 
@@ -325,6 +325,8 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
+    this.resizeStart();
+    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
