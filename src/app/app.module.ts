@@ -36,6 +36,7 @@ import {
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
+import { ReloadTriggerService } from './services/reload-trigger.service';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
@@ -99,7 +100,8 @@ import { ErrorService } from './services/error/error.service';
     UserService,
     CookieService,
     DatePipe,
-    ErrorService
+    ErrorService,
+    ReloadTriggerService
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent, ErrorDialogComponent]

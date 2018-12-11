@@ -9,6 +9,7 @@ import { DataService } from 'src/app/services/data/data.service';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
+import { TimeLog } from 'src/app/model/time-log.interface';
 
 @Component({
   selector: 'app-time-tracker',
@@ -23,6 +24,7 @@ export class TimeTrackerComponent implements OnInit {
     private titleService: Title
     ) { }
 
+  logs: TimeLog[] = [];
   projects: Project[] = [];
   issues: Issue[] = [];
   issueStrings: string[] = [];
@@ -37,8 +39,10 @@ export class TimeTrackerComponent implements OnInit {
   };
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
+  logCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredLogs: Observable<TimeLog[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
   startingBlockedByLoading = false;
@@ -55,6 +59,7 @@ export class TimeTrackerComponent implements OnInit {
     });
     this.loadProjects();
     this.loadIssues();
+    this.loadLogs();
     this.currentTrackerTimeString  = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
@@ -70,6 +75,11 @@ export class TimeTrackerComponent implements OnInit {
       .pipe(
         startWith(''),
         map(project => project ? this._filterProjects(project) : this.projects.slice())
+      );
+    this.filteredLogs = this.logCtrl.valueChanges
+      .pipe(
+        startWith(''),
+        map(log => log ? this._filterLogs(log) : this.logs.slice())
       );
   }
 
@@ -90,7 +100,8 @@ export class TimeTrackerComponent implements OnInit {
     this.dataService.updateTimeTracker(timeTracker).subscribe( t => {
       if (!isNull(t) && !(isUndefined(t))) {
         this.timeTracker = t;
-        this.extractFromTimeTracker();
+        this.ensureSelectedIssueIsFromIssueList();
+        this.ensureSelectedProjectIsFromProjectList();
         this.stoppingBlockedByLoading = false;
       } else {
         this.timeTracker = {
@@ -124,6 +135,12 @@ export class TimeTrackerComponent implements OnInit {
     return project.name;
   }
 
+  _displayLog(log: string): string {
+    if (isNull(log) || isUndefined(log)) { return ''; }
+    if (!log.includes('$$')) { return log; }
+    return log.substring(log.indexOf('$$') + 2);
+  }
+
   private _filterIssues(value): Issue[] {
     if (!this.isString(value)) { value = value.subject; }
     const filterValue: string = value.toLowerCase().replace('#', '').trim();
@@ -151,10 +168,23 @@ export class TimeTrackerComponent implements OnInit {
     return this.projects.filter(project => project.name.toLowerCase().includes(filterValue));
   }
 
+  private _filterLogs(value): TimeLog[] {
+    if (!this.isString(value)) { value = value.comment; }
+    const filterValue: string = value.toLowerCase().replace('#', '').trim();
+    return this.logs.filter(log =>
+      !isUndefined(log.comment) &&
+      !isNull(log.comment) &&
+      !isUndefined(log.comment) &&
+      !isNull(log.comment) &&
+      log.comment.length > 0 &&
+      filterValue.length > 0 &&
+      log.comment.toLowerCase().includes(filterValue));
+  }
+
   selectIssue(issue: Issue) {
     this.timeTracker.issue = issue;
     this.ensureSelectedIssueIsFromIssueList();
-    if (!isUndefined(this.timeTracker.issue)) {
+    if (!isUndefined(this.timeTracker.issue) && !isNull(this.timeTracker.issue)) {
       this.timeTracker.project = this.timeTracker.issue.project;
       this.ensureSelectedProjectIsFromProjectList();
       this.projectCtrl.setValue(this.timeTracker.project);
@@ -162,10 +192,35 @@ export class TimeTrackerComponent implements OnInit {
     this.updateTracker();
   }
 
+  selectLog(logData: string) {
+    console.log(logData);
+    if (logData === null || logData.length < 1 || !logData.includes('$$')) {
+      this.timeTracker.comment = '';
+      return;
+    }
+    const logId = Number.parseInt(logData.substring(0, logData.indexOf('$$')), 10);
+    const log = this.logs.find(tlog => tlog.id === logId);
+    this.timeTracker.comment = log.comment;
+    if (isUndefined(log.project) || isNull(log.project)) {
+      this.timeTracker.project = undefined;
+      this.projectCtrl.setValue(undefined);
+      this.timeTracker.issue = undefined;
+      this.issueCtrl.setValue(undefined);
+      return;
+    }
+    if (isUndefined(log.issue) || isNull(log.issue)) {
+      this.selectProject(log.project);
+      this.projectCtrl.setValue(this.timeTracker.project);
+    } else {
+      this.selectIssue(log.issue);
+      this.issueCtrl.setValue(this.timeTracker.issue);
+    }
+  }
+
   ensureSelectedProjectIsFromProjectList() {
     if (!this.projects.includes(this.timeTracker.project)) {
       this.projects.forEach( project => {
-        if (JSON.stringify(project) === JSON.stringify(this.timeTracker.project)) {
+        if (!isUndefined(this.timeTracker.project) && project.id === this.timeTracker.project.id) {
           this.timeTracker.project = project;
         }
       });
@@ -175,7 +230,7 @@ export class TimeTrackerComponent implements OnInit {
   ensureSelectedIssueIsFromIssueList() {
     if (!this.issues.includes(this.timeTracker.issue)) {
       this.issues.forEach( issue => {
-        if (JSON.stringify(issue) === JSON.stringify(this.timeTracker.issue)) {
+        if (!isUndefined(this.timeTracker.issue) && issue.id === this.timeTracker.issue.id) {
           this.timeTracker.issue = issue;
         }
       });
@@ -203,6 +258,20 @@ export class TimeTrackerComponent implements OnInit {
       this.issues = data;
     }, error => {
       console.error('Couldn\'t get issues from data service.');
+    });
+  }
+
+  loadLogs() {
+    this.dataService.getTimeLogs().subscribe( data => {
+      this.logs = [];
+      // filter through logs and remove those without a comment
+      data.forEach( log => {
+        if (!isUndefined(log.comment) && !isNull(log.comment) && log.comment.length > 0) {
+          this.logs.unshift(log);
+        }
+      });
+    }, error => {
+      console.error('Couldn\'t get time logs from data service.');
     });
   }
 
@@ -248,7 +317,7 @@ export class TimeTrackerComponent implements OnInit {
     this.titleService.setTitle(shortForm + ' ' + trackerInfo +   '• StundenStein');
   }
 
-  private shorten(value: string, maxLength: number, abbr: string = '…'): string {
+  shorten(value: string, maxLength: number, abbr: string = '…'): string {
     if (isUndefined(value)) { return ''; }
     if (value.length > maxLength) {
       value = value.substring(0, maxLength - abbr.length) + abbr;
@@ -270,7 +339,8 @@ export class TimeTrackerComponent implements OnInit {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
         if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
-          this.extractFromTimeTracker();
+          this.ensureSelectedIssueIsFromIssueList();
+          this.ensureSelectedProjectIsFromProjectList();
           this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
@@ -287,17 +357,13 @@ export class TimeTrackerComponent implements OnInit {
     });
   }
 
-  extractFromTimeTracker(): void {
-    this.ensureSelectedIssueIsFromIssueList();
-    this.ensureSelectedProjectIsFromProjectList();
-  }
-
   startTimeTracker(): void {
     this.startingBlockedByLoading = true;
     this.dataService.startTimeTracker(this.timeTracker).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
-        this.extractFromTimeTracker();
+        this.ensureSelectedIssueIsFromIssueList();
+        this.ensureSelectedProjectIsFromProjectList();
         this.startingBlockedByLoading = false;
       }
      );
