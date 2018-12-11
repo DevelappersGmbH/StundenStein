@@ -105,5 +105,5 @@
     </form>
   </mat-card-content>
 </mat-card>
-<span #hiddenStart style="visibility: hidden; white-space: pre;">{{elasticStart.value}}</span>
-<span #hiddenEnd style="visibility: hidden; white-space: pre;">{{elasticEnd.value}}</span>
+<span #hiddenStart style="visibility: hidden; white-space: pre;">{{timeLog.timeStarted.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>
+<span #hiddenEnd style="visibility: hidden; white-space: pre;">{{timeLog.timeStopped.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>

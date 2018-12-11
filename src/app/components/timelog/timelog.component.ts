@@ -285,15 +285,18 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   changeStartTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStarted = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDate(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStarted = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
+    console.log('new timelog timeStarted ', this.timeLog.timeStarted);
     this.calculateTime();
   }
 
@@ -408,7 +411,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       () =>
         (this.startWidth = Math.max(
           this.minWidth,
-          this.textStart.nativeElement.offsetWidth + 5
+          this.textStart.nativeElement.offsetWidth + 10
         ))
     );
   }
@@ -418,7 +421,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       () =>
         (this.endWidth = Math.max(
           this.minWidth,
-          this.textEnd.nativeElement.offsetWidth + 5
+          this.textEnd.nativeElement.offsetWidth + 10
         ))
     );
   }
