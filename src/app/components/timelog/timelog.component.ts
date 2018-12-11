@@ -211,7 +211,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       this.projectOptions = this.projects;
       this.timeLog.issue = null;
     }
-    this.updateTimeLog();
   }
 
   selectProject(project) {
@@ -230,12 +229,10 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         this.timeLog.issue ? this.timeLog.issue : undefined
       );
     }
-    this.updateTimeLog();
   }
 
   updateComment(comment) {
     this.timeLog.comment = comment;
-    this.updateTimeLog();
   }
 
   private searchIssueById(id): Issue {
@@ -268,7 +265,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
   markBillable() {
     this.timeLog.billable = !this.timeLog.billable;
-    this.updateTimeLog();
   }
 
   changeEndTime(time) {
@@ -284,7 +280,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       0
     );
     this.calculateTime();
-    this.updateTimeLog();
   }
 
   changeStartTime(time) {
@@ -300,7 +295,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       0
     );
     this.calculateTime();
-    this.updateTimeLog();
   }
 
   private isRunning() {
@@ -396,9 +390,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   updateTimeLog() {
-    this.loading = true;
     const that = this;
-    this.dataService.updateTimeLog(this.timeLog).subscribe({
+    that.loading = true;
+    this.dataService.updateTimeLog(this.timeLog).subscribe( {
       next() {
         that.loading = false;
       },

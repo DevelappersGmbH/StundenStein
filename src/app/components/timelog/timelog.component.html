@@ -64,7 +64,7 @@
 
           <span class="tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
-            <div class="oneline">
+          <div class="oneline">
             <mat-spinner
               class = "spinner"
               *ngIf="loading"
@@ -73,7 +73,7 @@
               color="primary"
               mode="indeterminate">
             </mat-spinner>
-            </div>
+          </div>
 
             <div class="oneline">
           <button mat-icon-button class="button" (click)="changeMode()">
