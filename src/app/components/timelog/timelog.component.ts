@@ -398,13 +398,14 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   updateTimeLog() {
     this.loading = true;
     this.dataService.updateTimeLog(this.timeLog).subscribe({
-      next(success) {
+      next() {
+        this.loading = false;
       },
       error(msg) {
         console.log('Error updating: ', msg);
+        this.loading = false;
       }
     });
-    this.loading = false;
   }
 
   resizeStart() {
