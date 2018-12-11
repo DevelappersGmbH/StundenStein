@@ -10,9 +10,9 @@
           </mat-autocomplete>
         </mat-form-field>
         <mat-form-field class="field field-small">
-          <input type="text" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
+          <input type="text" (change)="updateTracker()" [(ngModel)]="timeTracker.comment" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
           <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
-            <mat-option *ngFor="let log of filteredLogs | async" [value]="log">
+            <mat-option *ngFor="let log of filteredLogs | async" [value]="log.id + '$$' + log.comment">
               <span>{{shorten(log.comment, 25)}}</span>
               <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
               <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
@@ -30,7 +30,7 @@
       </div>
       <div class="field-container">
         <span class="field">{{ currentTrackerTimeString }}</span>
-        <mat-checkbox [(checked)]="timeTracker.billable" class="field">Billable</mat-checkbox>
+        <mat-checkbox name="billable" (change)="updateTracker()" [(ngModel)]="timeTracker.billable" class="field">Billable</mat-checkbox>
         <div class="field">
           <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary" [disabled]="startingBlockedByLoading">Start</button>
           <button *ngIf="this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>

@@ -100,7 +100,8 @@ export class TimeTrackerComponent implements OnInit {
     this.dataService.updateTimeTracker(timeTracker).subscribe( t => {
       if (!isNull(t) && !(isUndefined(t))) {
         this.timeTracker = t;
-        this.extractFromTimeTracker();
+        this.ensureSelectedIssueIsFromIssueList();
+        this.ensureSelectedProjectIsFromProjectList();
         this.stoppingBlockedByLoading = false;
       } else {
         this.timeTracker = {
@@ -134,9 +135,10 @@ export class TimeTrackerComponent implements OnInit {
     return project.name;
   }
 
-  _displayLog(log: TimeLog): string {
+  _displayLog(log: string): string {
     if (isNull(log) || isUndefined(log)) { return ''; }
-    return log.comment;
+    if (!log.includes('$$')) { return log; }
+    return log.substring(log.indexOf('$$') + 2);
   }
 
   private _filterIssues(value): Issue[] {
@@ -190,7 +192,15 @@ export class TimeTrackerComponent implements OnInit {
     this.updateTracker();
   }
 
-  selectLog(log: TimeLog) {
+  selectLog(logData: string) {
+    console.log(logData);
+    if (logData === null || logData.length < 1 || !logData.includes('$$')) {
+      this.timeTracker.comment = '';
+      return;
+    }
+    const logId = Number.parseInt(logData.substring(0, logData.indexOf('$$')), 10);
+    const log = this.logs.find(tlog => tlog.id === logId);
+    this.timeTracker.comment = log.comment;
     if (isUndefined(log.project) || isNull(log.project)) {
       this.timeTracker.project = undefined;
       this.projectCtrl.setValue(undefined);
@@ -329,7 +339,8 @@ export class TimeTrackerComponent implements OnInit {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
         if (!isNull(t) && !(isUndefined(t))) {
           this.timeTracker = t;
-          this.extractFromTimeTracker();
+          this.ensureSelectedIssueIsFromIssueList();
+          this.ensureSelectedProjectIsFromProjectList();
           this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
@@ -346,17 +357,13 @@ export class TimeTrackerComponent implements OnInit {
     });
   }
 
-  extractFromTimeTracker(): void {
-    this.ensureSelectedIssueIsFromIssueList();
-    this.ensureSelectedProjectIsFromProjectList();
-  }
-
   startTimeTracker(): void {
     this.startingBlockedByLoading = true;
     this.dataService.startTimeTracker(this.timeTracker).subscribe(
       timeTracker => {
         this.timeTracker = timeTracker;
-        this.extractFromTimeTracker();
+        this.ensureSelectedIssueIsFromIssueList();
+        this.ensureSelectedProjectIsFromProjectList();
         this.startingBlockedByLoading = false;
       }
      );
