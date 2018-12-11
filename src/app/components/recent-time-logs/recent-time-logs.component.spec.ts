@@ -5,7 +5,7 @@ import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.
 import { UserService } from 'src/app/services/user/user.service';
 import { DataService } from 'src/app/services/data/data.service';
 import { MatBadgeModule, MatListModule, MatProgressSpinnerModule} from '@angular/material';
-import { NO_ERRORS_SCHEMA }          from '@angular/core';
+import { NO_ERRORS_SCHEMA }  from '@angular/core';
 
 describe('RecentTimeLogsComponent', () => {
   let component: RecentTimeLogsComponent;
