@@ -42,6 +42,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   startWidth: number = this.minWidth;
   endWidth: number = this.minWidth;
 
+  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
   trackedTime: Date;
   active = false;
   editMode = false;
@@ -149,11 +151,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
     return this.issueOptions.filter(
       issue =>
-        issue.subject.toLowerCase().includes(filterValue) ||
+        (issue.subject.toLowerCase().includes(filterValue) ||
         issue.id.toString().includes(filterValue) ||
         issue.subject
           .toLowerCase()
-          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2)))
     );
   }
 
@@ -296,7 +298,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         0
       );
     }
-    console.log('new timelog timeStarted ', this.timeLog.timeStarted);
     this.calculateTime();
   }
 
@@ -407,21 +408,33 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   resizeStart() {
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
+    } else {
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
+    }
     setTimeout(
       () =>
         (this.startWidth = Math.max(
           this.minWidth,
-          this.textStart.nativeElement.offsetWidth + 10
+          newWidth
         ))
     );
   }
 
   resizeEnd() {
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
+    } else {
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
+    }
     setTimeout(
       () =>
         (this.endWidth = Math.max(
           this.minWidth,
-          this.textEnd.nativeElement.offsetWidth + 10
+          newWidth
         ))
     );
   }

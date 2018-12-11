@@ -1,5 +1,6 @@
 input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
   display: none;
+
 }
 
 .total-div{
@@ -42,9 +43,15 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   margin-right: 5px;
 }
 
-.end-time, .start-time {
+.start-time {
   position:relative;
   bottom:-2px;
+}
+
+.end-time {
+  position:relative;
+  bottom:-2px;
+  margin-left:3px;
 }
 
 .spinner{
