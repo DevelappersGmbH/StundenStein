@@ -269,7 +269,7 @@ export class TimeTrackerComponent implements OnInit {
     forkJoin(calls).subscribe(x => {
       this.dataService.getTimeTrackerByUserId(this.userService.getUser().id).subscribe(t => {
         if (!isNull(t) && !(isUndefined(t))) {
-          this.timeTracker = t;
+          this.setTrackerUpdates(t);
           this.extractFromTimeTracker();
           this.stoppingBlockedByLoading = false;
         } else {
@@ -326,6 +326,51 @@ export class TimeTrackerComponent implements OnInit {
       this.stoppingBlockedByLoading = true;
     }
     );
+  }
+
+  setTrackerUpdates(newTracker: TimeTracker): void {
+    if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
+    || isUndefined(this.timeTracker.id)
+    || this.timeTracker.id !== newTracker.id) {
+      this.timeTracker = newTracker;
+    }
+    if (
+      (
+        !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+        (isUndefined(newTracker.issue) || isNull(newTracker.issue))
+      )
+      ||
+      (
+        !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+        (isUndefined(newTracker.issue) || isNull(newTracker.issue))
+      )
+      ||
+      this.timeTracker.issue.id !== newTracker.issue.id
+      ) { this.timeTracker.issue = newTracker.issue;
+    }
+    if (
+      (
+        !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+        (isUndefined(newTracker.project) || isNull(newTracker.project))
+      )
+      ||
+      (
+        !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+        (isUndefined(newTracker.project) || isNull(newTracker.project))
+      )
+      ||
+      this.timeTracker.project.id !== newTracker.project.id
+      ) { this.timeTracker.project = newTracker.project;
+    }
+    if (this.timeTracker.timeStarted !== newTracker.timeStarted) {
+      this.timeTracker.timeStarted = newTracker.timeStarted;
+    }
+    if (this.timeTracker.billable !== newTracker.billable) {
+      this.timeTracker.billable = newTracker.billable;
+    }
+    if (this.timeTracker.comment !== newTracker.comment) {
+      this.timeTracker.comment = newTracker.comment;
+    }
   }
 
 }
