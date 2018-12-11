@@ -192,7 +192,7 @@ export class TimeLogComponent implements OnInit {
       this.updateIssueOptions(this.timeLog.project);
 
       this.projectControl.setValue(
-        this.timeLog.project ? this.timeLog.project : undefined
+        this.timeLog.project ? this.timeLog.project: undefined
       );
     } else {
       if (this.timeLog.project && this.timeLog.issue) {
@@ -375,7 +375,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteTimeLog() {
-    const that = this;
+    var that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
         console.log(success);
