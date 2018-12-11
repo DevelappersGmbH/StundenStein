@@ -76,8 +76,8 @@
           </div>
 
             <div class="oneline">
-          <button mat-icon-button class="button" (click)="changeMode()">
-            <mat-icon *ngIf="!loading" class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
+          <button *ngIf="!loading" mat-icon-button class="button" (click)="changeMode()">
+            <mat-icon  class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
             </div>
