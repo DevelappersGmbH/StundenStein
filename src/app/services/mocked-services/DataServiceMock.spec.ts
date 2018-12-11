@@ -42,4 +42,8 @@ export class DataServiceMock {
   public getTimeLogs(id: number): Observable<TimeLog[]> {
     return of(mockTimeLogs);
   }
+
+  public static getMockTimeLog(){
+    return mockTimeLog;
+  }
 }

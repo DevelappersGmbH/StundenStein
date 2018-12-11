@@ -22,6 +22,7 @@ describe('TimelogComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TimeLogComponent);
     component = fixture.componentInstance;
+    //component.timeLog = DataServiceMock.getMockTimeLog();
     fixture.detectChanges();
   });
 
