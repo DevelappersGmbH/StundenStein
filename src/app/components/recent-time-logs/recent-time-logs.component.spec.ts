@@ -1,7 +1,7 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RecentTimeLogsComponent } from './recent-time-logs.component';
-import { UserServiceMock } from './UserServiceMock';
-import { DataServiceMock } from './DataServiceMock';
+import { UserServiceMock } from '../../services/mocked-services/UserServiceMock.spec';
+import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.spec';
 import { UserService } from 'src/app/services/user/user.service';
 import { DataService } from 'src/app/services/data/data.service';
 import { MatBadgeModule, MatListModule, MatProgressSpinnerModule} from '@angular/material';

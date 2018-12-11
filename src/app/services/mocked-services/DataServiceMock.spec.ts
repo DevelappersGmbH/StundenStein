@@ -1,5 +1,3 @@
-import { User } from 'src/app/model/user.interface';
-import { Project } from 'src/app/model/project.interface';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { Observable, of } from 'rxjs';
 const mockUser = {
