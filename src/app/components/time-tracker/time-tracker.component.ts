@@ -45,6 +45,9 @@ export class TimeTrackerComponent implements OnInit {
   stoppingBlockedByLoading = false;
 
   ngOnInit() {
+    interval(10000).subscribe( val => {
+      this.loadTimeTracker();
+    });
     interval(1000).subscribe( val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
@@ -273,15 +276,14 @@ export class TimeTrackerComponent implements OnInit {
           this.extractFromTimeTracker();
           this.stoppingBlockedByLoading = false;
         } else {
-          this.timeTracker = {
+          this.setTrackerUpdates({
             billable: true,
             comment: '',
             issue: null,
             project: null
-          };
+          });
           this.stoppingBlockedByLoading = false;
         }
-        this.updateAutoCompletes();
         this.stoppingBlockedByLoading = false;
       });
     });
@@ -328,11 +330,20 @@ export class TimeTrackerComponent implements OnInit {
     );
   }
 
-  setTrackerUpdates(newTracker: TimeTracker): void {
+  setTrackerUpdates(newTracker: Partial<TimeTracker>): void {
+    let updateAutoCompletes = false;
     if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
-    || isUndefined(this.timeTracker.id)
-    || this.timeTracker.id !== newTracker.id) {
+    || (isUndefined(this.timeTracker.id) && !isUndefined(newTracker.id))) {
       this.timeTracker = newTracker;
+      updateAutoCompletes = true;
+    }
+    if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
+    && (isUndefined(newTracker.id) || isNull(newTracker.id))) {
+      return;
+    }
+    if (this.timeTracker.id !== newTracker.id) {
+      this.timeTracker = newTracker;
+      updateAutoCompletes = true;
     }
     if (
       (
@@ -347,6 +358,7 @@ export class TimeTrackerComponent implements OnInit {
       ||
       this.timeTracker.issue.id !== newTracker.issue.id
       ) { this.timeTracker.issue = newTracker.issue;
+        updateAutoCompletes = true;
     }
     if (
       (
@@ -361,6 +373,7 @@ export class TimeTrackerComponent implements OnInit {
       ||
       this.timeTracker.project.id !== newTracker.project.id
       ) { this.timeTracker.project = newTracker.project;
+        updateAutoCompletes = true;
     }
     if (this.timeTracker.timeStarted !== newTracker.timeStarted) {
       this.timeTracker.timeStarted = newTracker.timeStarted;
@@ -371,6 +384,7 @@ export class TimeTrackerComponent implements OnInit {
     if (this.timeTracker.comment !== newTracker.comment) {
       this.timeTracker.comment = newTracker.comment;
     }
+    if (updateAutoCompletes) { this.updateAutoCompletes(); }
   }
 
 }
