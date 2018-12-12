@@ -1,5 +1,6 @@
 input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
   display: none;
+
 }
 
 .total-div{
@@ -7,8 +8,12 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   justify-content: space-between;
 }
 
+.oneline {
+  display: inline-block;
+}
+
 .field {
-  margin-left: 5px;
+  margin-left: 10px;
 }
 
 .icon{
@@ -38,21 +43,35 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   margin-right: 5px;
 }
 
-.field.end-time, .start-time {
+.start-time {
   position:relative;
   bottom:-2px;
 }
 
-.field.tracked-time {
+.end-time {
   position:relative;
-  bottom:-1px;
+  bottom:-2px;
+  margin-left:3px;
 }
 
-::ng-deep mat-form-field.edit .mat-form-field-underline {
+.spinner{
+  position:relative;
+  bottom:-5px;
+  margin-left: 9px;
+  margin-right: 9px;
+}
+
+.tracked-time {
+  position:relative;
+  bottom:-1px;
+  margin-left:8px;
+}
+
+mat-form-field.edit .mat-form-field-underline {
   display: none;
 }
 
-::ng-deep .cdk-overlay-pane {
+.cdk-overlay-pane {
   width: auto !important;
   max-width: 400px;
 }

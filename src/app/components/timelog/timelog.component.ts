@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   EventEmitter,
@@ -7,7 +8,7 @@ import {
   Output,
   ViewChild,
   ViewEncapsulation
-  } from '@angular/core';
+} from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
@@ -23,9 +24,10 @@ import {isNull, isUndefined} from 'util';
 @Component({
   selector: 'app-timelog',
   templateUrl: './timelog.component.html',
-  styleUrls: ['./timelog.component.scss']
+  styleUrls: ['./timelog.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit {
+export class TimeLogComponent implements OnInit, AfterViewInit {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog
@@ -40,10 +42,14 @@ export class TimeLogComponent implements OnInit {
   startWidth: number = this.minWidth;
   endWidth: number = this.minWidth;
 
+  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
   trackedTime: Date;
   active = false;
   editMode = false;
   editButton = 'edit';
+  loading = false;
+  loadingDel = false;
 
   projects: Project[] = [];
   issues: Issue[] = [];
@@ -95,6 +101,11 @@ export class TimeLogComponent implements OnInit {
     }
   }
 
+  ngAfterViewInit() {
+    this.resizeEnd();
+    this.resizeStart();
+  }
+
   loadProjects() {
     this.dataService.getProjects().subscribe(
       data => {
@@ -140,11 +151,11 @@ export class TimeLogComponent implements OnInit {
 
     return this.issueOptions.filter(
       issue =>
-        issue.subject.toLowerCase().includes(filterValue) ||
+        (issue.subject.toLowerCase().includes(filterValue) ||
         issue.id.toString().includes(filterValue) ||
         issue.subject
           .toLowerCase()
-          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2)))
     );
   }
 
@@ -182,7 +193,6 @@ export class TimeLogComponent implements OnInit {
     console.log('Issue: ', issue);
 
     if (this.findIssue(issue)) {
-      console.log('Existing issue detected');
       this.timeLog.issue = issue;
       this.timeLog.project = issue.project;
 
@@ -192,7 +202,7 @@ export class TimeLogComponent implements OnInit {
       this.updateIssueOptions(this.timeLog.project);
 
       this.projectControl.setValue(
-        this.timeLog.project ? this.timeLog.project: undefined
+        this.timeLog.project ? this.timeLog.project : undefined
       );
     } else {
       if (this.timeLog.project && this.timeLog.issue) {
@@ -203,19 +213,15 @@ export class TimeLogComponent implements OnInit {
       this.projectOptions = this.projects;
       this.timeLog.issue = null;
     }
-    console.log('Timelog', this.timeLog);
-    this.updateTimeLog();
   }
 
   selectProject(project) {
     if (this.findProject(project)) {
       this.timeLog.project = project;
-      console.log('New project detected', project.name);
       this.projectControl.setValue(project ? project : undefined);
       this.updateIssueOptions(project);
       this.issueControl.setValue(undefined);
       this.timeLog.issue = null;
-      console.log(this.issueOptions);
     } else {
       this.issueOptions = this.issues;
       this.projectOptions = this.projects;
@@ -225,13 +231,10 @@ export class TimeLogComponent implements OnInit {
         this.timeLog.issue ? this.timeLog.issue : undefined
       );
     }
-    console.log('Timelog', this.timeLog);
-    this.updateTimeLog();
   }
 
   updateComment(comment) {
     this.timeLog.comment = comment;
-    this.updateTimeLog();
   }
 
   private searchIssueById(id): Issue {
@@ -264,7 +267,6 @@ export class TimeLogComponent implements OnInit {
 
   markBillable() {
     this.timeLog.billable = !this.timeLog.billable;
-    this.updateTimeLog();
   }
 
   changeEndTime(time) {
@@ -280,23 +282,23 @@ export class TimeLogComponent implements OnInit {
       0
     );
     this.calculateTime();
-    this.updateTimeLog();
   }
 
   changeStartTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStarted = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDate(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStarted = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
     this.calculateTime();
-    this.updateTimeLog();
   }
 
   private isRunning() {
@@ -322,9 +324,8 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
-    if (this.isRunning()) {
-      /*ERROR: stop the tracker first*/
-    }
+    this.resizeStart();
+    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -357,6 +358,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   deleteWarning() {
+    this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.disableClose = true;
@@ -369,53 +371,70 @@ export class TimeLogComponent implements OnInit {
 
     dialogRef
       .afterClosed()
-      .subscribe(data =>
-        data ? this.deleteTimeLog() : console.log('Do NOT delete')
+      .subscribe((data) => {
+        if (data) {
+          this.deleteTimeLog();
+        }
+        this.loadingDel = false;
+      }
       );
   }
 
   deleteTimeLog() {
-    var that = this;
+    const that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
       next(success) {
-        console.log(success);
         that.deleted.emit(that.timeLog.id);
       },
       error(msg) {
         console.log('Error deleting: ', msg);
       }
     });
+    this.loadingDel = false;
   }
 
   updateTimeLog() {
-    this.dataService.updateTimeLog(this.timeLog).subscribe({
-      next(success) {
-        console.log(success);
+    const that = this;
+    that.loading = true;
+    this.dataService.updateTimeLog(this.timeLog).subscribe( {
+      next() {
+        that.loading = false;
       },
       error(msg) {
         console.log('Error updating: ', msg);
+        that.loading = false;
       }
     });
   }
 
   resizeStart() {
-    console.log('resizeStart');
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
+    } else {
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
+    }
     setTimeout(
       () =>
         (this.startWidth = Math.max(
           this.minWidth,
-          this.textStart.nativeElement.offsetWidth + 5
+          newWidth
         ))
     );
   }
 
   resizeEnd() {
-    console.log('resizeEnd');
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
+    } else {
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
+    }
     setTimeout(
       () =>
         (this.endWidth = Math.max(
           this.minWidth,
-          this.textEnd.nativeElement.offsetWidth + 5
+          newWidth
         ))
     );
   }
