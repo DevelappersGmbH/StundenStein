@@ -1,3 +1,4 @@
+import { ReloadTriggerService } from './../../services/reload-trigger.service';
 import { Component, OnInit } from '@angular/core';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { DataService } from 'src/app/services/data/data.service';
@@ -13,7 +14,8 @@ export class RecentTimeLogsComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private userService: UserService
+    private userService: UserService,
+    private reloadTriggerService :ReloadTriggerService
     ) {
   }
 
@@ -25,61 +27,32 @@ export class RecentTimeLogsComponent implements OnInit {
   listLoading : boolean;
 
   ngOnInit() {
+    this.unbookedTimeLogsMap = new Map();
     this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap = new Map();
-    this.unbookedTimeLogsMap = new Map();
     this.loadTimeLogs();
+    this.reloadTriggerService.timeLogDeleted.subscribe(data => {
+      this.onTimeLogDelete(data);
+    });
+    this.reloadTriggerService.timeLogAdded.subscribe(data => {
+      this.onTimeLogAdded(data);
+    });
   }
 
-
-  onTimeLogDelete(deleted: number) {
-    this.removeTimeLogFromList(deleted);
+  onTimeLogAdded(timeLog: TimeLog){
+    this.timeLogObservablesList.push(timeLog);
+    this.seperateDates();
+    this.countUnbookedTimeLogs();
   }
 
-  loadTimeLogs() {
+  refreshList(){
     this.listLoading = true;
-    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
-      this.timeLogObservablesList = timeLogs.reverse();
-      this.seperateDates();
-      this.countUnbookedTimeLogs();
-      this.listLoading = false;
-     });
+    this.seperateDates();
+    this.countUnbookedTimeLogs();
+    this.listLoading = false;
   }
 
-  //pls dont try to understand what i do here thanks
-  seperateDates(){
-    let seperateDates: Date[] = new Array();
-    let dateExists: Boolean = false;
-    for(var i = 0;  i < this.timeLogObservablesList.length; i++ ){
-      var date = this.timeLogObservablesList[i].timeStopped;
-      var matchingDate;
-      for(var j = 0; j < seperateDates.length; j++){
-        dateExists = false;
-        var existingDate = seperateDates[j];
-        if(this.compareDatesEqual(date, existingDate)){
-          matchingDate = existingDate;
-          dateExists = true;
-          break;
-        }
-      }
-      if(!dateExists){
-        seperateDates.push(date);
-        matchingDate = date;
-        this.timeLogMap.set(matchingDate, new Array());
-      }
-      this.timeLogMap.get(matchingDate).push(this.timeLogObservablesList[i]);
-    } 
-    this.dateList = seperateDates;
-  }
-
-  compareDatesEqual(d1: Date, d2: Date){
-    if(d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()){
-      return true;
-    }
-    return false;
-  }
-
-  removeTimeLogFromList(id: number){
+  onTimeLogDelete(id: number) {
     this.timeLogMap.forEach((value: TimeLog[], key: Date) => {
       const index = value.findIndex(entry => entry.id == id);
       if (index >= 0) {
@@ -92,7 +65,45 @@ export class RecentTimeLogsComponent implements OnInit {
         }
       }
     });
-    this.countUnbookedTimeLogs();
+    this.refreshList();
+  }
+
+  loadTimeLogs() {
+    this.listLoading = true;
+    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
+      this.timeLogObservablesList = timeLogs.reverse();
+      this.refreshList();
+      this.listLoading = false;
+     });
+  }
+
+  seperateDates(){
+    this.timeLogMap = new Map();
+    let seperateDates: Date[] = new Array();
+    this.timeLogObservablesList.forEach(timeLog => {
+      let dateExists: Boolean = false;
+      let newDate: Date;
+      seperateDates.forEach(date => {
+        if(this.compareDatesEqual(timeLog.timeStarted, date)){
+          dateExists = true;
+          newDate = date;
+        }
+      });
+      if(!dateExists){
+        newDate = timeLog.timeStarted;
+        seperateDates.push(newDate);
+        this.timeLogMap.set(newDate, new Array());
+      }
+      this.timeLogMap.get(newDate).push(timeLog);
+    });
+    this.dateList = seperateDates;
+  }
+
+  compareDatesEqual(d1: Date, d2: Date){
+    if(d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()){
+      return true;
+    }
+    return false;
   }
 
   countUnbookedTimeLogs(){
