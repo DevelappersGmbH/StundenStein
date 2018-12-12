@@ -18,8 +18,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
-import { User } from '../../model/user.interface';
-import {isNull, isUndefined} from 'util';
+import {ReloadTriggerService} from '../../services/reload-trigger.service';
 
 @Component({
   selector: 'app-timelog',
@@ -30,7 +29,8 @@ import {isNull, isUndefined} from 'util';
 export class TimeLogComponent implements OnInit, AfterViewInit {
   constructor(
     private dataService: DataService,
-    private deleteDialog: MatDialog
+    private deleteDialog: MatDialog,
+    private reloadTriggerService: ReloadTriggerService
   ) {}
 
   @Input() timeLog: TimeLog;
@@ -383,14 +383,13 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   deleteTimeLog() {
     const that = this;
     this.dataService.deleteTimeLog(this.timeLog).subscribe({
-      next(success) {
-        that.deleted.emit(that.timeLog.id);
+      next() {
+        that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
       },
       error(msg) {
         console.log('Error deleting: ', msg);
       }
     });
-    this.loadingDel = false;
   }
 
   updateTimeLog() {
@@ -399,6 +398,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     this.dataService.updateTimeLog(this.timeLog).subscribe( {
       next() {
         that.loading = false;
+        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
       },
       error(msg) {
         console.log('Error updating: ', msg);
