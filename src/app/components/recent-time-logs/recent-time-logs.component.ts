@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Project } from './../../model/project.interface';
+import { Component, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { DataService } from 'src/app/services/data/data.service';
 import { UserService } from 'src/app/services/user/user.service';
+import { Issue } from 'src/app/model/issue.interface';
 
 @Component({
   selector: 'app-recent-time-logs',
@@ -9,7 +11,7 @@ import { UserService } from 'src/app/services/user/user.service';
   styleUrls: ['./recent-time-logs.component.scss']
 })
 
-export class RecentTimeLogsComponent implements OnInit {
+export class RecentTimeLogsComponent implements OnInit, OnChanges {
 
   constructor(
     private dataService: DataService,
@@ -19,34 +21,38 @@ export class RecentTimeLogsComponent implements OnInit {
 
   timeLogObservablesList: TimeLog[];
   dateList: Date[];
-  timeLogMap : Map<Date, TimeLog[]>;
-  unbookedTimeLogsMap : Map<Date, number>;
+  timeLogMap: Map<Date, TimeLog[]>;
+  unbookedTimeLogsMap: Map<Date, number>;
   numberOfUnbookedTimeLogs: number;
-  listLoading : boolean;
+  listLoading: boolean;
+
+  @Input() projects: Project[];
+  @Input() issues: Issue[];
+  @Input() timeLogs: TimeLog[];
 
   ngOnInit() {
+    this.listLoading = true;
     this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap = new Map();
     this.unbookedTimeLogsMap = new Map();
-    this.loadTimeLogs();
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+
+      const change = changes['timeLogs'];
+      this.timeLogObservablesList = change.currentValue.reverse();
+      this.seperateDates();
+      this.countUnbookedTimeLogs();
+      this.listLoading = false;
+    }
+  }
 
   onTimeLogDelete(deleted: number) {
     this.removeTimeLogFromList(deleted);
   }
 
-  loadTimeLogs() {
-    this.listLoading = true;
-    this.dataService.getTimeLogs(this.userService.getUser().id).subscribe(timeLogs => { 
-      this.timeLogObservablesList = timeLogs.reverse();
-      this.seperateDates();
-      this.countUnbookedTimeLogs();
-      this.listLoading = false;
-     });
-  }
-
-  //pls dont try to understand what i do here thanks
+  // pls dont try to understand what i do here thanks
   seperateDates(){
     let seperateDates: Date[] = new Array();
     let dateExists: Boolean = false;
@@ -68,7 +74,7 @@ export class RecentTimeLogsComponent implements OnInit {
         this.timeLogMap.set(matchingDate, new Array());
       }
       this.timeLogMap.get(matchingDate).push(this.timeLogObservablesList[i]);
-    } 
+    }
     this.dateList = seperateDates;
   }
 
