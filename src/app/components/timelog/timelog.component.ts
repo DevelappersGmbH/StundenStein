@@ -19,6 +19,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import {ReloadTriggerService} from '../../services/reload-trigger.service';
+import {ErrorService} from '../../services/error/error.service';
 
 @Component({
   selector: 'app-timelog',
@@ -30,7 +31,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
-    private reloadTriggerService: ReloadTriggerService
+    private reloadTriggerService: ReloadTriggerService,
+    private errorService: ErrorService
   ) {}
 
   @Input() timeLog: TimeLog;
@@ -113,7 +115,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         this.projectOptions = this.projects;
       },
       error => {
-        console.error('Couldn\'t get projects from data service.');
+        this.errorService.errorDialog('Couldn\'t get projects from data service.');
       }
     );
   }
@@ -125,7 +127,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         this.issueOptions = this.issues;
       },
       error => {
-        console.error('Couldn\'t get issues from data service.');
+        this.errorService.errorDialog('Couldn\'t get issues from data service.');
       }
     );
   }
@@ -190,7 +192,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   selectIssue(issue) {
-    console.log('Issue: ', issue);
 
     if (this.findIssue(issue)) {
       this.timeLog.issue = issue;
@@ -237,32 +238,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     this.timeLog.comment = comment;
   }
 
-  private searchIssueById(id): Issue {
-    this.issues.forEach(issue => {
-      if (issue.id === id) {
-        return issue;
-      }
-    });
-    console.log('No matching issue found');
-    return undefined;
-  }
-
-  private searchProjectById(id): Project {
-    this.projects.forEach(project => {
-      if (project.id === id) {
-        return project;
-      }
-    });
-    console.log('No matching project found');
-    return undefined;
-  }
-
   startTracker() {
     /*
     startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
     */
     /*make the trackedTime change according to timetracker*/
-    this.active = true;
   }
 
   markBillable() {
@@ -272,15 +252,17 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   changeEndTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStopped = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDate(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStopped = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
     this.calculateTime();
   }
 
@@ -299,10 +281,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       );
     }
     this.calculateTime();
-  }
-
-  private isRunning() {
-    return this.active;
   }
 
   private calculateTime() {
@@ -387,7 +365,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
       },
       error(msg) {
-        console.log('Error deleting: ', msg);
+        this.errorService.errorDialog(msg);
       }
     });
   }
@@ -401,7 +379,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
       },
       error(msg) {
-        console.log('Error updating: ', msg);
+        this.errorService.errorDialog(msg);
         that.loading = false;
       }
     });
