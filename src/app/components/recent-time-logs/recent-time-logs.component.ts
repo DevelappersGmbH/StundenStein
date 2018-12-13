@@ -48,11 +48,6 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     }
   }
 
-  onTimeLogDelete(deleted: number) {
-    this.removeTimeLogFromList(deleted);
-  }
-
-  // pls dont try to understand what i do here thanks
   seperateDates() {
     this.timeLogMap = new Map();
     let seperateDates: Date[] = new Array();
@@ -80,22 +75,6 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       return true;
     }
     return false;
-  }
-
-  removeTimeLogFromList(id: number) {
-    this.timeLogMap.forEach((value: TimeLog[], key: Date) => {
-      const index = value.findIndex(entry => entry.id == id);
-      if (index >= 0) {
-        value.splice(index, 1);
-      }
-      if (value.length == 0) {
-        const dateIndex = this.dateList.findIndex(date => date == key);
-        if (index >= 0) {
-          this.dateList.splice(dateIndex, 1);
-        }
-      }
-    });
-    this.countUnbookedTimeLogs();
   }
 
   countUnbookedTimeLogs(){
