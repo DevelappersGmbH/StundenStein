@@ -1,7 +1,11 @@
 <app-navbar></app-navbar>
 <div class="main-container">
   <div class="inner-container">
-    <app-time-tracker></app-time-tracker>
+    <app-time-tracker
+      [projects]="projects"
+      [issues]="issues"
+      [timeLogs]="timelogs"
+    ></app-time-tracker>
     <app-userreports></app-userreports>
     <app-recent-time-logs></app-recent-time-logs>
   </div>

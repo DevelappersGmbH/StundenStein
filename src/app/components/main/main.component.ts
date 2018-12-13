@@ -1,4 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { DataService } from 'src/app/services/data/data.service';
+import { Issue } from 'src/app/model/issue.interface';
+import { Project } from 'src/app/model/project.interface';
+import { TimeLog } from 'src/app/model/time-log.interface';
+import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
   selector: 'app-main',
@@ -6,7 +11,26 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
-  constructor() {}
+  projects: Project[] = [];
+  issues: Issue[] = [];
+  timelogs: TimeLog[] = [];
 
-  ngOnInit() {}
+  constructor(
+    private dataService: DataService,
+    private userService: UserService
+  ) {}
+
+  ngOnInit() {
+    this.dataService.getProjects().subscribe(ps => {
+      this.projects = ps;
+    });
+    this.dataService.getIssues().subscribe(is => {
+      this.issues = is;
+    });
+    this.dataService
+      .getTimeLogs(this.userService.getUser().id)
+      .subscribe(tls => {
+        this.timelogs = tls;
+      });
+  }
 }
