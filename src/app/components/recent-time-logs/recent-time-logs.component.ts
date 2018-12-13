@@ -21,6 +21,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap = new Map();
     this.unbookedTimeLogsMap = new Map();
+    this.timeLogsInitialized = false;
   }
 
   timeLogObservablesList: TimeLog[];
@@ -29,6 +30,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   unbookedTimeLogsMap: Map<Date, number>;
   numberOfUnbookedTimeLogs: number;
   listLoading: boolean;
+  timeLogsInitialized: boolean;
 
   @Input() projects: Project[];
   @Input() issues: Issue[];
@@ -41,8 +43,13 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     this.listLoading = true;
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
-      this.timeLogObservablesList = change.currentValue.reverse();
-      this.seperateDates();
+      if (!this.timeLogsInitialized){
+        this.timeLogObservablesList = change.currentValue.reverse();
+      }
+      else {
+        this.timeLogObservablesList = change.currentValue;
+      }
+        this.seperateDates();
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
