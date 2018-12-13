@@ -11,6 +11,7 @@ import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { Favicons } from 'src/app/services/favicon/favicon.service';
+import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -23,7 +24,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     private dataService: DataService ,
     private userService: UserService ,
     private titleService: Title ,
-    private faviconService: Favicons
+    private faviconService: Favicons ,
+    private reloadTriggerSerivce: ReloadTriggerService
     ) { }
 
   logs: TimeLog[] = [];
@@ -369,6 +371,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         console.error('Couldn\'t stop time tracker');
         this.stoppingBlockedByLoading = false;
       } else {
+        this.reloadTriggerSerivce.triggerTimeLogAdded(data);
         this.loadTimeTracker();
       }
     }, error => {
