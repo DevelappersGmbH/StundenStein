@@ -17,6 +17,10 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     private dataService: DataService,
     private userService: UserService
     ) {
+    this.listLoading = true;
+    this.numberOfUnbookedTimeLogs = 0;
+    this.timeLogMap = new Map();
+    this.unbookedTimeLogsMap = new Map();
   }
 
   timeLogObservablesList: TimeLog[];
@@ -31,15 +35,10 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   @Input() timeLogs: TimeLog[];
 
   ngOnInit() {
-    this.listLoading = true;
-    this.numberOfUnbookedTimeLogs = 0;
-    this.timeLogMap = new Map();
-    this.unbookedTimeLogsMap = new Map();
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (typeof changes['timeLogs'] !== 'undefined') {
-
       const change = changes['timeLogs'];
       this.timeLogObservablesList = change.currentValue.reverse();
       this.seperateDates();
