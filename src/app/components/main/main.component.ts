@@ -26,20 +26,34 @@ export class MainComponent implements OnInit {
     this.dataService.getProjects().subscribe(ps => {
       this.projects = ps;
     });
+
     this.dataService.getIssues().subscribe(is => {
       this.issues = is;
     });
+
     this.dataService
       .getTimeLogs(this.userService.getUser().id)
       .subscribe(tls => {
         this.timelogs = tls;
       });
+
     this.reloadTriggerService.timeLogAdded.subscribe(timelog => {
       this.timelogs.push(timelog);
       this.timelogs = this.timelogs.slice().sort((a, b) => {
         return <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted);
       });
     });
+
+    this.reloadTriggerService.timeLogUpdated.subscribe(timelog => {
+      const index = this.timelogs.findIndex(entry => entry.id === timelog.id);
+      if (index >= -1) {
+        this.timelogs[index] = timelog;
+      }
+      this.timelogs = this.timelogs.slice().sort((a, b) => {
+        return <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted);
+      });
+    });
+
     this.reloadTriggerService.timeLogDeleted.subscribe(id => {
       const index = this.timelogs.findIndex(entry => entry.id === id);
       if (index >= -1) {
