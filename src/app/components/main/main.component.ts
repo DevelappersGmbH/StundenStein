@@ -34,8 +34,13 @@ export class MainComponent implements OnInit {
       .subscribe(tls => {
         this.timelogs = tls;
       });
-    this.reloadTriggerService.timeLogAdded.subscribe(timelog =>
-      this.timelogs.push(timelog)
-    );
+    this.reloadTriggerService.timeLogAdded.subscribe(timelog => {
+      this.timelogs.push(timelog);
+      this.timelogs = this.timelogs.slice();
+    });
+    this.reloadTriggerService.timeLogDeleted.subscribe(id => {
+      this.timelogs.slice(id, 1);
+      this.timelogs = this.timelogs.slice();
+    });
   }
 }
