@@ -365,7 +365,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       project: this.timeTracker.project
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
-      if (data === false) {
+      if (data === undefined || data === null) {
         console.error('Couldn\'t stop time tracker');
         this.stoppingBlockedByLoading = false;
       } else {
