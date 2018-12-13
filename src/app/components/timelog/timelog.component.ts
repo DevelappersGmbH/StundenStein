@@ -364,8 +364,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       next() {
         that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
       },
-      error(msg) {
-        this.errorService.errorDialog(msg);
+      error() {
+        this.errorService.errorDialog('Could not delete this timeLog :(');
       }
     });
   }
@@ -378,8 +378,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
         that.loading = false;
         that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
       },
-      error(msg) {
-        this.errorService.errorDialog(msg);
+      error() {
+        this.errorService.errorDialog('Could not update this timeLog :(');
         that.loading = false;
       }
     });
