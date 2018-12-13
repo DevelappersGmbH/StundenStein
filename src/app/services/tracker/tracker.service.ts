@@ -32,6 +32,7 @@ export class TrackerService {
           this.stopAndStart(t, timeTracker);
         } else {
           // no tracker is running
+          this.start(timeTracker);
         }
       });
     });
