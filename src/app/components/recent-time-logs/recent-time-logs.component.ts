@@ -37,6 +37,13 @@ export class RecentTimeLogsComponent implements OnInit {
     this.reloadTriggerService.timeLogAdded.subscribe(data => {
       this.onTimeLogAdded(data);
     });
+    this.reloadTriggerService.timeLogUpdated.subscribe(date => {
+      this.onTimeLogUpdated(data);
+    });
+  }
+
+  onTimeLogUpdated(id: number){
+    this.refreshList();
   }
 
   onTimeLogAdded(timeLog: TimeLog){
