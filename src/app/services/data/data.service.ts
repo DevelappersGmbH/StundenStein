@@ -460,7 +460,7 @@ export class DataService {
           }
         });
         return timelogs.sort((a, b) => {
-          return <any>new Date(a.timeStarted) - <any>new Date(b.timeStarted);
+          return <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted);
         });
       })
     );
