@@ -10,6 +10,7 @@ import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
 import { TimeLog } from 'src/app/model/time-log.interface';
+import { Favicons } from 'src/app/services/favicon/favicon.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -21,7 +22,8 @@ export class TimeTrackerComponent implements OnInit {
   constructor(
     private dataService: DataService ,
     private userService: UserService ,
-    private titleService: Title
+    private titleService: Title ,
+    private faviconService: Favicons
     ) { }
 
   logs: TimeLog[] = [];
@@ -52,9 +54,11 @@ export class TimeTrackerComponent implements OnInit {
     interval(1000).subscribe( val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(((new Date()).valueOf() - (new Date(this.timeTracker.timeStarted)).valueOf()) / 1000);
+        this.faviconService.activate('running');
       } else {
         this.currentTrackerTimeString  = '00:00:00';
         this.titleService.setTitle('StundenStein');
+        this.faviconService.activate('idle');
       }
     });
     this.loadProjects();
