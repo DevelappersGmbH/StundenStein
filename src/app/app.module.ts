@@ -32,7 +32,7 @@ import {
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule
-  } from '@angular/material';
+} from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
@@ -42,6 +42,8 @@ import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserReportsComponent } from './components/userreports/userreports.component';
 import { UserService } from './services/user/user.service';
+import { ErrorDialogComponent } from './errorpopup/error-dialog.component';
+import { ErrorService } from './services/error/error.service';
 
 @NgModule({
   declarations: [
@@ -54,7 +56,8 @@ import { UserService } from './services/user/user.service';
     UserReportsComponent,
     RecentTimeLogsComponent,
     DeleteWarningComponent,
-    EnforcedInputsDirective
+    EnforcedInputsDirective,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -97,9 +100,10 @@ import { UserService } from './services/user/user.service';
     UserService,
     CookieService,
     DatePipe,
+    ErrorService,
     ReloadTriggerService
   ],
   bootstrap: [AppComponent],
-  entryComponents: [DeleteWarningComponent]
+  entryComponents: [DeleteWarningComponent, ErrorDialogComponent]
 })
 export class AppModule {}

@@ -1,0 +1,18 @@
+<table><tr><td><i class="material-icons" style="font-size: 53px; color: #d62c36;">cancel</i></td></tr></table>
+<h2 mat-dialog-title>Ooops...an error occurred.</h2>
+<mat-divider></mat-divider>
+<div class="center">
+  <mat-dialog-content style="font-size: 16px; font-family: Roboto;"> {{ data.message }} </mat-dialog-content>
+</div>
+<mat-divider style="margin-top: 10px;"></mat-divider>
+<mat-dialog-actions>
+  <table>
+    <tr>
+      <td>
+        <button class="mat-raised-button mat-primary" style="background-color: #d62c36;" (click)="close()">
+          Okay
+        </button>
+      </td>
+    </tr>
+  </table>
+</mat-dialog-actions>
