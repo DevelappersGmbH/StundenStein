@@ -4,24 +4,24 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
   ViewChild,
-  ViewEncapsulation,
-  OnChanges,
-  SimpleChanges
-} from '@angular/core';
+  ViewEncapsulation
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
+import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
-import {ReloadTriggerService} from '../../services/reload-trigger.service';
-import { isNull, isUndefined } from 'util';
 
 @Component({
   selector: 'app-timelog',
@@ -107,7 +107,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => project ? this.filterProjects(project) : this.projectOptions.slice())
+      map(project =>
+        project ? this.filterProjects(project) : this.projectOptions.slice()
+      )
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -121,12 +123,16 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   displayIssue(issue: Issue): string {
-    if (isNull(issue) || isUndefined(issue)) { return ''; }
+    if (isNull(issue) || isUndefined(issue)) {
+      return '';
+    }
     return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject(project: Project): string {
-    if (isNull(project) || isUndefined(project)) { return ''; }
+    if (isNull(project) || isUndefined(project)) {
+      return '';
+    }
     return project.name;
   }
 
@@ -141,11 +147,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
     return this.issueOptions.filter(
       issue =>
-        (issue.subject.toLowerCase().includes(filterValue) ||
+        issue.subject.toLowerCase().includes(filterValue) ||
         issue.id.toString().includes(filterValue) ||
         issue.subject
           .toLowerCase()
-          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2)))
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
     );
   }
 
@@ -335,7 +341,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
   private findProject(project): Project {
     if (project) {
-    return this.projectOptions.find(entry => entry.id === project.id);
+      return this.projectOptions.find(entry => entry.id === project.id);
     }
     return undefined;
   }
@@ -359,15 +365,12 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
       dialogConfig
     );
 
-    dialogRef
-      .afterClosed()
-      .subscribe((data) => {
-        if (data) {
-          this.deleteTimeLog();
-        }
-        this.loadingDel = false;
+    dialogRef.afterClosed().subscribe(data => {
+      if (data) {
+        this.deleteTimeLog();
       }
-      );
+      this.loadingDel = false;
+    });
   }
 
   deleteTimeLog() {
@@ -385,10 +388,10 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   updateTimeLog() {
     const that = this;
     that.loading = true;
-    this.dataService.updateTimeLog(this.timeLog).subscribe( {
+    this.dataService.updateTimeLog(this.timeLog).subscribe({
       next() {
         that.loading = false;
-        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
+        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog);
       },
       error(msg) {
         console.log('Error updating: ', msg);
@@ -404,13 +407,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     } else {
       newWidth = this.textStart.nativeElement.offsetWidth + 10;
     }
-    setTimeout(
-      () =>
-        (this.startWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
+    setTimeout(() => (this.startWidth = Math.max(this.minWidth, newWidth)));
   }
 
   resizeEnd() {
@@ -420,12 +417,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     } else {
       newWidth = this.textStart.nativeElement.offsetWidth + 10;
     }
-    setTimeout(
-      () =>
-        (this.endWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
+    setTimeout(() => (this.endWidth = Math.max(this.minWidth, newWidth)));
   }
 }
