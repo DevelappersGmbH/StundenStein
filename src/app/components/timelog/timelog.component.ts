@@ -37,7 +37,6 @@ export class TimeLogComponent implements OnInit {
   trackedTime: Date;
   booked: boolean;
   currentUser: User;
-  active = false;
   editMode = false;
   editButton = 'edit';
 
@@ -261,7 +260,6 @@ export class TimeLogComponent implements OnInit {
   }
 
   startTracker() {
-    this.active = true;
     this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment });
   }
 
@@ -306,10 +304,6 @@ export class TimeLogComponent implements OnInit {
 
   refreshTrackedTime() {
     // send tracked time to TimeTracker?
-  }
-
-  private isRunning() {
-    return this.active;
   }
 
   private calculateTime() {
