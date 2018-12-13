@@ -330,9 +330,6 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
-    if (this.isRunning()) {
-      /*ERROR: stop the tracker first*/
-    }
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
