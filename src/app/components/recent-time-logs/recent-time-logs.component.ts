@@ -38,6 +38,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
+    this.listLoading = true;
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
       this.timeLogObservablesList = change.currentValue.reverse();
@@ -75,21 +76,21 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   }
 
   compareDatesEqual(d1: Date, d2: Date){
-    if(d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()){
+    if (d1.getDay() == d2.getDay() && d1.getMonth() == d2.getMonth() && d1.getFullYear() == d2.getFullYear()) {
       return true;
     }
     return false;
   }
 
-  removeTimeLogFromList(id: number){
+  removeTimeLogFromList(id: number) {
     this.timeLogMap.forEach((value: TimeLog[], key: Date) => {
       const index = value.findIndex(entry => entry.id == id);
       if (index >= 0) {
         value.splice(index, 1);
       }
-      if(value.length == 0){
+      if (value.length == 0) {
         const dateIndex = this.dateList.findIndex(date => date == key);
-        if(index >= 0){
+        if (index >= 0) {
           this.dateList.splice(dateIndex, 1);
         }
       }
@@ -101,13 +102,13 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap.forEach((timeLogs: TimeLog[], date: Date) => {
       let unbookedTimeLogs = 0;
-      timeLogs.forEach((timeLog: TimeLog) =>{
-        if(!timeLog.booked){
+      timeLogs.forEach((timeLog: TimeLog) => {
+        if (!timeLog.booked) {
           unbookedTimeLogs++;
           this.numberOfUnbookedTimeLogs++;
         }
       });
-      this.unbookedTimeLogsMap.set(date,unbookedTimeLogs);
+      this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
   });
   }
 }
