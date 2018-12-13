@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from 'src/app/services/data/data.service';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
+import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -17,7 +18,8 @@ export class MainComponent implements OnInit {
 
   constructor(
     private dataService: DataService,
-    private userService: UserService
+    private userService: UserService,
+    private reloadTriggerService: ReloadTriggerService
   ) {}
 
   ngOnInit() {
@@ -32,5 +34,8 @@ export class MainComponent implements OnInit {
       .subscribe(tls => {
         this.timelogs = tls;
       });
+    this.reloadTriggerService.timeLogAdded.subscribe(timelog =>
+      this.timelogs.push(timelog)
+    );
   }
 }
