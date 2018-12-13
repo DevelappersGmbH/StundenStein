@@ -97,9 +97,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
       this.timeLog.project ? this.timeLog.project : undefined
     );
 
-    this.loadIssues();
-    this.loadProjects();
-
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
       map(issue =>
