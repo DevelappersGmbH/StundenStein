@@ -21,6 +21,7 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { TimeLog } from '../../model/time-log.interface';
 import {ReloadTriggerService} from '../../services/reload-trigger.service';
+import { isNull, isUndefined } from 'util';
 
 @Component({
   selector: 'app-timelog',
@@ -120,12 +121,12 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   displayIssue(issue: Issue): string {
-    if (!issue) { return ''; }
-    return issue.id.toString() + ': ' + issue.subject;
+    if (isNull(issue) || isUndefined(issue)) { return ''; }
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject(project: Project): string {
-    if (!project) { return ''; }
+    if (isNull(project) || isUndefined(project)) { return ''; }
     return project.name;
   }
 
