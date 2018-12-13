@@ -10,7 +10,7 @@
           </mat-form-field>
 
           <mat-autocomplete #autoIssue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)" [displayWith]="displayIssue" >
-            <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.id}}: {{issue.subject}} </mat-option>
+            <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.tracker}} #{{issue.id}}: {{issue.subject}} </mat-option>
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">

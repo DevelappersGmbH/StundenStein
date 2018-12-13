@@ -1,37 +1,45 @@
-import { Component, OnInit } from '@angular/core';
-import { Project } from 'src/app/model/project.interface';
-import { Issue } from 'src/app/model/issue.interface';
-import { isUndefined, isNull } from 'util';
-import { FormControl } from '@angular/forms';
-import { Observable, forkJoin, interval } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import {
+  Component,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges
+  } from '@angular/core';
 import { DataService } from 'src/app/services/data/data.service';
-import { TimeTracker } from 'src/app/model/time-tracker.interface';
-import { UserService } from 'src/app/services/user/user.service';
-import { Title } from '@angular/platform-browser';
-import { TimeLog } from 'src/app/model/time-log.interface';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { Favicons } from 'src/app/services/favicon/favicon.service';
+import { forkJoin, interval, Observable } from 'rxjs';
+import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
+import { Issue } from 'src/app/model/issue.interface';
+import { map, startWith } from 'rxjs/operators';
+import { Project } from 'src/app/model/project.interface';
+import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
+import { TimeLog } from 'src/app/model/time-log.interface';
+import { TimeTracker } from 'src/app/model/time-tracker.interface';
+import { Title } from '@angular/platform-browser';
+import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
   selector: 'app-time-tracker',
   templateUrl: './time-tracker.component.html',
   styleUrls: ['./time-tracker.component.scss']
 })
-export class TimeTrackerComponent implements OnInit {
+export class TimeTrackerComponent implements OnInit, OnChanges {
 
   constructor(
-    private dataService: DataService ,
-    private userService: UserService ,
-    private titleService: Title ,
-    private errorService: ErrorService ,
-    private faviconService: Favicons
+    private dataService: DataService,
+    private userService: UserService,
+    private titleService: Title,
+    private faviconService: Favicons,
+    private reloadTriggerSerivce: ReloadTriggerService,
+    private errorService: ErrorService
     ) { }
 
   logs: TimeLog[] = [];
-  projects: Project[] = [];
-  issues: Issue[] = [];
-  issueStrings: string[] = [];
+  @Input() timeLogs: TimeLog[] = [];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
   currentTrackerTimeString: string;
   automaticMode: boolean;
   automaticLock: boolean;
@@ -52,6 +60,19 @@ export class TimeTrackerComponent implements OnInit {
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+
+      const change = changes['timeLogs'];
+      change.currentValue.forEach( log => {
+        if (!isUndefined(log.comment) && !isNull(log.comment) && log.comment.length > 0) {
+          this.logs.unshift(log);
+        }
+      });
+
+    }
+  }
+
   ngOnInit() {
     interval(1000).subscribe( val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
@@ -63,9 +84,6 @@ export class TimeTrackerComponent implements OnInit {
         this.faviconService.activate('idle');
       }
     });
-    this.loadProjects();
-    this.loadIssues();
-    this.loadLogs();
     this.currentTrackerTimeString  = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
@@ -250,36 +268,6 @@ export class TimeTrackerComponent implements OnInit {
     this.updateTracker();
   }
 
-  loadProjects() {
-    this.dataService.getProjects().subscribe( data => {
-      this.projects = data;
-    }, error => {
-      this.errorService.errorDialog('Couldn\'t get projects from data service.');
-    });
-  }
-
-  loadIssues() {
-    this.dataService.getIssues().subscribe( data => {
-      this.issues = data;
-    }, error => {
-      this.errorService.errorDialog('Couldn\'t get issues from data service.');
-    });
-  }
-
-  loadLogs() {
-    this.dataService.getTimeLogs().subscribe( data => {
-      this.logs = [];
-      // filter through logs and remove those without a comment
-      data.forEach( log => {
-        if (!isUndefined(log.comment) && !isNull(log.comment) && log.comment.length > 0) {
-          this.logs.unshift(log);
-        }
-      });
-    }, error => {
-      this.errorService.errorDialog('Couldn\'t get time logs from data service.');
-    });
-  }
-
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
     let prefix = '';
@@ -386,10 +374,11 @@ export class TimeTrackerComponent implements OnInit {
       project: this.timeTracker.project
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
-      if (data === false) {
+      if (data === undefined || data === null) {
         this.errorService.errorDialog('Couldn\'t stop time tracker');
         this.stoppingBlockedByLoading = false;
       } else {
+        this.reloadTriggerSerivce.triggerTimeLogAdded(data);
         this.loadTimeTracker();
       }
     }, error => {

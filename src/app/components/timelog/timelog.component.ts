@@ -4,21 +4,24 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation
-} from '@angular/core';
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
 import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
+import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
-import {ReloadTriggerService} from '../../services/reload-trigger.service';
 
 @Component({
   selector: 'app-timelog',
@@ -26,7 +29,7 @@ import {ReloadTriggerService} from '../../services/reload-trigger.service';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit, AfterViewInit {
+export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
@@ -34,6 +37,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   ) {}
 
   @Input() timeLog: TimeLog;
+  @Input() timeLogs: TimeLog[];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('hiddenStart') textStart: ElementRef;
@@ -51,9 +57,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   loading = false;
   loadingDel = false;
 
-  projects: Project[] = [];
-  issues: Issue[] = [];
-
   issueControl = new FormControl();
   projectControl = new FormControl();
   issueOptions: Issue[] = [];
@@ -62,6 +65,20 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   filteredProjects: Observable<Project[]>;
 
   filteredObject = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
+    }
+    if (typeof changes['issues'] !== 'undefined') {
+      const change = changes['issues'];
+      this.issueOptions = this.issues;
+    }
+    if (typeof changes['projects'] !== 'undefined') {
+      const change = changes['projects'];
+      this.projectOptions = this.projects;
+    }
+  }
 
   ngOnInit() {
     this.trackedTime = new Date(
@@ -81,9 +98,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       this.timeLog.project ? this.timeLog.project : undefined
     );
 
-    this.loadIssues();
-    this.loadProjects();
-
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
       map(issue =>
@@ -93,7 +107,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => project ? this.filterProjects(project) : this.projectOptions.slice())
+      map(project =>
+        project ? this.filterProjects(project) : this.projectOptions.slice()
+      )
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -106,37 +122,17 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     this.resizeStart();
   }
 
-  loadProjects() {
-    this.dataService.getProjects().subscribe(
-      data => {
-        this.projects = data;
-        this.projectOptions = this.projects;
-      },
-      error => {
-        console.error('Couldn\'t get projects from data service.');
-      }
-    );
-  }
-
-  loadIssues() {
-    this.dataService.getIssues().subscribe(
-      data => {
-        this.issues = data;
-        this.issueOptions = this.issues;
-      },
-      error => {
-        console.error('Couldn\'t get issues from data service.');
-      }
-    );
-  }
-
   displayIssue(issue: Issue): string {
-    if (!issue) { return ''; }
-    return issue.id.toString() + ': ' + issue.subject;
+    if (isNull(issue) || isUndefined(issue)) {
+      return '';
+    }
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject(project: Project): string {
-    if (!project) { return ''; }
+    if (isNull(project) || isUndefined(project)) {
+      return '';
+    }
     return project.name;
   }
 
@@ -151,11 +147,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
     return this.issueOptions.filter(
       issue =>
-        (issue.subject.toLowerCase().includes(filterValue) ||
+        issue.subject.toLowerCase().includes(filterValue) ||
         issue.id.toString().includes(filterValue) ||
         issue.subject
           .toLowerCase()
-          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2)))
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
     );
   }
 
@@ -345,7 +341,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
   private findProject(project): Project {
     if (project) {
-    return this.projectOptions.find(entry => entry.id === project.id);
+      return this.projectOptions.find(entry => entry.id === project.id);
     }
     return undefined;
   }
@@ -369,15 +365,12 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       dialogConfig
     );
 
-    dialogRef
-      .afterClosed()
-      .subscribe((data) => {
-        if (data) {
-          this.deleteTimeLog();
-        }
-        this.loadingDel = false;
+    dialogRef.afterClosed().subscribe(data => {
+      if (data) {
+        this.deleteTimeLog();
       }
-      );
+      this.loadingDel = false;
+    });
   }
 
   deleteTimeLog() {
@@ -395,10 +388,10 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   updateTimeLog() {
     const that = this;
     that.loading = true;
-    this.dataService.updateTimeLog(this.timeLog).subscribe( {
+    this.dataService.updateTimeLog(this.timeLog).subscribe({
       next() {
         that.loading = false;
-        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
+        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog);
       },
       error(msg) {
         console.log('Error updating: ', msg);
@@ -414,13 +407,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     } else {
       newWidth = this.textStart.nativeElement.offsetWidth + 10;
     }
-    setTimeout(
-      () =>
-        (this.startWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
+    setTimeout(() => (this.startWidth = Math.max(this.minWidth, newWidth)));
   }
 
   resizeEnd() {
@@ -430,12 +417,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     } else {
       newWidth = this.textStart.nativeElement.offsetWidth + 10;
     }
-    setTimeout(
-      () =>
-        (this.endWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
+    setTimeout(() => (this.endWidth = Math.max(this.minWidth, newWidth)));
   }
 }
