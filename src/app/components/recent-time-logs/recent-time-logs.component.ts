@@ -52,28 +52,25 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   }
 
   // pls dont try to understand what i do here thanks
-  seperateDates(){
+  seperateDates() {
+    this.timeLogMap = new Map();
     let seperateDates: Date[] = new Array();
-    let dateExists: Boolean = false;
-    for(var i = 0;  i < this.timeLogObservablesList.length; i++ ){
-      var date = this.timeLogObservablesList[i].timeStopped;
-      var matchingDate;
-      for(var j = 0; j < seperateDates.length; j++){
-        dateExists = false;
-        var existingDate = seperateDates[j];
-        if(this.compareDatesEqual(date, existingDate)){
-          matchingDate = existingDate;
+    this.timeLogObservablesList.forEach(timeLog => {
+      let dateExists: Boolean = false;
+      let newDate: Date;
+      seperateDates.forEach(date => {
+        if (this.compareDatesEqual(timeLog.timeStarted, date)) {
           dateExists = true;
-          break;
+          newDate = date;
         }
+      });
+      if (!dateExists) {
+        newDate = timeLog.timeStarted;
+        seperateDates.push(newDate);
+        this.timeLogMap.set(newDate, new Array());
       }
-      if(!dateExists){
-        seperateDates.push(date);
-        matchingDate = date;
-        this.timeLogMap.set(matchingDate, new Array());
-      }
-      this.timeLogMap.get(matchingDate).push(this.timeLogObservablesList[i]);
-    }
+      this.timeLogMap.get(newDate).push(timeLog);
+    });
     this.dateList = seperateDates;
   }
 
