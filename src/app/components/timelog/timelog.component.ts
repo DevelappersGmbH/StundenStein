@@ -7,7 +7,9 @@ import {
   OnInit,
   Output,
   ViewChild,
-  ViewEncapsulation
+  ViewEncapsulation,
+  OnChanges,
+  SimpleChanges
 } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
@@ -26,7 +28,7 @@ import {ReloadTriggerService} from '../../services/reload-trigger.service';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit, AfterViewInit {
+export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
@@ -34,6 +36,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   ) {}
 
   @Input() timeLog: TimeLog;
+  @Input() timeLogs: TimeLog[];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
 
   @ViewChild('hiddenStart') textStart: ElementRef;
@@ -51,9 +56,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   loading = false;
   loadingDel = false;
 
-  projects: Project[] = [];
-  issues: Issue[] = [];
-
   issueControl = new FormControl();
   projectControl = new FormControl();
   issueOptions: Issue[] = [];
@@ -62,6 +64,20 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   filteredProjects: Observable<Project[]>;
 
   filteredObject = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
+    }
+    if (typeof changes['issues'] !== 'undefined') {
+      const change = changes['issues'];
+      this.issueOptions = this.issues;
+    }
+    if (typeof changes['projects'] !== 'undefined') {
+      const change = changes['projects'];
+      this.projectOptions = this.projects;
+    }
+  }
 
   ngOnInit() {
     this.trackedTime = new Date(
@@ -104,30 +120,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.resizeEnd();
     this.resizeStart();
-  }
-
-  loadProjects() {
-    this.dataService.getProjects().subscribe(
-      data => {
-        this.projects = data;
-        this.projectOptions = this.projects;
-      },
-      error => {
-        console.error('Couldn\'t get projects from data service.');
-      }
-    );
-  }
-
-  loadIssues() {
-    this.dataService.getIssues().subscribe(
-      data => {
-        this.issues = data;
-        this.issueOptions = this.issues;
-      },
-      error => {
-        console.error('Couldn\'t get issues from data service.');
-      }
-    );
   }
 
   displayIssue(issue: Issue): string {
