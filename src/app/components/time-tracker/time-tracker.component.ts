@@ -10,6 +10,7 @@ import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { UserService } from 'src/app/services/user/user.service';
 import { Title } from '@angular/platform-browser';
 import { TimeLog } from 'src/app/model/time-log.interface';
+import { ErrorService } from 'src/app/services/error/error.service';
 
 @Component({
   selector: 'app-time-tracker',
@@ -21,7 +22,8 @@ export class TimeTrackerComponent implements OnInit {
   constructor(
     private dataService: DataService ,
     private userService: UserService ,
-    private titleService: Title
+    private titleService: Title ,
+    private errorService: ErrorService
     ) { }
 
   logs: TimeLog[] = [];
@@ -114,7 +116,7 @@ export class TimeTrackerComponent implements OnInit {
       }
       this.updateAutoCompletes();
     }, error => {
-      console.error('Couldn\'t update time tracker.');
+      this.errorService.errorDialog('Couldn\'t update time tracker.');
       this.stoppingBlockedByLoading = false;
     });
   }
@@ -193,7 +195,6 @@ export class TimeTrackerComponent implements OnInit {
   }
 
   selectLog(logData: string) {
-    console.log(logData);
     if (logData === null || logData.length < 1 || !logData.includes('$$')) {
       this.timeTracker.comment = '';
       return;
@@ -249,7 +250,7 @@ export class TimeTrackerComponent implements OnInit {
     this.dataService.getProjects().subscribe( data => {
       this.projects = data;
     }, error => {
-      console.error('Couldn\'t get projects from data service.');
+      this.errorService.errorDialog('Couldn\'t get projects from data service.');
     });
   }
 
@@ -257,7 +258,7 @@ export class TimeTrackerComponent implements OnInit {
     this.dataService.getIssues().subscribe( data => {
       this.issues = data;
     }, error => {
-      console.error('Couldn\'t get issues from data service.');
+      this.errorService.errorDialog('Couldn\'t get issues from data service.');
     });
   }
 
@@ -271,7 +272,7 @@ export class TimeTrackerComponent implements OnInit {
         }
       });
     }, error => {
-      console.error('Couldn\'t get time logs from data service.');
+      this.errorService.errorDialog('Couldn\'t get time logs from data service.');
     });
   }
 
@@ -382,13 +383,13 @@ export class TimeTrackerComponent implements OnInit {
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe( data => {
       if (data === false) {
-        console.error('Couldn\'t stop time tracker');
+        this.errorService.errorDialog('Couldn\'t stop time tracker');
         this.stoppingBlockedByLoading = false;
       } else {
         this.loadTimeTracker();
       }
     }, error => {
-      console.error(error);
+      this.errorService.errorDialog('Couldn\'t stop time tracker');
       this.stoppingBlockedByLoading = true;
     }
     );
