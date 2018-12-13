@@ -39,7 +39,10 @@ export class MainComponent implements OnInit {
       this.timelogs = this.timelogs.slice();
     });
     this.reloadTriggerService.timeLogDeleted.subscribe(id => {
-      this.timelogs.slice(id, 1);
+      const index = this.timelogs.findIndex(entry => entry.id === id);
+      if (index >= -1) {
+        this.timelogs.splice(index, 1);
+      }
       this.timelogs = this.timelogs.slice();
     });
   }
