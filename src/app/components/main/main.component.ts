@@ -32,7 +32,7 @@ export class MainComponent implements OnInit {
     });
 
     this.dataService
-      .getTimeLogs(this.userService.getUser().id)
+      .getAllTimeLogs(this.userService.getUser().id)
       .subscribe(tls => {
         this.timelogs = tls;
       });

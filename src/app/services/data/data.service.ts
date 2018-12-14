@@ -401,69 +401,87 @@ export class DataService {
     );
   }
 
-  getTimeLogs(userId: number = -1): Observable<TimeLog[]> {
+  getTimeLogCount(userId: number = -1): Observable<number> {
+    return this.hourglassService.getTimeLogCount(userId);
+  }
+
+  getTimeLogs(offset: number, limit: number, userId: number = -1) {
     const calls: Observable<any>[] = [
-      this.hourglassService.getTimeLogs(userId),
+      this.hourglassService.getTimeLogs(offset, limit, userId),
       this.hourglassService.getTimeBookings(userId),
       this.redmineService.getTimeEntryActivities(),
       this.redmineService.getProjects(),
       this.redmineService.getIssues()
     ];
     return forkJoin(calls).pipe(
-      map(results => {
-        const timelogs: TimeLog[] = [];
-        const hourglassTimeLogs: HourGlassTimeLog[] = results[0];
-        const hourglassTimeBookings: HourGlassTimeBooking[] = results[1];
-        const redmineTimeEntryActivities: RedmineTimeEntryActivities =
-          results[2];
-        hourglassTimeBookings.forEach(hgbooking => {
-          timelogs.push({
-            id: hgbooking.time_log_id,
-            hourGlassTimeBookingId: hgbooking.id,
-            billable: this.mapRedmineTimeEntryActivityToBillable(
-              hgbooking.time_entry.activity_id,
-              redmineTimeEntryActivities
-            ),
-            booked: true,
-            comment: hgbooking.time_entry.comments,
-            timeStarted: new Date(hgbooking.start),
-            timeStopped: new Date(hgbooking.stop),
-            timeInHours: hgbooking.time_entry.hours,
-            project: this.projects.find(
-              entry => entry.id === hgbooking.time_entry.project_id
-            ),
-            issue: this.issues.find(
-              entry => entry.id === hgbooking.time_entry.issue_id
-            ),
-            user: this.mapRedmineUserIdToCurrentUserOrNull(
-              hgbooking.time_entry.user_id
-            ),
-            redmineTimeEntryId: hgbooking.time_entry_id
-          });
-        });
-        hourglassTimeLogs.forEach(hglog => {
-          if (timelogs.findIndex(entry => entry.id === hglog.id) === -1) {
-            timelogs.push({
-              id: hglog.id,
-              billable: true,
-              booked: false,
-              comment: hglog.comments,
-              hourGlassTimeBookingId: null,
-              issue: null,
-              project: null,
-              timeStarted: new Date(hglog.start),
-              timeStopped: new Date(hglog.stop),
-              timeInHours: hglog.hours,
-              user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id),
-              redmineTimeEntryId: null
-            });
-          }
-        });
-        return timelogs.sort((a, b) => {
-          return <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted);
-        });
-      })
+      map(results => this.mapHourGlassTimeLogsAndBookingsToTimeLogs(results))
     );
+  }
+
+  getAllTimeLogs(userId: number = -1): Observable<TimeLog[]> {
+    const calls: Observable<any>[] = [
+      this.hourglassService.getAllTimeLogs(userId),
+      this.hourglassService.getTimeBookings(userId),
+      this.redmineService.getTimeEntryActivities(),
+      this.redmineService.getProjects(),
+      this.redmineService.getIssues()
+    ];
+    return forkJoin(calls).pipe(
+      map(results => this.mapHourGlassTimeLogsAndBookingsToTimeLogs(results))
+    );
+  }
+
+  mapHourGlassTimeLogsAndBookingsToTimeLogs(results: any[]) {
+    const timelogs: TimeLog[] = [];
+    const hourglassTimeLogs: HourGlassTimeLog[] = results[0];
+    const hourglassTimeBookings: HourGlassTimeBooking[] = results[1];
+    const redmineTimeEntryActivities: RedmineTimeEntryActivities = results[2];
+    hourglassTimeBookings.forEach(hgbooking => {
+      timelogs.push({
+        id: hgbooking.time_log_id,
+        hourGlassTimeBookingId: hgbooking.id,
+        billable: this.mapRedmineTimeEntryActivityToBillable(
+          hgbooking.time_entry.activity_id,
+          redmineTimeEntryActivities
+        ),
+        booked: true,
+        comment: hgbooking.time_entry.comments,
+        timeStarted: new Date(hgbooking.start),
+        timeStopped: new Date(hgbooking.stop),
+        timeInHours: hgbooking.time_entry.hours,
+        project: this.projects.find(
+          entry => entry.id === hgbooking.time_entry.project_id
+        ),
+        issue: this.issues.find(
+          entry => entry.id === hgbooking.time_entry.issue_id
+        ),
+        user: this.mapRedmineUserIdToCurrentUserOrNull(
+          hgbooking.time_entry.user_id
+        ),
+        redmineTimeEntryId: hgbooking.time_entry_id
+      });
+    });
+    hourglassTimeLogs.forEach(hglog => {
+      if (timelogs.findIndex(entry => entry.id === hglog.id) === -1) {
+        timelogs.push({
+          id: hglog.id,
+          billable: true,
+          booked: false,
+          comment: hglog.comments,
+          hourGlassTimeBookingId: null,
+          issue: null,
+          project: null,
+          timeStarted: new Date(hglog.start),
+          timeStopped: new Date(hglog.stop),
+          timeInHours: hglog.hours,
+          user: this.mapRedmineUserIdToCurrentUserOrNull(hglog.user_id),
+          redmineTimeEntryId: null
+        });
+      }
+    });
+    return timelogs.sort((a, b) => {
+      return <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted);
+    });
   }
 
   deleteTimeLog(timeLog: TimeLog): Observable<boolean> {
