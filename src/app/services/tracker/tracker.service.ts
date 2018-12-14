@@ -5,6 +5,7 @@ import { Observable, forkJoin } from 'rxjs';
 import { isNull, isUndefined } from 'util';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { ReloadTriggerService } from '../reload-trigger.service';
+import { ErrorService } from '../error/error.service';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +15,8 @@ export class TrackerService {
   constructor(
     private dataService: DataService,
     private userService: UserService,
-    private reloadTriggerService: ReloadTriggerService
+    private reloadTriggerService: ReloadTriggerService,
+    private errorService: ErrorService
   ) {
     this.reTrackingInProgress = new EventEmitter();
     this.trackerModified = new EventEmitter();
@@ -52,13 +54,13 @@ export class TrackerService {
   private stopAndStart(toStop: TimeTracker, toStart: Partial<TimeTracker>) {
     this.dataService.stopTimeTracker(toStop).subscribe( logCreated => {
       if (logCreated === undefined || logCreated === null) {
-        console.error('Couldn\'t stop time tracker');
+        this.errorService.errorDialog('Couldn\'t stop time tracker');
       } else {
         this.reloadTriggerService.triggerTimeLogAdded(logCreated);
         this.start(toStart);
       }
     }, error => {
-      console.error('Couldn\'t stop time tracker');
+      this.errorService.errorDialog('Couldn\'t stop time tracker');
     }
     );
   }
