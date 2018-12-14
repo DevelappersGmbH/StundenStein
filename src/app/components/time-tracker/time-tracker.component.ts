@@ -79,6 +79,12 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    this.trackerService.reTrackingInProgress.subscribe(isTracking => {
+      this.stoppingBlockedByLoading = isTracking;
+    });
+    this.trackerService.trackerModified.subscribe(newTracker => {
+      this.timeTracker = newTracker;
+    });
     interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
@@ -97,11 +103,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           this.faviconService.activate('idle');
           this.favIconRunning = false;
         }
-      }
-      if (this.trackerService.reloadNeeded) {
-        this.trackerService.reloadNeeded = false;
-        this.stoppingBlockedByLoading = true;
-        this.loadTimeTracker();
       }
     });
     this.currentTrackerTimeString = '00:00:00';

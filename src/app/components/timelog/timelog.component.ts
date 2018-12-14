@@ -61,6 +61,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   loading = false;
   loadingDel = false;
 
+  restartBlocked = false;
+  trackerSpinning = false;
+
   issueControl = new FormControl();
   projectControl = new FormControl();
   issueOptions: Issue[] = [];
@@ -119,6 +122,15 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
+
+    this.trackerService.reTrackingInProgress.subscribe(inProgress => {
+      if (inProgress === true) {
+        this.restartBlocked = true;
+      } else {
+        this.restartBlocked = false;
+        this.trackerSpinning = false;
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -236,6 +248,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   startTracker() {
+    this.trackerSpinning = true;
     this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment });
   }
 

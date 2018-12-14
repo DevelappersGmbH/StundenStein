@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { DataService } from '../data/data.service';
 import { UserService } from '../user/user.service';
 import { Observable, forkJoin } from 'rxjs';
 import { isNull, isUndefined } from 'util';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
+import { ReloadTriggerService } from '../reload-trigger.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,13 +12,23 @@ import { TimeTracker } from 'src/app/model/time-tracker.interface';
 export class TrackerService {
 
   constructor(
-    private dataService: DataService ,
-    private userService: UserService
-  ) { }
+    private dataService: DataService,
+    private userService: UserService,
+    private reloadTriggerService: ReloadTriggerService
+  ) {
+    this.reTrackingInProgress = new EventEmitter();
+    this.trackerModified = new EventEmitter();
+  }
 
-  public reloadNeeded = false;
+  public reTrackingInProgress: EventEmitter<boolean>;
+  public trackerModified: EventEmitter<TimeTracker>;
+
+  private triggerInProgress(inProgress: boolean) {
+    this.reTrackingInProgress.emit(inProgress);
+  }
 
   track(timeTracker: Partial<TimeTracker>) {
+    this.triggerInProgress(true);
     if (isUndefined(timeTracker) || isNull(timeTracker) || !isUndefined(timeTracker.id)) {
       console.error('Tried to start invalid time tracker.');
     }
@@ -43,6 +54,7 @@ export class TrackerService {
       if (logCreated === undefined || logCreated === null) {
         console.error('Couldn\'t stop time tracker');
       } else {
+        this.reloadTriggerService.triggerTimeLogAdded(logCreated);
         this.start(toStart);
       }
     }, error => {
@@ -54,7 +66,8 @@ export class TrackerService {
   private start(timeTracker: Partial<TimeTracker>) {
     this.dataService.startTimeTracker(timeTracker).subscribe(
       returnedTracker => {
-        this.reloadNeeded = true;
+        this.trackerModified.emit(returnedTracker);
+        this.triggerInProgress(false);
       }
      );
   }

@@ -38,9 +38,18 @@
 
         <div>
           <div class="oneline">
-          <button mat-icon-button class="button_play" [disabled]="editMode" (click)="startTracker()"><mat-icon
-            class="icon">play_arrow</mat-icon></button>
-            </div>
+            <mat-spinner
+              class = "spinner"
+              *ngIf="trackerSpinning"
+              [strokeWidth]="3"
+              [diameter]="22"
+              color="primary"
+              mode="indeterminate">
+            </mat-spinner>
+            <button *ngIf="!trackerSpinning" mat-icon-button class="button_play" [disabled]="editMode || restartBlocked" (click)="startTracker()">
+              <mat-icon class="icon">play_arrow</mat-icon>
+            </button>
+          </div>
 
           <div class="oneline">
           <button mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
