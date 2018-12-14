@@ -84,7 +84,7 @@ export class MainComponent implements OnInit {
     this.dataService.getTimeLogs(offset, limit, userId).subscribe(logs => {
       logs.forEach(log => {
         const index = this.timelogs.findIndex(entry => entry.id === log.id);
-        if (index >= -1) {
+        if (index > -1) {
           this.timelogs.splice(index, 1, log);
         } else {
           this.timelogs.push(log);
@@ -92,7 +92,14 @@ export class MainComponent implements OnInit {
         this.timelogs = this.timelogs.slice();
         const count: number = itemsToDownload - logs.length;
         const newoffset: number = count - limit;
-        this.getTimeLogs(offset >= 0 ? offset : 0, limit, count, userId);
+        if (count > 0) {
+          this.getTimeLogs(
+            newoffset >= 0 ? newoffset : 0,
+            limit,
+            count,
+            userId
+          );
+        }
       });
     });
   }
