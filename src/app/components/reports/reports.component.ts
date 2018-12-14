@@ -28,7 +28,11 @@ export class ReportsComponent
   widthHelp = [];
   actualSelect = 0;
 
-  constructor(private dataService: DataService, private userService: UserService, private errorService: ErrorService) {}
+  constructor(
+    private dataService: DataService,
+    private userService: UserService,
+    private errorService: ErrorService
+  ) {}
 
   ngOnInit() {
     this.periodArray = [[], [], []]; // final data array for every use in component
@@ -36,7 +40,9 @@ export class ReportsComponent
       .getTimeLogs(this.userService.getUser().id)
       .subscribe(res => {
         if (res === undefined) {
-          this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
+          this.errorService.errorDialog(
+            'Did not recieved data from the dataService, wich distributes the project data.'
+          );
         }
         // fill dmwArray
         const date = new Date();
@@ -187,14 +193,16 @@ export class ReportsComponent
         },
         options: {
           scales: {
-              yAxes: [{
-                  ticks: {
-                      beginAtZero: true
-                  }
-              }]
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true
+                }
+              }
+            ]
           },
           deferred: { delay: 500 }
-      }
+        }
       });
     } else if (this.tab === 'month') {
       this.chart3 = new Chart('canvas3', {
@@ -210,14 +218,16 @@ export class ReportsComponent
         },
         options: {
           scales: {
-              yAxes: [{
-                  ticks: {
-                      beginAtZero: true
-                  }
-              }]
+            yAxes: [
+              {
+                ticks: {
+                  beginAtZero: true
+                }
+              }
+            ]
           },
           deferred: { delay: 500 }
-      }
+        }
       });
     }
     this.chart = new Chart('canvas', {
@@ -233,14 +243,16 @@ export class ReportsComponent
       },
       options: {
         scales: {
-            yAxes: [{
-                ticks: {
-                    beginAtZero: true
-                }
-            }]
+          yAxes: [
+            {
+              ticks: {
+                beginAtZero: true
+              }
+            }
+          ]
         },
         deferred: { delay: 500 }
-    }
+      }
     });
   }
 
