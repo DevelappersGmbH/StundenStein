@@ -31,7 +31,8 @@ import {
   MatProgressSpinnerModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatTabsModule
 } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -44,6 +45,7 @@ import { UserReportsComponent } from './components/userreports/userreports.compo
 import { UserService } from './services/user/user.service';
 import { ErrorDialogComponent } from './errorpopup/error-dialog.component';
 import { ErrorService } from './services/error/error.service';
+import { ReportsComponent } from './components/reports/reports.component';
 
 @NgModule({
   declarations: [
@@ -57,7 +59,8 @@ import { ErrorService } from './services/error/error.service';
     RecentTimeLogsComponent,
     DeleteWarningComponent,
     EnforcedInputsDirective,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    ReportsComponent
   ],
   imports: [
     BrowserModule,
@@ -85,7 +88,8 @@ import { ErrorService } from './services/error/error.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatBadgeModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTabsModule
   ],
   providers: [
     AuthenticationService,

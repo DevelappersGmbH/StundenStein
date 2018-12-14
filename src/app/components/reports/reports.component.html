@@ -1,0 +1,17 @@
+<mat-tab-group mat-align-tabs="center" (selectedTabChange)="tabChanged($event)">
+  <mat-tab label="Day">
+    <div *ngIf="chart">
+      <canvas id="canvas" width="30vw" height="10vh">{{ chart }}</canvas>
+    </div>
+  </mat-tab>
+  <mat-tab label="Week">
+    <div *ngIf="chart2">
+      <canvas id="canvas2" width="30vw" height="10vh">{{ chart2 }}</canvas>
+    </div>
+  </mat-tab>
+  <mat-tab label="Month">
+    <div *ngIf="chart3">
+      <canvas id="canvas3" width="30vw" height="10vh">{{ chart3 }}</canvas>
+    </div>
+  </mat-tab>
+</mat-tab-group>
