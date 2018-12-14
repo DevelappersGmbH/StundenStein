@@ -39,8 +39,8 @@ export class TrackerService {
   }
 
   private stopAndStart(toStop: TimeTracker, toStart: Partial<TimeTracker>) {
-    this.dataService.stopTimeTracker(toStop).subscribe( data => {
-      if (data === false) {
+    this.dataService.stopTimeTracker(toStop).subscribe( logCreated => {
+      if (logCreated === undefined || logCreated === null) {
         console.error('Couldn\'t stop time tracker');
       } else {
         this.start(toStart);
