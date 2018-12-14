@@ -84,6 +84,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
     this.trackerService.trackerModified.subscribe(newTracker => {
       this.timeTracker = newTracker;
+      this.ensureSelectedIssueIsFromIssueList();
+      this.ensureSelectedProjectIsFromProjectList();
+      this.updateAutoCompletes();
+      this.stoppingBlockedByLoading = false;
     });
     interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {

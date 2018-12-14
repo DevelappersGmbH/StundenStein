@@ -249,7 +249,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
   startTracker() {
     this.trackerSpinning = true;
-    this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment });
+    this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment, billable: true });
   }
 
   markBillable() {
