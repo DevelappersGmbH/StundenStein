@@ -1,3 +1,4 @@
+import { CookieService } from 'ngx-cookie-service';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -8,7 +9,6 @@ import { User } from 'src/app/model/user.interface';
 
 const currentUserAuthTokenKey = 'currentUserAuthToken';
 const redmineApiUrlKey = 'redmineApiUrl';
-const expirationDateKey = 'expirationDate';
 
 @Injectable({
   providedIn: 'root'
@@ -18,51 +18,40 @@ export class AuthenticationService {
 
   redirectUrl: string;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cookieService: CookieService) {}
 
-  private setExpirationDate(rememberMe: boolean = false) {
+  private generateExpirationDate(rememberMe: boolean = false): Date {
     const currentDate = new Date();
-    let newExpirationDate = currentDate.setHours(currentDate.getHours() + 4);
+    let newExpirationDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate(),
+      currentDate.getHours() + 4,
+      currentDate.getMinutes()
+    );
     if (rememberMe) {
-      newExpirationDate = currentDate.setDate(currentDate.getDate() + 7);
+      newExpirationDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth(),
+        currentDate.getDate() + 7,
+        currentDate.getHours(),
+        currentDate.getMinutes()
+      );
     }
-    const expirationDate = localStorage.getItem(expirationDateKey);
-    if (expirationDate) {
-      localStorage.removeItem(expirationDateKey);
-    }
-    localStorage.setItem(expirationDateKey, JSON.stringify(newExpirationDate));
+    return newExpirationDate;
   }
 
-  private getExpirationDate(): number {
-    const expirationDate = localStorage.getItem(expirationDateKey);
-    if (expirationDate) {
-      return JSON.parse(expirationDate);
-    }
-    return null;
-  }
-
-  isExpirationDateValid(): boolean {
-    const currentDate = Date.now();
-    const expirationDate = this.getExpirationDate();
-    if (currentDate >= expirationDate) {
-      this.clearLocalStorage();
-      return false;
-    }
-    return true;
-  }
-
-  private setRedmineApiUrl(redmineUrl: string) {
-    const redmineApiUrl = localStorage.getItem(redmineApiUrlKey);
-    if (redmineApiUrl) {
-      localStorage.removeItem(redmineApiUrlKey);
-    }
-    localStorage.setItem(redmineApiUrlKey, this.prepareRedmineUrl(redmineUrl));
+  private setRedmineApiUrl(redmineUrl: string, expirationDate: Date) {
+    this.cookieService.set(
+      redmineApiUrlKey,
+      this.prepareRedmineUrl(redmineUrl),
+      expirationDate
+    );
   }
 
   getRedmineApiUrl(): string {
-    const redmineUrl = localStorage.getItem(redmineApiUrlKey);
-    if (redmineUrl) {
-      return redmineUrl;
+    if (this.checkIfRedmineUrlExist()) {
+      return this.cookieService.get(redmineApiUrlKey);
     }
     return null;
   }
@@ -76,23 +65,22 @@ export class AuthenticationService {
   }
 
   checkIfRedmineUrlExist(): boolean {
-    return !!this.getRedmineApiUrl();
+    return this.cookieService.check(redmineApiUrlKey);
   }
 
-  private setAuthToken(token: string) {
-    const tokenString = localStorage.getItem(currentUserAuthTokenKey);
-    if (tokenString) {
-      localStorage.removeItem(currentUserAuthTokenKey);
-    }
-    localStorage.setItem(currentUserAuthTokenKey, token);
+  private setAuthToken(token: string, expirationDate: Date) {
+    this.cookieService.set(currentUserAuthTokenKey, token, expirationDate);
   }
 
   getAuthToken(): string {
-    const tokenString = localStorage.getItem(currentUserAuthTokenKey);
-    if (tokenString) {
-      return tokenString;
+    if (this.checkIfAuthTokenExist()) {
+      return this.cookieService.get(currentUserAuthTokenKey);
     }
     return null;
+  }
+
+  checkIfAuthTokenExist(): boolean {
+    return this.cookieService.check(currentUserAuthTokenKey);
   }
 
   login(
@@ -100,14 +88,15 @@ export class AuthenticationService {
     apiKey: string,
     rememberMe: boolean = false
   ): Observable<User> {
-    this.setRedmineApiUrl(redmineUrl);
-    this.setAuthToken(apiKey);
+    const expirationDate = this.generateExpirationDate(rememberMe);
+    this.setRedmineApiUrl(redmineUrl, expirationDate);
+    this.setAuthToken(apiKey, expirationDate);
+
     const url =
       environment.corsProxyUrl + this.getRedmineApiUrl() + this.usersUrl;
 
     return this.http.get<RedmineUserObject>(url).pipe(
       map((res: RedmineUserObject) => {
-        this.setExpirationDate(rememberMe);
         return {
           id: res.user.id,
           name: `${res.user.firstname} ${res.user.lastname}`
@@ -117,10 +106,11 @@ export class AuthenticationService {
   }
 
   logout() {
-    this.clearLocalStorage();
+    this.clearCookies();
   }
 
-  private clearLocalStorage() {
-    localStorage.clear();
+  private clearCookies() {
+    this.cookieService.delete(currentUserAuthTokenKey);
+    this.cookieService.delete(redmineApiUrlKey);
   }
 }

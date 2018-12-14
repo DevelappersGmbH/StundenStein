@@ -33,7 +33,10 @@ export class AuthGuard implements CanActivate, CanActivateChild {
   }
 
   checkLogin(url: string): boolean {
-    if (this.authenticationService.isExpirationDateValid()) {
+    if (
+      this.authenticationService.checkIfRedmineUrlExist() &&
+      this.authenticationService.checkIfAuthTokenExist()
+    ) {
       return true;
     }
 

@@ -1,12 +1,27 @@
-import { Component, Input, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
+import { ErrorService } from '../../services/error/error.service';
 import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
+import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
 import { User } from '../../model/user.interface';
 import {TrackerService} from '../../services/tracker/tracker.service';
@@ -14,34 +29,37 @@ import {TrackerService} from '../../services/tracker/tracker.service';
 @Component({
   selector: 'app-timelog',
   templateUrl: './timelog.component.html',
-  styleUrls: ['./timelog.component.scss']
+  styleUrls: ['./timelog.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit {
+export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
-    private trackerService: TrackerService
+    private trackerService: TrackerService,
+    private reloadTriggerService: ReloadTriggerService,
+    private errorService: ErrorService
   ) {}
 
   @Input() timeLog: TimeLog;
+  @Input() timeLogs: TimeLog[];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
+  @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
 
-  currentColor = 'red';
-  currentIssueSubject: string;
-  currentProjectName: string;
-  currentIssue: Issue;
-  currentProject: Project;
-  currentComment: string;
-  startTime: Date;
-  endTime: Date;
-  billable: boolean;
+  @ViewChild('hiddenStart') textStart: ElementRef;
+  @ViewChild('hiddenEnd') textEnd: ElementRef;
+  minWidth = 45;
+  startWidth: number = this.minWidth;
+  endWidth: number = this.minWidth;
+
+  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
+
   trackedTime: Date;
-  booked: boolean;
-  currentUser: User;
   editMode = false;
   editButton = 'edit';
-
-  projects: Project[] = [];
-  issues: Issue[] = [];
+  loading = false;
+  loadingDel = false;
 
   issueControl = new FormControl();
   projectControl = new FormControl();
@@ -52,11 +70,25 @@ export class TimeLogComponent implements OnInit {
 
   filteredObject = false;
 
+  ngOnChanges(changes: SimpleChanges) {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
+    }
+    if (typeof changes['issues'] !== 'undefined') {
+      const change = changes['issues'];
+      this.issueOptions = this.issues;
+    }
+    if (typeof changes['projects'] !== 'undefined') {
+      const change = changes['projects'];
+      this.projectOptions = this.projects;
+    }
+  }
+
   ngOnInit() {
     this.trackedTime = new Date(
       this.timeLog.timeStarted.getFullYear(),
       this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
+      this.timeLog.timeStarted.getDate(),
       Math.floor(this.timeLog.timeInHours),
       (this.timeLog.timeInHours * 60) % 60,
       0,
@@ -64,39 +96,11 @@ export class TimeLogComponent implements OnInit {
     );
 
     this.issueControl.setValue(
-      this.timeLog.issue ? this.timeLog.issue.subject : ''
+      this.timeLog.issue ? this.timeLog.issue : undefined
     );
     this.projectControl.setValue(
-      this.timeLog.project ? this.timeLog.project.name : ''
+      this.timeLog.project ? this.timeLog.project : undefined
     );
-
-    this.loadIssues();
-    this.loadProjects();
-
-    this.issueControl.valueChanges.subscribe(value => {
-      if (value === '') {
-        if (this.timeLog.project && this.timeLog.issue) {
-          this.updateIssueOptions(this.timeLog.project);
-        } else if (this.timeLog.issue) {
-          this.projectControl.setValue('');
-        }
-        this.projectOptions = this.projects;
-        this.timeLog.issue = null;
-      }
-    });
-
-    this.projectControl.valueChanges.subscribe(value => {
-      if (value === '') {
-        console.log('Here');
-        this.issueOptions = this.issues;
-        console.log('Length options: ', this.issueOptions.length);
-        this.projectOptions = this.projects;
-        this.issueControl.setValue('Dummy value');
-        this.issueControl.setValue('');
-        this.timeLog.issue = null;
-        this.timeLog.project = null;
-      }
-    });
 
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
@@ -107,41 +111,33 @@ export class TimeLogComponent implements OnInit {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => this.filterProjects(project))
+      map(project =>
+        project ? this.filterProjects(project) : this.projectOptions.slice()
+      )
     );
 
-    if (
-      !this.timeLog.issue ||
-      !this.timeLog.project ||
-      this.timeLog.project.name === '' ||
-      this.timeLog.issue.subject === ''
-    ) {
+    if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
   }
 
-  loadProjects() {
-    this.dataService.getProjects().subscribe(
-      data => {
-        this.projects = data;
-        this.projectOptions = this.projects;
-      },
-      error => {
-        console.error('Couldn\'t get projects from data service.');
-      }
-    );
+  ngAfterViewInit() {
+    this.resizeEnd();
+    this.resizeStart();
   }
 
-  loadIssues() {
-    this.dataService.getIssues().subscribe(
-      data => {
-        this.issues = data;
-        this.issueOptions = this.issues;
-      },
-      error => {
-        console.error('Couldn\'t get issues from data service.');
-      }
-    );
+  displayIssue(issue: Issue): string {
+    if (isNull(issue) || isUndefined(issue)) {
+      return '';
+    }
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
+  }
+
+  displayProject(project: Project): string {
+    if (isNull(project) || isUndefined(project)) {
+      return '';
+    }
+    return project.name;
   }
 
   private filterIssues(value): Issue[] {
@@ -194,40 +190,44 @@ export class TimeLogComponent implements OnInit {
   }
 
   selectIssue(issue) {
-    console.log('Issue: ', issue);
-
     if (this.findIssue(issue)) {
-      console.log('Existing issue detected');
       this.timeLog.issue = issue;
       this.timeLog.project = issue.project;
-      this.issueControl.setValue(
-        this.timeLog.issue ? this.timeLog.issue.subject : ''
-      );
 
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue : undefined
+      );
       this.updateIssueOptions(this.timeLog.project);
 
       this.projectControl.setValue(
-        this.timeLog.project ? this.timeLog.project.name : ''
+        this.timeLog.project ? this.timeLog.project : undefined
       );
     } else {
-      console.log('No such issue!');
+      if (this.timeLog.project && this.timeLog.issue) {
+        this.updateIssueOptions(this.timeLog.project);
+      } else if (this.timeLog.issue) {
+        this.projectControl.setValue(undefined);
+      }
+      this.projectOptions = this.projects;
+      this.timeLog.issue = null;
     }
-    console.log(this.projectOptions);
   }
 
   selectProject(project) {
     if (this.findProject(project)) {
-      console.log('New project detected', project);
       this.timeLog.project = project;
-      this.projectControl.setValue(project ? project.name : '');
+      this.projectControl.setValue(project ? project : undefined);
       this.updateIssueOptions(project);
-      this.issueControl.setValue('Dummy value');
-      this.issueControl.setValue(
-        this.timeLog.issue ? this.timeLog.issue.subject : ''
-      );
-      console.log(this.issueOptions);
+      this.issueControl.setValue(undefined);
+      this.timeLog.issue = null;
     } else {
-      console.log('Something went wrong');
+      this.issueOptions = this.issues;
+      this.projectOptions = this.projects;
+      this.timeLog.issue = null;
+      this.timeLog.project = null;
+      this.issueControl.setValue(
+        this.timeLog.issue ? this.timeLog.issue : undefined
+      );
     }
   }
 
@@ -235,75 +235,46 @@ export class TimeLogComponent implements OnInit {
     this.timeLog.comment = comment;
   }
 
-  private searchIssueById(id): Issue {
-    this.issues.forEach(issue => {
-      if (issue.id === id) {
-        return issue;
-      }
-    });
-    console.log('No matching issue found');
-    return undefined;
-  }
-
-  private searchProjectById(id): Project {
-    this.projects.forEach(project => {
-      if (project.id === id) {
-        return project;
-      }
-    });
-    console.log('No matching project found');
-    return undefined;
-  }
-
-  updateForm() {
-    console.log('OnSelectionChange');
-  }
-
   startTracker() {
     this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment });
   }
 
   markBillable() {
-    /*
-    send billable sign to TimeTracker
-    */
     this.timeLog.billable = !this.timeLog.billable;
   }
 
   changeEndTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStopped = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStopped = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
     this.calculateTime();
-    this.refreshTrackedTime();
   }
 
   changeStartTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStarted = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDay(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStarted = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
     this.calculateTime();
-    this.refreshTrackedTime();
-  }
-
-  refreshTrackedTime() {
-    // send tracked time to TimeTracker?
   }
 
   private calculateTime() {
@@ -317,12 +288,7 @@ export class TimeLogComponent implements OnInit {
   }
 
   private isBooked() {
-    if (
-      !this.timeLog.issue ||
-      !this.timeLog.project ||
-      this.timeLog.project.name === '' ||
-      this.timeLog.issue.subject === ''
-    ) {
+    if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.timeLog.booked = false;
     } else {
       this.timeLog.booked = true;
@@ -330,6 +296,8 @@ export class TimeLogComponent implements OnInit {
   }
 
   changeMode() {
+    this.resizeStart();
+    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -342,72 +310,89 @@ export class TimeLogComponent implements OnInit {
         /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
         this.editButton = 'edit';
       }
+      this.updateTimeLog();
     }
     this.editMode = !this.editMode;
   }
 
   private findProject(project): Project {
-    return this.projectOptions.find(entry => entry.id === project.id);
+    if (project) {
+      return this.projectOptions.find(entry => entry.id === project.id);
+    }
+    return undefined;
   }
 
   private findIssue(issue): Issue {
-    return this.issueOptions.find(entry => entry.id === issue.id);
+    if (issue) {
+      return this.issueOptions.find(entry => entry.id === issue.id);
+    }
+    return undefined;
   }
 
   deleteWarning() {
+    this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
-
-    dialogConfig.data = {
-      id: 1,
-      description: 'Delete time log?'
-    };
 
     const dialogRef = this.deleteDialog.open(
       DeleteWarningComponent,
       dialogConfig
     );
 
-    dialogRef
-      .afterClosed()
-      .subscribe(data =>
-        data ? console.log('Delete') : console.log('Do NOT delete')
-      );
+    dialogRef.afterClosed().subscribe(data => {
+      if (data) {
+        this.deleteTimeLog();
+      }
+      this.loadingDel = false;
+    });
   }
 
-  blurProject(input) {
-    console.log('blurProject' + input);
-    let exists = false;
-    this.projectOptions.forEach(project => {
-      if (!exists) {
-        if (input === project.name) {
-          exists = true;
-        }
+  deleteTimeLog() {
+    const that = this;
+    this.dataService.deleteTimeLog(this.timeLog).subscribe({
+      next() {
+        that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
+      },
+      error() {
+        this.errorService.errorDialog('Could not delete this timeLog :(');
       }
     });
-    if (exists) {
-      this.projectControl.setValue(input);
-    } else {
-      this.projectControl.setValue('');
-    }
   }
 
-  blurIssue(input) {
-    console.log('blurIssue' + input);
-    let exists = false;
-    this.issueOptions.forEach(issue => {
-      if (!exists) {
-        if (input === issue.subject) {
-          exists = true;
-        }
+  updateTimeLog() {
+    const that = this;
+    that.loading = true;
+    this.dataService.updateTimeLog(this.timeLog).subscribe({
+      next() {
+        that.loading = false;
+        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog);
+      },
+      error() {
+        this.errorService.errorDialog('Could not update this timeLog :(');
+        that.loading = false;
       }
     });
-    if (exists) {
-      this.issueControl.setValue(input);
+  }
+
+  resizeStart() {
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
     } else {
-      this.issueControl.setValue('');
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
     }
+    setTimeout(() => (this.startWidth = Math.max(this.minWidth, newWidth)));
+  }
+
+  resizeEnd() {
+    let newWidth;
+    if (this.isFirefox) {
+      newWidth = this.textStart.nativeElement.offsetWidth + 30;
+    } else {
+      newWidth = this.textStart.nativeElement.offsetWidth + 10;
+    }
+    setTimeout(() => (this.endWidth = Math.max(this.minWidth, newWidth)));
   }
 }
