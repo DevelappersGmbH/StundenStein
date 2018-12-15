@@ -23,6 +23,8 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
+import { User } from '../../model/user.interface';
+import {TrackerService} from '../../services/tracker/tracker.service';
 
 @Component({
   selector: 'app-timelog',
@@ -34,6 +36,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
+    private trackerService: TrackerService,
     private reloadTriggerService: ReloadTriggerService,
     private errorService: ErrorService
   ) {}
@@ -53,11 +56,13 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   trackedTime: Date;
-  active = false;
   editMode = false;
   editButton = 'edit';
   loading = false;
   loadingDel = false;
+
+  restartBlocked = false;
+  trackerSpinning = false;
 
   issueControl = new FormControl();
   projectControl = new FormControl();
@@ -117,6 +122,15 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
+
+    this.trackerService.reTrackingInProgress.subscribe(inProgress => {
+      if (inProgress === true) {
+        this.restartBlocked = true;
+      } else {
+        this.restartBlocked = false;
+        this.trackerSpinning = false;
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -234,10 +248,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   startTracker() {
-    /*
-    startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
-    */
-    /*make the trackedTime change according to timetracker*/
+    this.trackerSpinning = true;
+    this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment, billable: true });
   }
 
   markBillable() {

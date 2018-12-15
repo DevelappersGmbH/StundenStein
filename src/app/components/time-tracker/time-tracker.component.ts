@@ -18,6 +18,7 @@ import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { Title } from '@angular/platform-browser';
+import { TrackerService } from 'src/app/services/tracker/tracker.service';
 import { UserService } from 'src/app/services/user/user.service';
 
 @Component({
@@ -32,7 +33,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     private titleService: Title,
     private faviconService: Favicons,
     private reloadTriggerSerivce: ReloadTriggerService,
-    private errorService: ErrorService
+    private errorService: ErrorService,
+    private trackerService: TrackerService
   ) {}
 
   logs: TimeLog[] = [];
@@ -77,6 +79,16 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    this.trackerService.reTrackingInProgress.subscribe(isTracking => {
+      this.stoppingBlockedByLoading = isTracking;
+    });
+    this.trackerService.trackerModified.subscribe(newTracker => {
+      this.timeTracker = newTracker;
+      this.ensureSelectedIssueIsFromIssueList();
+      this.ensureSelectedProjectIsFromProjectList();
+      this.updateAutoCompletes();
+      this.stoppingBlockedByLoading = false;
+    });
     interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
