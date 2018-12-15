@@ -48,8 +48,8 @@
           </div>
 
           <div class="oneline">
-            <mat-form-field [ngStyle]="{'width.px': endWidth}" class="end-time" [ngClass]="{ edit: !editMode }">
-              <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+            <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+              <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                      [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
             </mat-form-field>
           </div>
@@ -57,8 +57,8 @@
           -
 
           <div class="oneline">
-          <mat-form-field [ngStyle]="{'width.px': endWidth}" class="end-time" [ngClass]="{ edit: !editMode }">
-            <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+          <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
           </div>
