@@ -64,7 +64,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   filteredObject = false;
 
   ngOnInit() {
-    console.log(this.timeLog);
     this.trackedTime = new Date(
       this.timeLog.timeStarted.getFullYear(),
       this.timeLog.timeStarted.getMonth(),
