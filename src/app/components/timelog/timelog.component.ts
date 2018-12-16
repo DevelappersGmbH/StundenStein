@@ -41,8 +41,10 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     private errorService: ErrorService
   ) {}
 
+
+  logs: TimeLog[] = [];
   @Input() timeLog: TimeLog;
-  @Input() timeLogs: TimeLog[];
+  @Input() timeLogs: TimeLog[] = [];
   @Input() projects: Project[] = [];
   @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
@@ -66,16 +68,28 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
   issueControl = new FormControl();
   projectControl = new FormControl();
+  logControl = new FormControl();
   issueOptions: Issue[] = [];
   projectOptions: Project[] = [];
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredLogs: Observable<TimeLog[]>;
 
   filteredObject = false;
+
 
   ngOnChanges(changes: SimpleChanges) {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
+      change.currentValue.forEach(log => {
+        if (
+          !isUndefined(log.comment) &&
+          !isNull(log.comment) &&
+          log.comment.length > 0
+        ) {
+          this.logs.unshift(log);
+        }
+      });
     }
     if (typeof changes['issues'] !== 'undefined') {
       const change = changes['issues'];
@@ -104,6 +118,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     this.projectControl.setValue(
       this.timeLog.project ? this.timeLog.project : undefined
     );
+    this.logControl.setValue(
+      this.timeLog.comment ? this.timeLog.comment : undefined
+    );
 
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
@@ -117,6 +134,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
       map(project =>
         project ? this.filterProjects(project) : this.projectOptions.slice()
       )
+    );
+
+    this.filteredLogs = this.logControl.valueChanges.pipe(
+      startWith(''),
+      map(log => (log ? this.filterLogs(log) : this.logs.slice()))
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -138,18 +160,40 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     this.resizeStart();
   }
 
-  displayIssue(issue: Issue): string {
+
+   shorten (value: string, maxLength: number, abbr: string = '…'): string {
+    if (!value) {
+      return '';
+    }
+    if (value.length > maxLength) {
+      value = value.substring(0, maxLength - abbr.length) + abbr;
+    }
+    return value;
+  }
+
+
+  displayIssue = (issue) => {
     if (isNull(issue) || isUndefined(issue)) {
       return '';
     }
-    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
+    return this.shorten(issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject, 46);
   }
 
-  displayProject(project: Project): string {
+  displayProject = (project) => {
     if (isNull(project) || isUndefined(project)) {
       return '';
     }
-    return project.name;
+    return this.shorten(project.name, 33);
+  }
+
+  displayLog = (log) => {
+    if (!log) {
+      return '';
+    }
+    if (!log.includes('$$')) {
+      return this.shorten(log, 52);
+    }
+    return this.shorten(log.substring(log.indexOf('$$') + 2), 52);
   }
 
   private filterIssues(value): Issue[] {
@@ -185,6 +229,26 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
     return this.projectOptions.filter(project =>
       project.name.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private filterLogs(value): TimeLog[] {
+    if (!this.isString(value)) {
+      value = value.comment;
+    }
+    const filterValue: string = value
+      .toLowerCase()
+      .replace('#', '')
+      .trim();
+    return this.logs.filter(
+      log =>
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        log.comment.length > 0 &&
+        filterValue.length > 0 &&
+        log.comment.toLowerCase().includes(filterValue)
     );
   }
 
@@ -243,8 +307,31 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  updateComment(comment) {
-    this.timeLog.comment = comment;
+  selectLog(logData: string) {
+    if (logData === null || logData.length < 1 || !logData.includes('$$')) {
+      this.timeLog.comment = '';
+      return;
+    }
+    const logId = Number.parseInt(
+      logData.substring(0, logData.indexOf('$$')),
+      10
+    );
+    const log = this.logs.find(tlog => tlog.id === logId);
+    this.timeLog.comment = log.comment;
+    if (!log.project) {
+      this.timeLog.project = undefined;
+      this.projectControl.setValue(undefined);
+      this.timeLog.issue = undefined;
+      this.issueControl.setValue(undefined);
+      return;
+    }
+    if (!log.issue) {
+      this.selectProject(log.project);
+      this.projectControl.setValue(this.timeLog.project);
+    } else {
+      this.selectIssue(log.issue);
+      this.issueControl.setValue(this.timeLog.issue);
+    }
   }
 
   startTracker() {

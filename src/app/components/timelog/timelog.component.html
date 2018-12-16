@@ -14,12 +14,18 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <input type="text" [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
-                   matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
-                   (blur)="updateComment($event.target.value)"
-            />
+            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+                   [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
           </mat-form-field>
+
+          <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="displayLog" #autoLog="matAutocomplete">
+            <mat-option *ngFor="let log of (filteredLogs | async)" [value]="log.id + '$$' + log.comment">
+              <span>{{shorten(log.comment, 25)}}</span>
+              <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
+              <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
+            </mat-option>
+          </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
             <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
