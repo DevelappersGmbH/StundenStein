@@ -51,7 +51,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    console.log(this.timeLogs);
     this.pixelWidth = require('string-pixel-width');
     this.tdArray = [[], [], []];
     this.widthHelp = [];
