@@ -1,9 +1,10 @@
 declare var require: any;
-import { Component, OnInit, AfterViewInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
 import { ErrorService } from '../../services/error/error.service';
 import { HostListener } from '@angular/core';
+import { TimeLog } from 'src/app/model/time-log.interface';
 // import { pixelWidth } from 'string-pixel-width';
 
 @Component({
@@ -41,30 +42,31 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
   ) {
     this.onResize();
   }
+
+  @Input() timeLogs: TimeLog[] = [];
+
   onResize(event?) {
     this.screenHeight = window.innerHeight;
     this.screenWidth = window.innerWidth;
   }
 
   ngOnInit() {
+    console.log(this.timeLogs);
     this.pixelWidth = require('string-pixel-width');
     this.tdArray = [[], [], []];
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component
-    this.dataService
-      .getTimeLogs(this.userService.getUser().id)
-      .subscribe(res => {
-        if (res === undefined) {
+        if (this.timeLogs === undefined) {
           this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
         }
         // fill dmwArray
         const date = new Date();
         this.dwmArray = [];
-        for (let i = 0; i < res.length; i++) {
+        for (let i = 0; i < this.timeLogs.length; i++) {
           // month sequence
           if (
-            new Date(res[i].timeStopped).getFullYear() === date.getFullYear() &&
-            new Date(res[i].timeStopped).getMonth() === date.getMonth()
+            new Date(this.timeLogs[i].timeStopped).getFullYear() === date.getFullYear() &&
+            new Date(this.timeLogs[i].timeStopped).getMonth() === date.getMonth()
           ) {
             if (this.dwmArray[i] === undefined) {
               this.dwmArray[i] = [2];
@@ -72,7 +74,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
               this.dwmArray[i][this.dwmArray[i].length] = 2;
             }
             // day sequence
-            if (new Date(res[i].timeStopped).getDate() === date.getDate()) {
+            if (new Date(this.timeLogs[i].timeStopped).getDate() === date.getDate()) {
               if (this.dwmArray[i] === undefined) {
                 this.dwmArray[i] = [0];
               } else {
@@ -82,7 +84,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
           }
           // week sequence
           if (
-            this.getWeekNumber(new Date(res[i].timeStopped)) ===
+            this.getWeekNumber(new Date(this.timeLogs[i].timeStopped)) ===
             this.getWeekNumber(date)
           ) {
             if (this.dwmArray[i] === undefined) {
@@ -96,7 +98,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
           }
         }
         // fill periodArray
-        for (let i = 0; i < res.length; i++) {
+        for (let i = 0; i < this.timeLogs.length; i++) {
           for (let m = 0; m < this.dwmArray[i].length; m++) {
             let projEx = false;
             let projN = 0;
@@ -107,10 +109,10 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
                 n < this.periodArray[this.dwmArray[i][m]].length;
                 n++
               ) {
-                if (res[i].booked && res[i].project !== undefined) {
+                if (this.timeLogs[i].booked && this.timeLogs[i].project !== undefined) {
                   if (
                     this.periodArray[this.dwmArray[i][m]][n][0] ===
-                    res[i].project.name
+                    this.timeLogs[i].project.name
                   ) {
                     projEx = true;
                     projN = n;
@@ -126,27 +128,27 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
             let timeInHoursMod;
             if (this.dwmArray[i][m] === 0) {
               timeInHoursMod = this.checkSameDay(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
+                this.timeLogs[i].timeStarted,
+                this.timeLogs[i].timeStopped,
+                this.timeLogs[i].timeInHours
               );
             } else if (this.dwmArray[i][m] === 1) {
               timeInHoursMod = this.checkSameWeek(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
+                this.timeLogs[i].timeStarted,
+                this.timeLogs[i].timeStopped,
+                this.timeLogs[i].timeInHours
               );
             } else if (this.dwmArray[i][m] === 2) {
               timeInHoursMod = this.checkSameMonth(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
+                this.timeLogs[i].timeStarted,
+                this.timeLogs[i].timeStopped,
+                this.timeLogs[i].timeInHours
               );
             }
             // add to suitable period and project
             if (projEx) {
               this.periodArray[this.dwmArray[i][m]][projN][2] += timeInHoursMod;
-              if (!res[i].billable) {
+              if (!this.timeLogs[i].billable) {
                 if (this.periodArray[this.dwmArray[i][m]][projN].length === 4) {
                   this.periodArray[this.dwmArray[i][m]][
                     projN
@@ -159,16 +161,16 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
               }
             } else {
               // create new project in suitable period
-              if (res[i].booked) {
+              if (this.timeLogs[i].booked) {
                 this.periodArray[this.dwmArray[i][m]][
                   this.periodArray[this.dwmArray[i][m]].length
-                ] = [res[i].project.name, res[i].project.color, timeInHoursMod];
+                ] = [this.timeLogs[i].project.name, this.timeLogs[i].project.color, timeInHoursMod];
               } else {
                 this.periodArray[this.dwmArray[i][m]][
                   this.periodArray[this.dwmArray[i][m]].length
                 ] = [null, '#585a5e', timeInHoursMod];
               }
-              if (!res[i].billable) {
+              if (!this.timeLogs[i].billable) {
                 if (
                   this.periodArray[this.dwmArray[i][m]][
                     this.periodArray[this.dwmArray[i][m]].length - 1
@@ -193,7 +195,6 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         }
         this.width = []; // width for the stripe chart sequences
         this.setWidth();
-      });
   }
   ngAfterViewInit() {
     if (this.ob) {
