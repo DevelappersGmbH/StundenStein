@@ -1,10 +1,11 @@
 declare var require: any;
-import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { UserService } from '../../services/user/user.service';
 import { ErrorService } from '../../services/error/error.service';
 import { HostListener } from '@angular/core';
 import { TimeLog } from 'src/app/model/time-log.interface';
+import { isNull, isUndefined } from 'util';
 // import { pixelWidth } from 'string-pixel-width';
 
 @Component({
@@ -15,7 +16,7 @@ import { TimeLog } from 'src/app/model/time-log.interface';
 
 @HostListener('window:resize', ['$event'])
 
-export class UserReportsComponent implements OnInit, AfterViewInit {
+export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
   tdArray = [[], [], []];
   projectData = []; // data for project names
   selected = 'day'; // day week month selection for user
@@ -52,20 +53,21 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.pixelWidth = require('string-pixel-width');
+    this.initialize();
     this.tdArray = [[], [], []];
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component
-        if (this.timeLogs === undefined) {
-          this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
-        }
-        // fill dmwArray
-        const date = new Date();
-        this.dwmArray = [];
-        for (let i = 0; i < this.timeLogs.length; i++) {
-          // month sequence
-          if (
-            new Date(this.timeLogs[i].timeStopped).getFullYear() === date.getFullYear() &&
-            new Date(this.timeLogs[i].timeStopped).getMonth() === date.getMonth()
+    if (this.timeLogs === undefined) {
+      this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
+    }
+    // fill dmwArray
+    const date = new Date();
+    this.dwmArray = [];
+    for (let i = 0; i < this.timeLogs.length; i++) {
+    // month sequence
+      if (
+        new Date(this.timeLogs[i].timeStopped).getFullYear() === date.getFullYear() &&
+          new Date(this.timeLogs[i].timeStopped).getMonth() === date.getMonth()
           ) {
             if (this.dwmArray[i] === undefined) {
               this.dwmArray[i] = [2];
@@ -195,6 +197,23 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
         this.width = []; // width for the stripe chart sequences
         this.setWidth();
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
+      change.currentValue.forEach(log => {
+        if (
+          !isUndefined(log.comment) &&
+          !isNull(log.comment) &&
+          log.comment.length > 0
+        ) {
+          this.timeLogs.unshift(log);
+        }
+      });
+    }
+    this.ngOnInit();
+  }
+
   ngAfterViewInit() {
     if (this.ob) {
       this.ob = false;
@@ -204,6 +223,10 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     for (let x = 0; x < this.width.length; x++) {
       this.tdArray[this.actualSelect][x] = x;
     }
+  }
+
+  initialize() {
+
   }
   // checks if timelog is started and stopped at the same day
   checkSameDay(start: Date, stop: Date, time: number) {
