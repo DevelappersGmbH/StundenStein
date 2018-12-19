@@ -90,17 +90,12 @@ export class MainComponent implements OnInit {
           this.timelogs.push(log);
         }
         this.timelogs = this.timelogs.slice();
-        const count: number = itemsToDownload - logs.length;
-        const newoffset: number = count - limit;
-        if (count > 0) {
-          this.getTimeLogs(
-            newoffset >= 0 ? newoffset : 0,
-            limit,
-            count,
-            userId
-          );
-        }
       });
+      const count: number = itemsToDownload - logs.length;
+      const newoffset: number = count - limit;
+      if (count > 0) {
+        this.getTimeLogs(newoffset >= 0 ? newoffset : 0, limit, count, userId);
+      }
     });
   }
 }
