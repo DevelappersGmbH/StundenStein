@@ -32,7 +32,7 @@ export class MainComponent implements OnInit {
       this.issues = is;
     });
 
-    this.getAllTimeLogsInkrementally();
+    this.getAllTimeLogsIncrementally();
 
     this.reloadTriggerService.timeLogAdded.subscribe(timelog => {
       this.timelogs.push(timelog);
@@ -62,7 +62,7 @@ export class MainComponent implements OnInit {
     });
   }
 
-  private getAllTimeLogsInkrementally() {
+  private getAllTimeLogsIncrementally() {
     this.dataService.getTimeLogCount().subscribe(count => {
       const limit = 100; // Max of Entries loadable using one request
       const offset = count - limit;
