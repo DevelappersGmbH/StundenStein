@@ -2,9 +2,8 @@
   <mat-card-content>
     <form class="total-record">
       <div class="total-div">
-        <div>
           <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
-            <input type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input id="issue" type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
@@ -14,7 +13,7 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <input type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input id="comment" type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
           </mat-form-field>
@@ -29,7 +28,7 @@
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
             <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
-            <input type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -38,11 +37,10 @@
             <mat-option *ngFor="let project of (filteredProjects| async)" [style.color]="project.color" [value]="project"> {{project.name}}
             </mat-option>
           </mat-autocomplete>
-        </div>
 
-        <div><!-- empty space --></div>
+        <div class="empty"><!-- empty space --></div>
 
-        <div>
+        <div class="part3">
           <div class="oneline">
             <mat-spinner
               class = "spinner"

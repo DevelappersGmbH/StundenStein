@@ -176,24 +176,29 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     if (isNull(issue) || isUndefined(issue)) {
       return '';
     }
-    return this.shorten(issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject, 46);
+
+    const issueWidth = document.getElementById('issue').offsetWidth;
+    return this.shorten(issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject, 0.15 * issueWidth);
   }
 
   displayProject = (project) => {
     if (isNull(project) || isUndefined(project)) {
       return '';
     }
-    return this.shorten(project.name, 33);
+    const projectWidth = document.getElementById('project').offsetWidth;
+    return this.shorten(project.name, 0.15 * projectWidth);
   }
 
   displayLog = (log) => {
+    const commentWidth = document.getElementById('comment').offsetWidth;
     if (!log) {
       return '';
     }
     if (!log.includes('$$')) {
-      return this.shorten(log, 52);
+      return this.shorten(log, 0.15 * commentWidth);
     }
-    return this.shorten(log.substring(log.indexOf('$$') + 2), 52);
+
+    return this.shorten(log.substring(log.indexOf('$$') + 2), 0.15 * commentWidth);
   }
 
   private filterIssues(value): Issue[] {

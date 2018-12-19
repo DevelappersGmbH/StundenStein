@@ -13,25 +13,25 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .field {
-  margin-left: 10px;
+  margin-left: 5px;
 }
 
 .issue {
-  width: 300px;
+  width:25%;
 }
 
 .project {
-  width: 220px;
+  width:10%;
+  margin-right: 20px;
 }
 
 .comment {
-  width: 350px;
+  width:25%;
 }
 
 .icon{
   color: #ccc;
 }
-
 
 .icon.active {
   color: limegreen;
