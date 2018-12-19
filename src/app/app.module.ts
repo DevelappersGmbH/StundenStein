@@ -47,6 +47,7 @@ import { ErrorService } from './services/error/error.service';
 import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
 import { BrowserFavicons } from './services/favicon/favicon.service';
 import { Favicons } from './services/favicon/favicon.service';
+import { UrtestComponent } from './components/urtest/urtest.component';
 
 
 @NgModule({
@@ -61,7 +62,8 @@ import { Favicons } from './services/favicon/favicon.service';
     RecentTimeLogsComponent,
     DeleteWarningComponent,
     EnforcedInputsDirective,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    UrtestComponent
   ],
   imports: [
     BrowserModule,
