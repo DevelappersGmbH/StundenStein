@@ -64,7 +64,7 @@ export class MainComponent implements OnInit {
 
   private getAllTimeLogsInkrementally() {
     this.dataService.getTimeLogCount().subscribe(count => {
-      const limit = 100;
+      const limit = 100; // Max of Entries loadable using one request
       const offset = count - limit;
       this.getTimeLogs(
         offset >= 0 ? offset : 0,
