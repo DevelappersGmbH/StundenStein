@@ -32,7 +32,7 @@ import {TrackerService} from '../../services/tracker/tracker.service';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
+export class TimeLogComponent implements OnInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
@@ -46,14 +46,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() projects: Project[] = [];
   @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
-
-  @ViewChild('hiddenStart') textStart: ElementRef;
-  @ViewChild('hiddenEnd') textEnd: ElementRef;
-  minWidth = 45;
-  startWidth: number = this.minWidth;
-  endWidth: number = this.minWidth;
-
-  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   trackedTime: Date;
   editMode = false;
@@ -133,20 +125,16 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     });
   }
 
-  ngAfterViewInit() {
-    this.resizeEnd();
-    this.resizeStart();
-  }
 
   displayIssue(issue: Issue): string {
-    if (isNull(issue) || isUndefined(issue)) {
+    if (!issue) {
       return '';
     }
     return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject(project: Project): string {
-    if (isNull(project) || isUndefined(project)) {
+    if (!project) {
       return '';
     }
     return project.name;
@@ -309,8 +297,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   changeMode() {
-    this.resizeStart();
-    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -389,23 +375,4 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     });
   }
 
-  resizeStart() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(() => (this.startWidth = Math.max(this.minWidth, newWidth)));
-  }
-
-  resizeEnd() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(() => (this.endWidth = Math.max(this.minWidth, newWidth)));
-  }
 }

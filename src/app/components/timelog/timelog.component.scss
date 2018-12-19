@@ -71,6 +71,10 @@ mat-form-field.edit .mat-form-field-underline {
   display: none;
 }
 
+.mat-form-field-infix {
+  width: 100%;
+}
+
 .cdk-overlay-pane {
   width: auto !important;
   max-width: 400px;

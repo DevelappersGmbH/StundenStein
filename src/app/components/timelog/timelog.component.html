@@ -57,17 +57,18 @@
           </div>
 
           <div class="oneline">
-          <mat-form-field [ngStyle]="{'width.px': startWidth}" class="start-time" [ngClass]="{ edit: !editMode }">
-            <input #elasticStart [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time"  matInput (input)="resizeStart()"/>
-        </mat-form-field>
+            <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+              <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+                     [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
+            </mat-form-field>
           </div>
 
           -
+
           <div class="oneline">
-          <mat-form-field [ngStyle]="{'width.px': endWidth}" class="end-time" [ngClass]="{ edit: !editMode }">
-            <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput (input)="resizeEnd()"/>
+          <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
           </div>
 
@@ -114,5 +115,3 @@
     </form>
   </mat-card-content>
 </mat-card>
-<span #hiddenStart style="visibility: hidden; white-space: pre;">{{timeLog.timeStarted.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>
-<span #hiddenEnd style="visibility: hidden; white-space: pre;">{{timeLog.timeStopped.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>
