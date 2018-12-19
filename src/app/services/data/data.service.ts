@@ -410,8 +410,8 @@ export class DataService {
       this.hourglassService.getTimeLogs(offset, limit, userId),
       this.hourglassService.getTimeBookings(offset, limit, userId),
       this.redmineService.getTimeEntryActivities(),
-      this.redmineService.getProjects(),
-      this.redmineService.getIssues()
+      this.getProjects(),
+      this.getIssues()
     ];
     return forkJoin(calls).pipe(
       map(results => this.mapHourGlassTimeLogsAndBookingsToTimeLogs(results))
@@ -423,8 +423,8 @@ export class DataService {
       this.hourglassService.getAllTimeLogs(userId),
       this.hourglassService.getAllTimeBookings(userId),
       this.redmineService.getTimeEntryActivities(),
-      this.redmineService.getProjects(),
-      this.redmineService.getIssues()
+      this.getProjects(),
+      this.getIssues()
     ];
     return forkJoin(calls).pipe(
       map(results => this.mapHourGlassTimeLogsAndBookingsToTimeLogs(results))
@@ -436,6 +436,8 @@ export class DataService {
     const hourglassTimeLogs: HourGlassTimeLog[] = results[0];
     const hourglassTimeBookings: HourGlassTimeBooking[] = results[1];
     const redmineTimeEntryActivities: RedmineTimeEntryActivities = results[2];
+    const projects: Project[] = results[3];
+    const issues: Issue[] = results[4];
     hourglassTimeBookings.forEach(hgbooking => {
       timelogs.push({
         id: hgbooking.time_log_id,
@@ -449,12 +451,10 @@ export class DataService {
         timeStarted: new Date(hgbooking.start),
         timeStopped: new Date(hgbooking.stop),
         timeInHours: hgbooking.time_entry.hours,
-        project: this.projects.find(
+        project: projects.find(
           entry => entry.id === hgbooking.time_entry.project_id
         ),
-        issue: this.issues.find(
-          entry => entry.id === hgbooking.time_entry.issue_id
-        ),
+        issue: issues.find(entry => entry.id === hgbooking.time_entry.issue_id),
         user: this.mapRedmineUserIdToCurrentUserOrNull(
           hgbooking.time_entry.user_id
         ),
