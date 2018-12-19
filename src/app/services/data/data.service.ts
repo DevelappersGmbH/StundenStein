@@ -408,7 +408,7 @@ export class DataService {
   getTimeLogs(offset: number, limit: number, userId: number = -1) {
     const calls: Observable<any>[] = [
       this.hourglassService.getTimeLogs(offset, limit, userId),
-      this.hourglassService.getTimeBookings(userId, limit, userId),
+      this.hourglassService.getTimeBookings(offset, limit, userId),
       this.redmineService.getTimeEntryActivities(),
       this.redmineService.getProjects(),
       this.redmineService.getIssues()

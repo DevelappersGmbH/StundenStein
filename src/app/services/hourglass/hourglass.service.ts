@@ -137,7 +137,7 @@ export class HourGlassService extends BaseDataService {
     userId: number = -1
   ): Observable<HourGlassTimeBooking[]> {
     let query =
-      this.getJsonEndpointUrl(this.timeLogsUrl) +
+      this.getJsonEndpointUrl(this.timeBookingsUrl) +
       '?offset=' +
       offset +
       '&limit=' +
