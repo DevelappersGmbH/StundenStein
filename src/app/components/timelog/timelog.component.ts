@@ -376,7 +376,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.calculateTime();
   }
 
-  private calculateTime() {
+  calculateTime() {
     const seconds =
       (<any>this.timeLog.timeStopped - <any>this.timeLog.timeStarted) / 1000;
     const hours = Math.floor(seconds / 3600);
@@ -426,7 +426,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     return undefined;
   }
 
-  deleteWarning() {
+  showDeleteWarning() {
     this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 

@@ -27,7 +27,7 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
+            <mat-icon id="warning" class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
             <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
@@ -50,19 +50,19 @@
               color="primary"
               mode="indeterminate">
             </mat-spinner>
-            <button *ngIf="!trackerSpinning" mat-icon-button class="button_play" [disabled]="editMode || restartBlocked" (click)="startTracker()">
+            <button id="btnPlay" *ngIf="!trackerSpinning" mat-icon-button class="button_play" [disabled]="editMode || restartBlocked" (click)="startTracker()">
               <mat-icon class="icon">play_arrow</mat-icon>
             </button>
           </div>
 
           <div class="oneline">
-          <button mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
+          <button id="btnBill" mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
             class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
           </div>
 
           <div class="oneline">
-            <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
-              <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+            <mat-form-field class="start-time" [ngClass]="{ edit: !editMode }">
+              <input id="startTime" [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                      [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
             </mat-form-field>
           </div>
@@ -71,7 +71,7 @@
 
           <div class="oneline">
           <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
-            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+            <input id="endTime" [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
           </div>
@@ -90,7 +90,7 @@
           </div>
 
             <div class="oneline">
-          <button *ngIf="!loading" mat-icon-button class="button" (click)="changeMode()">
+          <button id="btnEdit" *ngIf="!loading" mat-icon-button class="button" (click)="changeMode()">
             <mat-icon  class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
@@ -108,7 +108,7 @@
           </div>
 
               <div class="oneline">
-          <button mat-icon-button class="button" *ngIf="!loadingDel" (click)="deleteWarning()">
+          <button id="btnDel" mat-icon-button class="button" *ngIf="!loadingDel" (click)="showDeleteWarning()">
             <mat-icon class="icon">delete
             </mat-icon>
           </button>
