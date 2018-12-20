@@ -426,7 +426,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     return undefined;
   }
 
-  deleteWarning() {
+  showDeleteWarning() {
     this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 

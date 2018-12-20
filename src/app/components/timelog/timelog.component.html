@@ -1,5 +1,4 @@
-<mat-card class="record-component">
-  <mat-card-content>
+
     <form class="total-record">
       <div class="total-div">
           <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
@@ -38,9 +37,9 @@
             </mat-option>
           </mat-autocomplete>
 
-        <div class="empty"><!-- empty space --></div>
+        <div class="oneline"><!-- empty space --></div>
 
-        <div class="part3">
+        <div class="part3 oneline">
           <div class="oneline">
             <mat-spinner
               class = "spinner"
@@ -76,7 +75,7 @@
           </mat-form-field>
           </div>
 
-          <span class="tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
+          <span class="mat-subheading-2 oneline tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
           <div class="oneline">
             <mat-spinner
@@ -108,7 +107,7 @@
           </div>
 
               <div class="oneline">
-          <button mat-icon-button class="button" *ngIf="!loadingDel" (click)="deleteWarning()">
+          <button mat-icon-button class="button" *ngIf="!loadingDel" (click)="showDeleteWarning()">
             <mat-icon class="icon">delete
             </mat-icon>
           </button>
@@ -117,5 +116,3 @@
         </div>
       </div>
     </form>
-  </mat-card-content>
-</mat-card>
