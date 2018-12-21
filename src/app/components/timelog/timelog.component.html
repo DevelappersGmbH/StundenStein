@@ -26,10 +26,10 @@
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
             <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
+            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
           </mat-form-field>
 
           <mat-autocomplete #autoProject="matAutocomplete" (optionSelected)="selectProject($event.option.value)" [displayWith]="displayProject">

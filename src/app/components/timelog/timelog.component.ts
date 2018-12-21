@@ -163,7 +163,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     const issueWidth = document.getElementById('issue').offsetWidth;
     return this.shorten(
       issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject,
-      0.15 * issueWidth
+      0.14 * issueWidth
     );
   }
 
@@ -172,7 +172,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
       return '';
     }
     const projectWidth = document.getElementById('project').offsetWidth;
-    return this.shorten(project.name, 0.15 * projectWidth);
+    return this.shorten(project.name, 0.14 * projectWidth);
   }
 
   displayLog = log => {
@@ -181,12 +181,12 @@ export class TimeLogComponent implements OnInit, OnChanges {
       return '';
     }
     if (!log.includes('$$')) {
-      return this.shorten(log, 0.15 * commentWidth);
+      return this.shorten(log, 0.14 * commentWidth);
     }
 
     return this.shorten(
       log.substring(log.indexOf('$$') + 2),
-      0.15 * commentWidth
+      0.14 * commentWidth
     );
   }
 

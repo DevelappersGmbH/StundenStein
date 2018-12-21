@@ -1,4 +1,4 @@
-$break-small: 640px;
+$break-small: 700px;
 $break-medium: 992px;
 $break-large: 1240px;
 
@@ -11,7 +11,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: flex;
   justify-content: space-between;
   @media screen and (max-width: $break-medium) {
-    display: inline;
+    display: inline-block;
   }
 }
 
@@ -19,21 +19,15 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: inline-block;
 }
 
+
 .field {
   margin-left: 15px;
-}
-
-.part3{
-  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-   float: right;
-  }
-
 }
 
 .issue {
   width: 27%;
   @media screen and (max-width: $break-medium) {
-    width: 55%;
+    width: 40%;
     @media screen and (max-width: $break-small) {
       width: 90%;
     }
@@ -41,10 +35,13 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .project {
-  width:10%;
+  width: 10%;
   margin-right: 10px;
-  @media screen and (max-width: $break-medium) {
-    width: 31%;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    width: 15%;
+  }
+  @media screen and (max-width: $break-small) {
+    width: 55%;
   }
 }
 
@@ -55,8 +52,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   }
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
     width: 35%;
-    float: right;
-    margin-right: 10px;
   }
   @media screen and (max-width: $break-small) {
     width: 55%;
