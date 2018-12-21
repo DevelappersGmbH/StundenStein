@@ -22,7 +22,7 @@
   >
 </h2>
 <div *ngFor="let date of dateList">
-  <h3 mat-subheader>
+  <h3 class="mat-h3">
     <span matBadge="{{unbookedTimeLogsMap.get(date)}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false"
       [matBadgeHidden]="unbookedTimeLogsMap.get(date) == 0">{{ date | date: "fullDate" }}</span>
   </h3>
