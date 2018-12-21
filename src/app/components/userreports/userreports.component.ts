@@ -5,6 +5,8 @@ import { UserService } from '../../services/user/user.service';
 import { ErrorService } from '../../services/error/error.service';
 import { HostListener } from '@angular/core';
 import { TimeLog } from 'src/app/model/time-log.interface';
+import { Project } from 'src/app/model/project.interface';
+import { Issue } from 'src/app/model/issue.interface';
 import { isNull, isUndefined } from 'util';
 // import { pixelWidth } from 'string-pixel-width';
 
@@ -35,6 +37,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
   pixelWidth;
   screenHeight;
   screenWidth;
+  date = new Date();
 
   constructor(
     private dataService: DataService,
@@ -45,6 +48,8 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   @Input() timeLogs: TimeLog[] = [];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
 
   onResize(event?) {
     this.screenHeight = window.innerHeight;
@@ -61,141 +66,14 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
       this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
     }
     // fill dmwArray
-    const date = new Date();
     this.dwmArray = [];
-    for (let i = 0; i < this.timeLogs.length; i++) {
-    // month sequence
-      if (
-        new Date(this.timeLogs[i].timeStopped).getFullYear() === date.getFullYear() &&
-          new Date(this.timeLogs[i].timeStopped).getMonth() === date.getMonth()
-          ) {
-            if (this.dwmArray[i] === undefined) {
-              this.dwmArray[i] = [2];
-            } else {
-              this.dwmArray[i][this.dwmArray[i].length] = 2;
-            }
-            // day sequence
-            if (new Date(this.timeLogs[i].timeStopped).getDate() === date.getDate()) {
-              if (this.dwmArray[i] === undefined) {
-                this.dwmArray[i] = [0];
-              } else {
-                this.dwmArray[i][this.dwmArray[i].length] = 0;
-              }
-            }
-          }
-          // week sequence
-          if (
-            this.getWeekNumber(new Date(this.timeLogs[i].timeStopped)) ===
-            this.getWeekNumber(date)
-          ) {
-            if (this.dwmArray[i] === undefined) {
-              this.dwmArray[i] = [1];
-            } else {
-              this.dwmArray[i][this.dwmArray[i].length] = 1;
-            }
-          }
-          if (this.dwmArray[i] === undefined) {
-            this.dwmArray[i] = [];
-          }
-        }
-        // fill periodArray
-        for (let i = 0; i < this.timeLogs.length; i++) {
-          for (let m = 0; m < this.dwmArray[i].length; m++) {
-            let projEx = false;
-            let projN = 0;
-            // check if project already exists for the period
-            if (this.periodArray !== undefined) {
-              for (
-                let n = 0;
-                n < this.periodArray[this.dwmArray[i][m]].length;
-                n++
-              ) {
-                if (this.timeLogs[i].booked && this.timeLogs[i].project !== undefined) {
-                  if (
-                    this.periodArray[this.dwmArray[i][m]][n][0] ===
-                    this.timeLogs[i].project.name
-                  ) {
-                    projEx = true;
-                    projN = n;
-                  }
-                } else {
-                  if (this.periodArray[this.dwmArray[i][m]][n][0] == null) {
-                    projEx = true;
-                    projN = n;
-                  }
-                }
-              }
-            }
-            let timeInHoursMod;
-            if (this.dwmArray[i][m] === 0) {
-              timeInHoursMod = this.checkSameDay(
-                this.timeLogs[i].timeStarted,
-                this.timeLogs[i].timeStopped,
-                this.timeLogs[i].timeInHours
-              );
-            } else if (this.dwmArray[i][m] === 1) {
-              timeInHoursMod = this.checkSameWeek(
-                this.timeLogs[i].timeStarted,
-                this.timeLogs[i].timeStopped,
-                this.timeLogs[i].timeInHours
-              );
-            } else if (this.dwmArray[i][m] === 2) {
-              timeInHoursMod = this.checkSameMonth(
-                this.timeLogs[i].timeStarted,
-                this.timeLogs[i].timeStopped,
-                this.timeLogs[i].timeInHours
-              );
-            }
-            // add to suitable period and project
-            if (projEx) {
-              this.periodArray[this.dwmArray[i][m]][projN][2] += timeInHoursMod;
-              if (!this.timeLogs[i].billable) {
-                if (this.periodArray[this.dwmArray[i][m]][projN].length === 4) {
-                  this.periodArray[this.dwmArray[i][m]][
-                    projN
-                  ][3] += timeInHoursMod;
-                } else {
-                  this.periodArray[this.dwmArray[i][m]][
-                    projN
-                  ][3] = timeInHoursMod;
-                }
-              }
-            } else {
-              // create new project in suitable period
-              if (this.timeLogs[i].booked) {
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length
-                ] = [this.timeLogs[i].project.name, this.timeLogs[i].project.color, timeInHoursMod];
-              } else {
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length
-                ] = [null, '#585a5e', timeInHoursMod];
-              }
-              if (!this.timeLogs[i].billable) {
-                if (
-                  this.periodArray[this.dwmArray[i][m]][
-                    this.periodArray[this.dwmArray[i][m]].length - 1
-                  ].length === 4
-                ) {
-                  this.periodArray[this.dwmArray[i][m]][
-                    this.periodArray[this.dwmArray[i][m]].length - 1
-                  ][3] += timeInHoursMod;
-                }
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length - 1
-                ][3] = timeInHoursMod;
-              }
-            }
-          }
-        }
-        // some settings for new shown period
-        for (let j = 0; j < 3; j++) {
-          for (let x = 0; x < this.periodArray[j].length; x++) {
-            this.tdArray[j][x] = x;
-          }
-        }
-        this.width = []; // width for the stripe chart sequences
-        this.setWidth();
+    this.fillDwmArray();
+    // fill periodArray
+    this.fillProjectArray();
+    // some settings for new shown period
+    this.graphicalSettings();
+    this.width = []; // width for the stripe chart sequences
+    this.setWidth();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -212,6 +90,144 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
       });
     }
     this.ngOnInit();
+  }
+
+  fillDwmArray() {
+    for (let i = 0; i < this.timeLogs.length; i++) {
+      // month sequence
+        if (
+          new Date(this.timeLogs[i].timeStopped).getFullYear() === this.date.getFullYear() &&
+            new Date(this.timeLogs[i].timeStopped).getMonth() === this.date.getMonth()
+            ) {
+              if (this.dwmArray[i] === undefined) {
+                this.dwmArray[i] = [2];
+              } else {
+                this.dwmArray[i][this.dwmArray[i].length] = 2;
+              }
+              // day sequence
+              if (new Date(this.timeLogs[i].timeStopped).getDate() === this.date.getDate()) {
+                if (this.dwmArray[i] === undefined) {
+                  this.dwmArray[i] = [0];
+                } else {
+                  this.dwmArray[i][this.dwmArray[i].length] = 0;
+                }
+              }
+            }
+            // week sequence
+            if (
+              this.getWeekNumber(new Date(this.timeLogs[i].timeStopped)) ===
+              this.getWeekNumber(this.date)
+            ) {
+              if (this.dwmArray[i] === undefined) {
+                this.dwmArray[i] = [1];
+              } else {
+                this.dwmArray[i][this.dwmArray[i].length] = 1;
+              }
+            }
+            if (this.dwmArray[i] === undefined) {
+              this.dwmArray[i] = [];
+            }
+          }
+  }
+
+  fillProjectArray() {
+    for (let i = 0; i < this.timeLogs.length; i++) {
+      for (let m = 0; m < this.dwmArray[i].length; m++) {
+        let projEx = false;
+        let projN = 0;
+        // check if project already exists for the period
+        if (this.periodArray !== undefined) {
+          for (
+            let n = 0;
+            n < this.periodArray[this.dwmArray[i][m]].length;
+            n++
+          ) {
+            if (this.timeLogs[i].booked && this.timeLogs[i].project !== undefined) {
+              if (
+                this.periodArray[this.dwmArray[i][m]][n][0] ===
+                this.timeLogs[i].project.name
+              ) {
+                projEx = true;
+                projN = n;
+              }
+            } else {
+              if (this.periodArray[this.dwmArray[i][m]][n][0] == null) {
+                projEx = true;
+                projN = n;
+              }
+            }
+          }
+        }
+        let timeInHoursMod;
+        if (this.dwmArray[i][m] === 0) {
+          timeInHoursMod = this.checkSameDay(
+            this.timeLogs[i].timeStarted,
+            this.timeLogs[i].timeStopped,
+            this.timeLogs[i].timeInHours
+          );
+        } else if (this.dwmArray[i][m] === 1) {
+          timeInHoursMod = this.checkSameWeek(
+            this.timeLogs[i].timeStarted,
+            this.timeLogs[i].timeStopped,
+            this.timeLogs[i].timeInHours
+          );
+        } else if (this.dwmArray[i][m] === 2) {
+          timeInHoursMod = this.checkSameMonth(
+            this.timeLogs[i].timeStarted,
+            this.timeLogs[i].timeStopped,
+            this.timeLogs[i].timeInHours
+          );
+        }
+        // add to suitable period and project
+        if (projEx) {
+          this.periodArray[this.dwmArray[i][m]][projN][2] += timeInHoursMod;
+          if (!this.timeLogs[i].billable) {
+            if (this.periodArray[this.dwmArray[i][m]][projN].length === 4) {
+              this.periodArray[this.dwmArray[i][m]][
+                projN
+              ][3] += timeInHoursMod;
+            } else {
+              this.periodArray[this.dwmArray[i][m]][
+                projN
+              ][3] = timeInHoursMod;
+            }
+          }
+        } else {
+          // create new project in suitable period
+          if (this.timeLogs[i].booked) {
+            this.periodArray[this.dwmArray[i][m]][
+              this.periodArray[this.dwmArray[i][m]].length
+            ] = [this.timeLogs[i].project.name, this.timeLogs[i].project.color, timeInHoursMod];
+          } else {
+            this.periodArray[this.dwmArray[i][m]][
+              this.periodArray[this.dwmArray[i][m]].length
+            ] = [null, '#585a5e', timeInHoursMod];
+          }
+          if (!this.timeLogs[i].billable) {
+            if (
+              this.periodArray[this.dwmArray[i][m]][
+                this.periodArray[this.dwmArray[i][m]].length - 1
+              ].length === 4
+            ) {
+              this.periodArray[this.dwmArray[i][m]][
+                this.periodArray[this.dwmArray[i][m]].length - 1
+              ][3] += timeInHoursMod;
+            }
+            this.periodArray[this.dwmArray[i][m]][
+              this.periodArray[this.dwmArray[i][m]].length - 1
+            ][3] = timeInHoursMod;
+          }
+        }
+      }
+    }
+  }
+
+  graphicalSettings() {
+    for (let j = 0; j < 3; j++) {
+      for (let x = 0; x < this.periodArray[j].length; x++) {
+        this.tdArray[j][x] = x;
+      }
+    }
   }
 
   ngAfterViewInit() {
