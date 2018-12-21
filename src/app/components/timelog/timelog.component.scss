@@ -19,7 +19,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   display: inline-block;
 }
 
-
 .field {
   margin-left: 15px;
 }
@@ -70,7 +69,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   position:relative;
   bottom:-5px;
   color: transparent;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .icon.attention {
@@ -81,7 +80,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   position:relative;
   bottom:-5px;
   color: orangered;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .start-time {
