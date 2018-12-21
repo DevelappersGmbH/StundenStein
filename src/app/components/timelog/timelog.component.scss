@@ -13,13 +13,25 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .field {
-  margin-left: 10px;
+  margin-left: 5px;
+}
+
+.issue {
+  width:25%;
+}
+
+.project {
+  width:10%;
+  margin-right: 20px;
+}
+
+.comment {
+  width:25%;
 }
 
 .icon{
   color: #ccc;
 }
-
 
 .icon.active {
   color: limegreen;
@@ -69,6 +81,10 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 
 mat-form-field.edit .mat-form-field-underline {
   display: none;
+}
+
+.mat-form-field-infix {
+  width: 100%;
 }
 
 .cdk-overlay-pane {

@@ -23,8 +23,8 @@ import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
 import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
+import { TrackerService } from '../../services/tracker/tracker.service';
 import { User } from '../../model/user.interface';
-import {TrackerService} from '../../services/tracker/tracker.service';
 
 @Component({
   selector: 'app-timelog',
@@ -32,7 +32,7 @@ import {TrackerService} from '../../services/tracker/tracker.service';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
+export class TimeLogComponent implements OnInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
@@ -41,19 +41,12 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     private errorService: ErrorService
   ) {}
 
+  logs: TimeLog[] = [];
   @Input() timeLog: TimeLog;
-  @Input() timeLogs: TimeLog[];
+  @Input() timeLogs: TimeLog[] = [];
   @Input() projects: Project[] = [];
   @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
-
-  @ViewChild('hiddenStart') textStart: ElementRef;
-  @ViewChild('hiddenEnd') textEnd: ElementRef;
-  minWidth = 45;
-  startWidth: number = this.minWidth;
-  endWidth: number = this.minWidth;
-
-  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
   trackedTime: Date;
   editMode = false;
@@ -66,16 +59,27 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
   issueControl = new FormControl();
   projectControl = new FormControl();
+  logControl = new FormControl();
   issueOptions: Issue[] = [];
   projectOptions: Project[] = [];
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredLogs: Observable<TimeLog[]>;
 
   filteredObject = false;
 
   ngOnChanges(changes: SimpleChanges) {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
+      change.currentValue.forEach(log => {
+        if (
+          !isUndefined(log.comment) &&
+          !isNull(log.comment) &&
+          log.comment.length > 0
+        ) {
+          this.logs.unshift(log);
+        }
+      });
     }
     if (typeof changes['issues'] !== 'undefined') {
       const change = changes['issues'];
@@ -104,6 +108,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     this.projectControl.setValue(
       this.timeLog.project ? this.timeLog.project : undefined
     );
+    this.logControl.setValue(
+      this.timeLog.comment ? this.timeLog.comment : undefined
+    );
 
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
@@ -117,6 +124,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
       map(project =>
         project ? this.filterProjects(project) : this.projectOptions.slice()
       )
+    );
+
+    this.filteredLogs = this.logControl.valueChanges.pipe(
+      startWith(''),
+      map(log => (log ? this.filterLogs(log) : this.logs.slice()))
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
@@ -133,23 +145,49 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     });
   }
 
-  ngAfterViewInit() {
-    this.resizeEnd();
-    this.resizeStart();
-  }
-
-  displayIssue(issue: Issue): string {
-    if (isNull(issue) || isUndefined(issue)) {
+  shorten(value: string, maxLength: number, abbr: string = '…'): string {
+    if (!value) {
       return '';
     }
-    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
+    if (value.length > maxLength) {
+      value = value.substring(0, maxLength - abbr.length) + abbr;
+    }
+    return value;
   }
 
-  displayProject(project: Project): string {
-    if (isNull(project) || isUndefined(project)) {
+  displayIssue = issue => {
+    if (!issue) {
       return '';
     }
-    return project.name;
+
+    const issueWidth = document.getElementById('issue').offsetWidth;
+    return this.shorten(
+      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject,
+      0.15 * issueWidth
+    );
+  }
+
+  displayProject = project => {
+    if (!project) {
+      return '';
+    }
+    const projectWidth = document.getElementById('project').offsetWidth;
+    return this.shorten(project.name, 0.15 * projectWidth);
+  }
+
+  displayLog = log => {
+    const commentWidth = document.getElementById('comment').offsetWidth;
+    if (!log) {
+      return '';
+    }
+    if (!log.includes('$$')) {
+      return this.shorten(log, 0.15 * commentWidth);
+    }
+
+    return this.shorten(
+      log.substring(log.indexOf('$$') + 2),
+      0.15 * commentWidth
+    );
   }
 
   private filterIssues(value): Issue[] {
@@ -185,6 +223,26 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
 
     return this.projectOptions.filter(project =>
       project.name.toLowerCase().includes(filterValue)
+    );
+  }
+
+  private filterLogs(value): TimeLog[] {
+    if (!this.isString(value)) {
+      value = value.comment;
+    }
+    const filterValue: string = value
+      .toLowerCase()
+      .replace('#', '')
+      .trim();
+    return this.logs.filter(
+      log =>
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        log.comment.length > 0 &&
+        filterValue.length > 0 &&
+        log.comment.toLowerCase().includes(filterValue)
     );
   }
 
@@ -243,13 +301,41 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
-  updateComment(comment) {
-    this.timeLog.comment = comment;
+  selectLog(logData: string) {
+    if (logData === null || logData.length < 1 || !logData.includes('$$')) {
+      this.timeLog.comment = '';
+      return;
+    }
+    const logId = Number.parseInt(
+      logData.substring(0, logData.indexOf('$$')),
+      10
+    );
+    const log = this.logs.find(tlog => tlog.id === logId);
+    this.timeLog.comment = log.comment;
+    if (!log.project) {
+      this.timeLog.project = undefined;
+      this.projectControl.setValue(undefined);
+      this.timeLog.issue = undefined;
+      this.issueControl.setValue(undefined);
+      return;
+    }
+    if (!log.issue) {
+      this.selectProject(log.project);
+      this.projectControl.setValue(this.timeLog.project);
+    } else {
+      this.selectIssue(log.issue);
+      this.issueControl.setValue(this.timeLog.issue);
+    }
   }
 
   startTracker() {
     this.trackerSpinning = true;
-    this.trackerService.track({ project: this.timeLog.project, issue: this.timeLog.issue, comment: this.timeLog.comment, billable: true });
+    this.trackerService.track({
+      project: this.timeLog.project,
+      issue: this.timeLog.issue,
+      comment: this.timeLog.comment,
+      billable: true
+    });
   }
 
   markBillable() {
@@ -309,8 +395,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
   }
 
   changeMode() {
-    this.resizeStart();
-    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -387,25 +471,5 @@ export class TimeLogComponent implements OnInit, AfterViewInit, OnChanges {
         that.loading = false;
       }
     });
-  }
-
-  resizeStart() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(() => (this.startWidth = Math.max(this.minWidth, newWidth)));
-  }
-
-  resizeEnd() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(() => (this.endWidth = Math.max(this.minWidth, newWidth)));
   }
 }
