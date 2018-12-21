@@ -75,7 +75,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
 
   compareDatesEqual(d1: Date, d2: Date) {
     if (
-      d1.getUTCDay() === d2.getUTCDay() &&
+      d1.getUTCDate() === d2.getUTCDate() &&
       d1.getUTCMonth() === d2.getUTCMonth() &&
       d1.getUTCFullYear() === d2.getUTCFullYear()
     ) {
