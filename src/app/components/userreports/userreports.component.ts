@@ -63,7 +63,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component
     if (this.timeLogs === undefined) {
-      this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
+      this.errorService.errorDialog('Did not receives data from the dataService, wich distributes the project data.');
     }
     // fill dmwArray
     this.dwmArray = [];
@@ -381,8 +381,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit, OnChanges {
   }
   // get name of Project
   getProjectData(i, bool) {
-    let pixelTemp = this.screenWidth - 20;
-    pixelTemp = pixelTemp * (this.width[i] / 100);
+    const pixelTemp = this.screenWidth - 20 * (this.width[i] / 100);
     if (this.periodArray[this.actualSelect][i][0] == null) {
       return 'No project assigned';
     } else {
