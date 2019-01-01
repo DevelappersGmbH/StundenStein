@@ -47,8 +47,6 @@ import { ErrorService } from './services/error/error.service';
 import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
 import { BrowserFavicons } from './services/favicon/favicon.service';
 import { Favicons } from './services/favicon/favicon.service';
-import { UserReports2Component } from './components/userreports2/userreports2.component';
-
 
 @NgModule({
   declarations: [
@@ -62,8 +60,7 @@ import { UserReports2Component } from './components/userreports2/userreports2.co
     RecentTimeLogsComponent,
     DeleteWarningComponent,
     EnforcedInputsDirective,
-    ErrorDialogComponent,
-    UserReports2Component
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
