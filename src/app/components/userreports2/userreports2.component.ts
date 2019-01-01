@@ -64,7 +64,6 @@ export class UserReports2Component
     if (this.timeLogs.length > 0) {
       this.periodArray = this.setPeriod();
       this.setWidth(this.periodArray);
-      console.log(this.generalArray);
     }
   }
 
