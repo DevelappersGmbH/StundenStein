@@ -52,7 +52,7 @@ export class UserReportsComponent implements OnInit, AfterViewInit {
     this.widthHelp = [];
     this.periodArray = [[], [], []]; // final data array for every use in component
     this.dataService
-      .getTimeLogs(this.userService.getUser().id)
+      .getAllTimeLogs(this.userService.getUser().id)
       .subscribe(res => {
         if (res === undefined) {
           this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
