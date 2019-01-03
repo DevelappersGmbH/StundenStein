@@ -32,7 +32,9 @@ import {
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule,
-  MatTabsModule
+  MatTabsModule,
+  MatDatepickerModule,
+  MatNativeDateModule
 } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
@@ -89,7 +91,9 @@ import { ReportsComponent } from './components/reports/reports.component';
     MatDialogModule,
     MatBadgeModule,
     MatProgressSpinnerModule,
-    MatTabsModule
+    MatTabsModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [
     AuthenticationService,
