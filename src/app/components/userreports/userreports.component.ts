@@ -33,7 +33,6 @@ export class UserReportsComponent
   browserSize;
   browserWidth;
   setBrowserWidthOnInit;
-  rightValue = 0;
 
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
