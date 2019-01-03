@@ -65,7 +65,36 @@ export class HourGlassService extends BaseDataService {
     return this.httpClient.get<HourGlassTimeTrackers>(query);
   }
 
-  getTimeLogs(userId: number = -1): Observable<HourGlassTimeLog[]> {
+  getTimeLogCount(userId: number = -1): Observable<number> {
+    let query = this.getJsonEndpointUrl(this.timeLogsUrl) + '?limit=1';
+    if (userId > -1) {
+      query += '&user_id=' + userId;
+    }
+    return this.httpClient
+      .get<HourGlassTimeLogs>(query)
+      .pipe(map(logs => logs.count));
+  }
+
+  getTimeLogs(
+    offset: number,
+    limit: number,
+    userId: number = -1
+  ): Observable<HourGlassTimeLog[]> {
+    let query =
+      this.getJsonEndpointUrl(this.timeLogsUrl) +
+      '?offset=' +
+      offset +
+      '&limit=' +
+      limit;
+    if (userId > -1) {
+      query += '&user_id=' + userId;
+    }
+    return this.httpClient
+      .get<HourGlassTimeLogs>(query)
+      .pipe(map(logs => logs.records));
+  }
+
+  getAllTimeLogs(userId: number = -1): Observable<HourGlassTimeLog[]> {
     let query =
       this.getJsonEndpointUrl(this.timeLogsUrl) +
       '?limit=' +
@@ -102,7 +131,26 @@ export class HourGlassService extends BaseDataService {
     );
   }
 
-  getTimeBookings(userId: number = -1): Observable<HourGlassTimeBooking[]> {
+  getTimeBookings(
+    offset: number,
+    limit: number,
+    userId: number = -1
+  ): Observable<HourGlassTimeBooking[]> {
+    let query =
+      this.getJsonEndpointUrl(this.timeBookingsUrl) +
+      '?offset=' +
+      offset +
+      '&limit=' +
+      limit;
+    if (userId > -1) {
+      query += '&user_id=' + userId;
+    }
+    return this.httpClient
+      .get<HourGlassTimeBookings>(query)
+      .pipe(map(logs => logs.records));
+  }
+
+  getAllTimeBookings(userId: number = -1): Observable<HourGlassTimeBooking[]> {
     let query =
       this.getJsonEndpointUrl(this.timeBookingsUrl) +
       '?limit=' +
