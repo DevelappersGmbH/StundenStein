@@ -4,21 +4,27 @@ import {
   ElementRef,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation
-} from '@angular/core';
+  } from '@angular/core';
 import { DataService } from '../../services/data/data.service';
 import { DeleteWarningComponent } from '../delete-warning/delete-warning.component';
+import { ErrorService } from '../../services/error/error.service';
 import { FormControl } from '@angular/forms';
+import { isNull, isUndefined } from 'util';
 import { Issue } from '../../model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { MatDialog, MatDialogConfig } from '@angular/material';
 import { Observable } from 'rxjs';
 import { Project } from '../../model/project.interface';
+import { ReloadTriggerService } from '../../services/reload-trigger.service';
 import { TimeLog } from '../../model/time-log.interface';
-import {ReloadTriggerService} from '../../services/reload-trigger.service';
+import { TrackerService } from '../../services/tracker/tracker.service';
+import { User } from '../../model/user.interface';
 
 @Component({
   selector: 'app-timelog',
@@ -26,42 +32,64 @@ import {ReloadTriggerService} from '../../services/reload-trigger.service';
   styleUrls: ['./timelog.component.scss'],
   encapsulation: ViewEncapsulation.None
 })
-export class TimeLogComponent implements OnInit, AfterViewInit {
+export class TimeLogComponent implements OnInit, OnChanges {
   constructor(
     private dataService: DataService,
     private deleteDialog: MatDialog,
-    private reloadTriggerService: ReloadTriggerService
+    private trackerService: TrackerService,
+    private reloadTriggerService: ReloadTriggerService,
+    private errorService: ErrorService
   ) {}
 
+  logs: TimeLog[] = [];
   @Input() timeLog: TimeLog;
+  @Input() timeLogs: TimeLog[] = [];
+  @Input() projects: Project[] = [];
+  @Input() issues: Issue[] = [];
   @Output() deleted: EventEmitter<number> = new EventEmitter<number>();
 
-  @ViewChild('hiddenStart') textStart: ElementRef;
-  @ViewChild('hiddenEnd') textEnd: ElementRef;
-  minWidth = 45;
-  startWidth: number = this.minWidth;
-  endWidth: number = this.minWidth;
-
-  isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
-
   trackedTime: Date;
-  active = false;
   editMode = false;
   editButton = 'edit';
   loading = false;
   loadingDel = false;
 
-  projects: Project[] = [];
-  issues: Issue[] = [];
+  restartBlocked = false;
+  trackerSpinning = false;
 
   issueControl = new FormControl();
   projectControl = new FormControl();
+  logControl = new FormControl();
   issueOptions: Issue[] = [];
   projectOptions: Project[] = [];
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
+  filteredLogs: Observable<TimeLog[]>;
 
   filteredObject = false;
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
+      change.currentValue.forEach(log => {
+        if (
+          !isUndefined(log.comment) &&
+          !isNull(log.comment) &&
+          log.comment.length > 0
+        ) {
+          this.logs.unshift(log);
+        }
+      });
+    }
+    if (typeof changes['issues'] !== 'undefined') {
+      const change = changes['issues'];
+      this.issueOptions = this.issues;
+    }
+    if (typeof changes['projects'] !== 'undefined') {
+      const change = changes['projects'];
+      this.projectOptions = this.projects;
+    }
+  }
 
   ngOnInit() {
     this.trackedTime = new Date(
@@ -80,9 +108,9 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     this.projectControl.setValue(
       this.timeLog.project ? this.timeLog.project : undefined
     );
-
-    this.loadIssues();
-    this.loadProjects();
+    this.logControl.setValue(
+      this.timeLog.comment ? this.timeLog.comment : undefined
+    );
 
     this.filteredIssues = this.issueControl.valueChanges.pipe(
       startWith(''),
@@ -93,51 +121,73 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
     this.filteredProjects = this.projectControl.valueChanges.pipe(
       startWith(''),
-      map(project => project ? this.filterProjects(project) : this.projectOptions.slice())
+      map(project =>
+        project ? this.filterProjects(project) : this.projectOptions.slice()
+      )
+    );
+
+    this.filteredLogs = this.logControl.valueChanges.pipe(
+      startWith(''),
+      map(log => (log ? this.filterLogs(log) : this.logs.slice()))
     );
 
     if (!this.timeLog.project || this.timeLog.project.name === '') {
       this.editButton = 'playlist_add';
     }
-  }
 
-  ngAfterViewInit() {
-    this.resizeEnd();
-    this.resizeStart();
-  }
-
-  loadProjects() {
-    this.dataService.getProjects().subscribe(
-      data => {
-        this.projects = data;
-        this.projectOptions = this.projects;
-      },
-      error => {
-        console.error('Couldn\'t get projects from data service.');
+    this.trackerService.reTrackingInProgress.subscribe(inProgress => {
+      if (inProgress === true) {
+        this.restartBlocked = true;
+      } else {
+        this.restartBlocked = false;
+        this.trackerSpinning = false;
       }
+    });
+  }
+
+  shorten(value: string, maxLength: number, abbr: string = '…'): string {
+    if (!value) {
+      return '';
+    }
+    if (value.length > maxLength) {
+      value = value.substring(0, maxLength - abbr.length) + abbr;
+    }
+    return value;
+  }
+
+  displayIssue = issue => {
+    if (!issue) {
+      return '';
+    }
+
+    const issueWidth = document.getElementById('issue').offsetWidth;
+    return this.shorten(
+      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject,
+      0.15 * issueWidth
     );
   }
 
-  loadIssues() {
-    this.dataService.getIssues().subscribe(
-      data => {
-        this.issues = data;
-        this.issueOptions = this.issues;
-      },
-      error => {
-        console.error('Couldn\'t get issues from data service.');
-      }
+  displayProject = project => {
+    if (!project) {
+      return '';
+    }
+    const projectWidth = document.getElementById('project').offsetWidth;
+    return this.shorten(project.name, 0.15 * projectWidth);
+  }
+
+  displayLog = log => {
+    const commentWidth = document.getElementById('comment').offsetWidth;
+    if (!log) {
+      return '';
+    }
+    if (!log.includes('$$')) {
+      return this.shorten(log, 0.15 * commentWidth);
+    }
+
+    return this.shorten(
+      log.substring(log.indexOf('$$') + 2),
+      0.15 * commentWidth
     );
-  }
-
-  displayIssue(issue: Issue): string {
-    if (!issue) { return ''; }
-    return issue.id.toString() + ': ' + issue.subject;
-  }
-
-  displayProject(project: Project): string {
-    if (!project) { return ''; }
-    return project.name;
   }
 
   private filterIssues(value): Issue[] {
@@ -151,11 +201,11 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
     return this.issueOptions.filter(
       issue =>
-        (issue.subject.toLowerCase().includes(filterValue) ||
+        issue.subject.toLowerCase().includes(filterValue) ||
         issue.id.toString().includes(filterValue) ||
         issue.subject
           .toLowerCase()
-          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2)))
+          .includes(filterValue.substring(filterValue.lastIndexOf(': ') + 2))
     );
   }
 
@@ -176,6 +226,26 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     );
   }
 
+  private filterLogs(value): TimeLog[] {
+    if (!this.isString(value)) {
+      value = value.comment;
+    }
+    const filterValue: string = value
+      .toLowerCase()
+      .replace('#', '')
+      .trim();
+    return this.logs.filter(
+      log =>
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        !isUndefined(log.comment) &&
+        !isNull(log.comment) &&
+        log.comment.length > 0 &&
+        filterValue.length > 0 &&
+        log.comment.toLowerCase().includes(filterValue)
+    );
+  }
+
   private isString(value): boolean {
     return Object.prototype.toString.call(value) === '[object String]';
   }
@@ -190,8 +260,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   selectIssue(issue) {
-    console.log('Issue: ', issue);
-
     if (this.findIssue(issue)) {
       this.timeLog.issue = issue;
       this.timeLog.project = issue.project;
@@ -233,36 +301,41 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
     }
   }
 
-  updateComment(comment) {
-    this.timeLog.comment = comment;
-  }
-
-  private searchIssueById(id): Issue {
-    this.issues.forEach(issue => {
-      if (issue.id === id) {
-        return issue;
-      }
-    });
-    console.log('No matching issue found');
-    return undefined;
-  }
-
-  private searchProjectById(id): Project {
-    this.projects.forEach(project => {
-      if (project.id === id) {
-        return project;
-      }
-    });
-    console.log('No matching project found');
-    return undefined;
+  selectLog(logData: string) {
+    if (logData === null || logData.length < 1 || !logData.includes('$$')) {
+      this.timeLog.comment = '';
+      return;
+    }
+    const logId = Number.parseInt(
+      logData.substring(0, logData.indexOf('$$')),
+      10
+    );
+    const log = this.logs.find(tlog => tlog.id === logId);
+    this.timeLog.comment = log.comment;
+    if (!log.project) {
+      this.timeLog.project = undefined;
+      this.projectControl.setValue(undefined);
+      this.timeLog.issue = undefined;
+      this.issueControl.setValue(undefined);
+      return;
+    }
+    if (!log.issue) {
+      this.selectProject(log.project);
+      this.projectControl.setValue(this.timeLog.project);
+    } else {
+      this.selectIssue(log.issue);
+      this.issueControl.setValue(this.timeLog.issue);
+    }
   }
 
   startTracker() {
-    /*
-    startTracker from timetracker component with necessary variables like this.issue, this.comment, this.project
-    */
-    /*make the trackedTime change according to timetracker*/
-    this.active = true;
+    this.trackerSpinning = true;
+    this.trackerService.track({
+      project: this.timeLog.project,
+      issue: this.timeLog.issue,
+      comment: this.timeLog.comment,
+      billable: true
+    });
   }
 
   markBillable() {
@@ -272,15 +345,17 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   changeEndTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
-    this.timeLog.timeStopped = new Date(
-      this.timeLog.timeStarted.getFullYear(),
-      this.timeLog.timeStarted.getMonth(),
-      this.timeLog.timeStarted.getDate(),
-      hours,
-      mins,
-      0,
-      0
-    );
+    if (!isNaN(hours) && !isNaN(mins)) {
+      this.timeLog.timeStopped = new Date(
+        this.timeLog.timeStarted.getFullYear(),
+        this.timeLog.timeStarted.getMonth(),
+        this.timeLog.timeStarted.getDate(),
+        hours,
+        mins,
+        0,
+        0
+      );
+    }
     this.calculateTime();
   }
 
@@ -299,10 +374,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       );
     }
     this.calculateTime();
-  }
-
-  private isRunning() {
-    return this.active;
   }
 
   private calculateTime() {
@@ -324,8 +395,6 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   }
 
   changeMode() {
-    this.resizeStart();
-    this.resizeEnd();
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
       this.editButton = 'done';
@@ -345,7 +414,7 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
 
   private findProject(project): Project {
     if (project) {
-    return this.projectOptions.find(entry => entry.id === project.id);
+      return this.projectOptions.find(entry => entry.id === project.id);
     }
     return undefined;
   }
@@ -369,15 +438,12 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       dialogConfig
     );
 
-    dialogRef
-      .afterClosed()
-      .subscribe((data) => {
-        if (data) {
-          this.deleteTimeLog();
-        }
-        this.loadingDel = false;
+    dialogRef.afterClosed().subscribe(data => {
+      if (data) {
+        this.deleteTimeLog();
       }
-      );
+      this.loadingDel = false;
+    });
   }
 
   deleteTimeLog() {
@@ -386,8 +452,8 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
       next() {
         that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
       },
-      error(msg) {
-        console.log('Error deleting: ', msg);
+      error() {
+        this.errorService.errorDialog('Could not delete this timeLog :(');
       }
     });
   }
@@ -395,47 +461,15 @@ export class TimeLogComponent implements OnInit, AfterViewInit {
   updateTimeLog() {
     const that = this;
     that.loading = true;
-    this.dataService.updateTimeLog(this.timeLog).subscribe( {
+    this.dataService.updateTimeLog(this.timeLog).subscribe({
       next() {
         that.loading = false;
-        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog.id);
+        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog);
       },
-      error(msg) {
-        console.log('Error updating: ', msg);
+      error() {
+        this.errorService.errorDialog('Could not update this timeLog :(');
         that.loading = false;
       }
     });
-  }
-
-  resizeStart() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(
-      () =>
-        (this.startWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
-  }
-
-  resizeEnd() {
-    let newWidth;
-    if (this.isFirefox) {
-      newWidth = this.textStart.nativeElement.offsetWidth + 30;
-    } else {
-      newWidth = this.textStart.nativeElement.offsetWidth + 10;
-    }
-    setTimeout(
-      () =>
-        (this.endWidth = Math.max(
-          this.minWidth,
-          newWidth
-        ))
-    );
   }
 }

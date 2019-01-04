@@ -1,21 +1,24 @@
-<div
-class="container" 
-*ngIf="listLoading"> 
- <mat-progress-spinner
-        layout-align="center center"
-        color="primary"
-        mode="indeterminate"
-        value="50">
-</mat-progress-spinner>
+<div class="container" *ngIf="listLoading">
+  <mat-progress-spinner layout-align="center center" color="primary" mode="indeterminate" value="50">
+  </mat-progress-spinner>
 </div>
 <h2 *ngIf="!listLoading" class="mat-headline" style="padding-top: 12px; margin-bottom: -5px">
-  <span matBadge="{{numberOfUnbookedTimeLogs}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="numberOfUnbookedTimeLogs == 0">Recently tracked</span>
+  <span matBadge="{{numberOfUnbookedTimeLogs}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false"
+    [matBadgeHidden]="numberOfUnbookedTimeLogs == 0">Recently tracked</span>
 </h2>
-<mat-list *ngFor="let date of dateList">
-  <h3 mat-subheader>
-    <span matBadge="{{unbookedTimeLogsMap.get(date)}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false" [matBadgeHidden]="unbookedTimeLogsMap.get(date) == 0">{{
-      date | date: "fullDate"
-    }}</span>
-  </h3>
-  <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" (deleted)="onTimeLogDelete($event)" [timeLog]="timeLog"></app-timelog>
-</mat-list>
+<div *ngFor="let date of dateList">
+  <mat-card>
+    <mat-card-subtitle>
+      <h3 class="mat-h3">
+        <span matBadge="{{unbookedTimeLogsMap.get(date)}}" matBadgeSize="medium" matBadgeColor="warn" matBadgeOverlap="false"
+          [matBadgeHidden]="unbookedTimeLogsMap.get(date) == 0">{{ date | date: "fullDate" }}</span>
+      </h3>
+    </mat-card-subtitle>
+    <mat-card-content>
+      <mat-list>
+        <app-timelog *ngFor="let timeLog of timeLogMap.get(date)" [timeLog]="timeLog" [timeLogs]="timeLogs" [projects]="projects"
+          [issues]="issues"></app-timelog>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
+</div>

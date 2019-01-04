@@ -48,6 +48,9 @@ import { UserService } from './services/user/user.service';
 import { ErrorDialogComponent } from './errorpopup/error-dialog.component';
 import { ErrorService } from './services/error/error.service';
 import { ReportsComponent } from './components/reports/reports.component';
+import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
+import { BrowserFavicons } from './services/favicon/favicon.service';
+import { Favicons } from './services/favicon/favicon.service';
 
 @NgModule({
   declarations: [
@@ -109,7 +112,27 @@ import { ReportsComponent } from './components/reports/reports.component';
     CookieService,
     DatePipe,
     ErrorService,
-    ReloadTriggerService
+    ReloadTriggerService,
+    {
+      provide: Favicons,
+      useClass: BrowserFavicons
+    },
+    {
+      provide: BROWSER_FAVICONS_CONFIG,
+      useValue: {
+        icons: {
+          'running': {
+            type: 'image/png',
+            href: '../assets/icons/baseline_timelapse_white_18dp_red.png'
+          },
+          'idle': {
+            type: 'image/png',
+            href: '../assets/icons/baseline_timer_white_18dp.png'
+          }
+        },
+        cacheBusting: true
+      }
+    }
   ],
   bootstrap: [AppComponent],
   entryComponents: [DeleteWarningComponent, ErrorDialogComponent]

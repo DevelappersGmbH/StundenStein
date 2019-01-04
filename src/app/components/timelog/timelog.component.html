@@ -1,29 +1,33 @@
-<mat-card class="record-component">
-  <mat-card-content>
+
     <form class="total-record">
       <div class="total-div">
-        <div>
           <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
-            <input type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input id="issue" type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
 
           <mat-autocomplete #autoIssue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)" [displayWith]="displayIssue" >
-            <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.id}}: {{issue.subject}} </mat-option>
+            <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.tracker}} #{{issue.id}}: {{issue.subject}} </mat-option>
           </mat-autocomplete>
 
           <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <input type="text" [readonly]="!editMode" [(ngModel)]="timeLog.comment" [ngModelOptions]="{ standalone: true }"
-                   matInput (click)="$event.target.select()" (keyup.enter)="updateComment($event.target.value)"
-                   (blur)="updateComment($event.target.value)"
-            />
+            <input id="comment" type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+                   [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
           </mat-form-field>
 
+          <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="displayLog" #autoLog="matAutocomplete">
+            <mat-option *ngFor="let log of (filteredLogs | async)" [value]="log.id + '$$' + log.comment">
+              <span>{{shorten(log.comment, 25)}}</span>
+              <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
+              <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
+            </mat-option>
+          </mat-autocomplete>
+
           <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
             <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
-            <input type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -32,15 +36,23 @@
             <mat-option *ngFor="let project of (filteredProjects| async)" [style.color]="project.color" [value]="project"> {{project.name}}
             </mat-option>
           </mat-autocomplete>
-        </div>
 
-        <div><!-- empty space --></div>
+        <div class="empty"><!-- empty space --></div>
 
-        <div>
+        <div class="part3">
           <div class="oneline">
-          <button mat-icon-button class="button_play" [disabled]="editMode" (click)="startTracker()"><mat-icon
-            class="icon">play_arrow</mat-icon></button>
-            </div>
+            <mat-spinner
+              class = "spinner"
+              *ngIf="trackerSpinning"
+              [strokeWidth]="3"
+              [diameter]="22"
+              color="primary"
+              mode="indeterminate">
+            </mat-spinner>
+            <button *ngIf="!trackerSpinning" mat-icon-button class="button_play" [disabled]="editMode || restartBlocked" (click)="startTracker()">
+              <mat-icon class="icon">play_arrow</mat-icon>
+            </button>
+          </div>
 
           <div class="oneline">
           <button mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
@@ -48,17 +60,18 @@
           </div>
 
           <div class="oneline">
-          <mat-form-field [ngStyle]="{'width.px': startWidth}" class="start-time" [ngClass]="{ edit: !editMode }">
-            <input #elasticStart [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time"  matInput (input)="resizeStart()"/>
-        </mat-form-field>
+            <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+              <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+                     [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
+            </mat-form-field>
           </div>
 
           -
+
           <div class="oneline">
-          <mat-form-field [ngStyle]="{'width.px': endWidth}" class="end-time" [ngClass]="{ edit: !editMode }">
-            <input #elasticEnd [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
-                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput (input)="resizeEnd()"/>
+          <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
+            <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+                   [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
           </div>
 
@@ -103,7 +116,3 @@
         </div>
       </div>
     </form>
-  </mat-card-content>
-</mat-card>
-<span #hiddenStart style="visibility: hidden; white-space: pre;">{{timeLog.timeStarted.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>
-<span #hiddenEnd style="visibility: hidden; white-space: pre;">{{timeLog.timeStopped.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}}</span>
