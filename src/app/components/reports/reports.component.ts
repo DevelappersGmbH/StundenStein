@@ -1,29 +1,30 @@
-import {
-  Component,
-  OnInit,
-  AfterViewInit
-} from '@angular/core';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { Chart } from 'chart.js';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { FormControl } from '@angular/forms';
-import {MomentDateAdapter} from '@angular/material-moment-adapter';
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE} from '@angular/material/core';
+import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MAT_DATE_LOCALE
+} from '@angular/material/core';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import * as _moment from 'moment';
 // tslint:disable-next-line:no-duplicate-imports
-import {default as _rollupMoment} from 'moment';
+import { default as _rollupMoment } from 'moment';
 
 const moment = _rollupMoment || _moment;
 
 export const MY_FORMATS = {
   parse: {
-    dateInput: 'LL',
+    dateInput: 'LL'
   },
   display: {
     dateInput: 'LL',
     monthYearLabel: 'MMM YYYY',
     dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
-  },
+    monthYearA11yLabel: 'MMMM YYYY'
+  }
 };
 
 @Component({
@@ -31,25 +32,27 @@ export const MY_FORMATS = {
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.scss'],
   providers: [
-    {provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE]},
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE]
+    },
 
-    {provide: MAT_DATE_FORMATS, useValue: MY_FORMATS},
+    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }
   ]
 })
-export class ReportsComponent
-  implements OnInit, AfterViewInit {
+export class ReportsComponent implements OnInit, AfterViewInit {
   chart = [];
   chartData = [1, 2, 3, 4, 5, 6];
   minDate = new Date(2000, 0, 1);
   maxDate = new Date();
   date = new FormControl(moment());
+  startDate = new Date();
+  endDate = new Date();
 
-  constructor(
-    private errorService: ErrorService
-  ) {}
+  constructor(private errorService: ErrorService) {}
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
     this.setChart();
@@ -80,5 +83,15 @@ export class ReportsComponent
         deferred: { delay: 500 }
       }
     });
+  }
+
+  addEvent1(event: MatDatepickerInputEvent<any>) {
+    console.log(event.value._d);
+    this.startDate = event.value._d;
+  }
+
+  addEvent2(event: MatDatepickerInputEvent<any>) {
+    console.log(event.value._d);
+    this.endDate = event.value._d;
   }
 }

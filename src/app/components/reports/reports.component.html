@@ -2,9 +2,14 @@
   <mat-card-title>Reports</mat-card-title>
   <mat-card-content>
     <mat-form-field>
-      <input matInput [max]="maxDate" [matDatepicker]="dp" placeholder="Verbose datepicker" [formControl]="date">
-      <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
-      <mat-datepicker #dp></mat-datepicker>
+      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="date" (dateInput)="addEvent1($event)" (dateChange)="addEvent1($event)" placeholder="Start date">
+      <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+      <mat-datepicker #dp1></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateInput)="addEvent2($event)" (dateChange)="addEvent2($event)" placeholder="End date">
+      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+      <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
     <div *ngIf="chart">
       <canvas id="canvas" width="30vw" height="10vh">{{ chart }}</canvas>
