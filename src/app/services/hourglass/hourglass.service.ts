@@ -4,8 +4,11 @@ import { flatMap, map } from 'rxjs/operators';
 import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeBookings } from 'src/app/redmine-model/hourglass-time-bookings.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
+import { HourGlassTimeLogBookRequest } from 'src/app/redmine-model/requests/hourglass-time-log-book-request.interface';
 import { HourGlassTimeLogRequest } from 'src/app/redmine-model/requests/hourglass-time-log-request.interface';
 import { HourGlassTimeLogs } from 'src/app/redmine-model/hourglass-time-logs.interface';
+import { HourGlassTimeLogsBulkRequest } from 'src/app/redmine-model/requests/hourglass-time-logs-bulk-request.interface';
+import { HourGlassTimeLogsCreateResponse } from 'src/app/redmine-model/responses/hourglass-time-logs-bulk-response.interface';
 import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackerRequest } from 'src/app/redmine-model/requests/hourglass-time-tracker-request.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
@@ -24,6 +27,7 @@ export class HourGlassService extends BaseDataService {
   private timeLogsDownloadLimit = 100;
   private timeBookingsUrl = '/hourglass/time_bookings';
   private timeBookingsDownloadLimit = 100;
+  private timeLogsCreateUrl = '/hourglass/time_logs/bulk_create';
 
   constructor(
     protected authenticationService: AuthenticationService,
@@ -184,6 +188,34 @@ export class HourGlassService extends BaseDataService {
         }
         return of(items);
       })
+    );
+  }
+
+  createTimeLog(
+    createTimeLogsRequest: HourGlassTimeLogsBulkRequest
+  ): Observable<HttpResponse<HourGlassTimeLogsCreateResponse>> {
+    const query = this.getJsonEndpointUrl(
+      this.timeLogsUrl + '/' + this.timeLogsCreateUrl
+    );
+    return this.httpClient.post<HourGlassTimeLogsCreateResponse>(
+      query,
+      createTimeLogsRequest,
+      {
+        observe: 'response'
+      }
+    );
+  }
+
+  bookTimeLog(
+    timeLogId: number,
+    bookTimeLogRequest: HourGlassTimeLogBookRequest
+  ): Observable<HourGlassTimeBooking> {
+    const query = this.getJsonEndpointUrl(
+      this.timeLogsUrl + '/' + timeLogId + '/book'
+    );
+    return this.httpClient.post<HourGlassTimeBooking>(
+      query,
+      bookTimeLogRequest
     );
   }
 
