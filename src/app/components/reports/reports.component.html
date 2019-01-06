@@ -2,12 +2,12 @@
   <mat-card-title>Reports</mat-card-title>
   <mat-card-content>
     <mat-form-field>
-      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="date" (dateInput)="addEvent1($event)" (dateChange)="addEvent1($event)" placeholder="Start date">
+      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="date" (dateChange)="addEvent($event, true)" placeholder="Start date">
       <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
       <mat-datepicker #dp1></mat-datepicker>
     </mat-form-field>
     <mat-form-field>
-      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateInput)="addEvent2($event)" (dateChange)="addEvent2($event)" placeholder="End date">
+      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateChange)="addEvent($event, false)" placeholder="End date">
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>

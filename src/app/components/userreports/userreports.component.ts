@@ -262,7 +262,7 @@ export class UserReportsComponent
   }
 
   getBubblePos(i): string {
-    const el1 = document.getElementById('chart' + i); // .style.cssText = "--my-var: #000";
+    const el1 = document.getElementById('chart' + i);
     el1.style.cssText += 'right: 0';
     const temp = this.setBrowserWidthOnInit === this.browserSize.width ? 16 : 0;
     const browserWidth = this.browserSize.width - temp;
