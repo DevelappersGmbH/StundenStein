@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, Input } from '@angular/core';
+import { Component, OnInit, AfterViewInit, Input, AfterContentInit } from '@angular/core';
 import { Chart } from 'chart.js';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { FormControl } from '@angular/forms';
@@ -41,31 +41,41 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }
   ]
 })
-export class ReportsComponent implements OnInit, AfterViewInit {
+export class ReportsComponent implements OnInit, AfterViewInit, AfterContentInit {
   chart = new Array();
-  chartData = [1, 2, 3, 4, 5, 6];
+  chartData = new Array();
+  chartLabel = new Array();
   minDate = new Date(2000, 0, 1);
   maxDate = new Date();
   date = new FormControl(moment());
   startDate = new Date();
   endDate = new Date();
   generalArray = new Array();
+  tempDate;
+  today = new Date();
 
   constructor(private errorService: ErrorService) {}
 
   @Input() timeLogs: TimeLog[] = [];
 
-  ngOnInit() {}
+  ngOnInit() {
+    if (this.chart.length === 0) {
+      this.chartData = [this.today.getDate() + '.' + this.today.getMonth() + 1];
+    }
+  }
 
   ngAfterViewInit() {
     this.setChart();
+  }
+
+  ngAfterContentInit() {
   }
 
   setChart() {
     this.chart = new Chart('canvas', {
       type: 'bar',
       data: {
-        labels: this.chartData,
+        labels: this.chartLabel,
         datasets: [
           {
             data: this.chartData,
@@ -83,7 +93,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
             }
           ]
         },
-        deferred: { delay: 500 }
+        // deferred: { delay: 500 }
       }
     });
   }
@@ -92,7 +102,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
     bool ? this.startDate = event.value._d : this.endDate = event.value._d;
     this.startDate.getTime() > this.endDate.getTime()
     ? this.errorService.errorDialog('End date has to be higher than start date.')
-    : this.setPeriod();
+    : this.setOverView(this.setPeriod());
   }
 
   checkDay(start: Date, stop: Date) {
@@ -100,8 +110,7 @@ export class ReportsComponent implements OnInit, AfterViewInit {
   }
 
   setPeriod() {
-    const array = this.timeLogs.filter(x => this.arrayFilter(x));
-    console.log(array);
+    return this.timeLogs.filter(x => this.arrayFilter(x));
   }
 
   arrayFilter(x) {
@@ -109,7 +118,58 @@ export class ReportsComponent implements OnInit, AfterViewInit {
     x.timeStopped.getTime() <= this.endDate.getTime();
   }
 
+  checkSameDate(date1: Date, date2: Date) {
+    return date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear();
+  }
+
+  setOverView(array: any[]) {
+    console.log(array);
+    let indexOfWidth: number;
+    const temp = new Array();
+    array.forEach(e => {
+      if (
+        temp.find(function(element, index) {
+          indexOfWidth = index;
+          console.log(element);
+          console.log(e);
+          return element[2] === e.timeStopped.getDate() &&
+          element[2].getMonth() === e.timeStopped.getMonth() &&
+          element[2].getFullYear() === e.timeStopped.getFullYear();
+        })
+      ) {
+        temp[indexOfWidth][0] += e.timeInHours;
+        /*if (e.billable) {
+          temp[indexOfWidth][1] += e.timeInHours;
+        }*/
+      } else {
+        temp.push([
+          e.timeInHours,
+          e.timeStopped.getTime(),
+          e.timeStopped
+        ]);
+      }
+    });
+    const temp3 = Math.floor((this.endDate.getTime() - this.startDate.getTime()) / 1000 / 60 / 60 / 24);
+    const arrayTemp = new Array();
+    for (let i = temp3; i >= 0; i--) {
+      const date2 = new Date();
+      const date = new Date();
+      date2.setDate(date.getDate() - i);
+      if (temp.find(x => this.checkSameDate(x[2], date2))) {
+        const el = temp.find(x => this.checkSameDate(x[2], date2));
+        arrayTemp.push([el[0]]);
+      } else {
+        arrayTemp.push([0]);
+      }
+    }
+    this.chartData = arrayTemp;
+    this.setChartData();
+  }
+
   setWidth(array: any[]) {
+    console.log('setWidth');
     let indexOfWidth,
       counter = 0,
       counterBillable = 0;
@@ -152,6 +212,15 @@ export class ReportsComponent implements OnInit, AfterViewInit {
   }
 
   setChartData() {
-    for (let i = 0; i < )
+    const date = new Date();
+    const date2 = new Date();
+    const array = new Array();
+    const temp = Math.floor((this.endDate.getTime() - this.startDate.getTime()) / 1000 / 60 / 60 / 24);
+    for (let i = temp; i >= 0; i--) {
+      date2.setDate(date.getDate() - i);
+      array.push([date2.getDate() + '.' + date2.getMonth() + 1]);
+    }
+    this.chartLabel = array;
+    this.ngAfterViewInit();
   }
 }

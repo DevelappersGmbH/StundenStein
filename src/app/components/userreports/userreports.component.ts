@@ -143,9 +143,9 @@ export class UserReportsComponent
             : element[0] === 'No project assigned';
         })
       ) {
-        width[indexOfWidth][1] += e.timeInHours;
+        width[indexOfWidth][1] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         if (e.billable) {
-          width[indexOfWidth][3] += e.timeInHours;
+          width[indexOfWidth][3] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         }
       } else {
         const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
