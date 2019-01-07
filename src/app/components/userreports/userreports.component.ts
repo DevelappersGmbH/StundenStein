@@ -33,6 +33,8 @@ export class UserReportsComponent
   browserSize;
   browserWidth;
   setBrowserWidthOnInit;
+  dwmlArray = [[], [], [], []];
+  lastTimeLogsLength = 0;
 
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
@@ -57,9 +59,13 @@ export class UserReportsComponent
       );
     }
     if (this.timeLogs.length > 0) {
-      this.periodArray = this.setPeriod();
-      this.setWidth(this.periodArray);
+      if (this.timeLogs.length === this.lastTimeLogsLength && this.dwmlArray[this.period].length > 0) {
+        this.generalArray = this.dwmlArray[this.period];
+      } else {
+        this.setWidth(this.setPeriod());
+      }
     }
+    this.lastTimeLogsLength = this.timeLogs.length;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -144,8 +150,10 @@ export class UserReportsComponent
         })
       ) {
         width[indexOfWidth][1] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+        width[indexOfWidth][4] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         if (e.billable) {
           width[indexOfWidth][3] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+          width[indexOfWidth][5] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         }
       } else {
         const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
@@ -168,6 +176,7 @@ export class UserReportsComponent
       e[3] = Math.round((e[3] / counterBillable) * 100);
     });
     width.sort((a, b) => b[1] - a[1]);
+    this.dwmlArray[this.period] = width;
     this.generalArray = width;
   }
 
