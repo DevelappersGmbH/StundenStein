@@ -508,9 +508,9 @@ export class DataService {
 
   createTimeLog(timelog: TimeLog): Observable<TimeLog> {
     const calls: Observable<any>[] = [
-      this.redmineService.getTimeEntryActivities(),
-      this.getProjects(),
-      this.getIssues()
+      this.redmineService.getTimeEntryActivities(), // To map Billable
+      this.getProjects(), // To map created TimeBooking back to TimeLog
+      this.getIssues() // To map created TimeBooking back to TimeLog
     ];
     return forkJoin(calls).pipe(
       flatMap(results => {
@@ -532,8 +532,10 @@ export class DataService {
           flatMap(data => {
             let createdTimeLog: HourGlassTimeLog;
             if (data.ok && data.body.success.length > 0) {
+              // If the timelog was created successfully, set createdTimeLog
               createdTimeLog = data.body[0];
-              if (timelog.booked) {
+              if (timelog.project !== undefined && timelog.project !== null) {
+                // A timelog is booked if it has got a project attached.
                 // Book created time log
                 const bookRequest: HourGlassTimeLogBookRequest = {
                   time_booking: {
