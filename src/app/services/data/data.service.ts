@@ -14,6 +14,7 @@ import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
 import { RedmineIssue } from 'src/app/redmine-model/redmine-issue.interface';
+import { RedmineMapper } from 'src/app/model/mappers/redmine-mapper';
 import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
@@ -38,6 +39,7 @@ export class DataService {
 
   constructor(
     private redmineService: RedmineService,
+    private redmineMapper: RedmineMapper,
     private hourglassService: HourGlassService,
     private userService: UserService,
     private colorService: ColorService,
@@ -60,7 +62,9 @@ export class DataService {
     } else {
       this.projectsObservable = this.redmineService.getProjects().pipe(
         map(data => {
-          this.projects = this.mapRedmineProjectArrayToProjectArray(data);
+          this.projects = this.redmineMapper.mapRedmineProjectArrayToProjectArray(
+            data
+          );
           this.projectsRecentlyCached = new Date();
           this.projectsObservable = null;
           return this.projects;
@@ -86,7 +90,7 @@ export class DataService {
       ];
       this.issuesObservable = forkJoin(calls).pipe(
         map(results => {
-          this.issues = this.mapRedmineIssueArrayToIssueArray(
+          this.issues = this.redmineMapper.mapRedmineIssueArrayToIssueArray(
             results[0],
             results[1]
           );
@@ -98,51 +102,6 @@ export class DataService {
       );
       return this.issuesObservable;
     }
-  }
-
-  mapRedmineProjectArrayToProjectArray(
-    redmineProjects: RedmineProject[]
-  ): Project[] {
-    const projects: Project[] = [];
-    redmineProjects.forEach(project => {
-      projects.push(this.mapRedmineProjectToProject(project));
-    });
-    return projects;
-  }
-
-  mapRedmineProjectToProject(redmineProject: RedmineProject): Project {
-    return {
-      id: redmineProject.id,
-      name: redmineProject.name,
-      color: this.colorService.getColor(redmineProject.identifier)
-    };
-  }
-
-  mapRedmineIssueArrayToIssueArray(
-    redmineIssues: RedmineIssue[],
-    projects: Project[]
-  ): Issue[] {
-    const issues = [];
-    redmineIssues.forEach(redmineIssue => {
-      const issue: Issue = {
-        id: redmineIssue.id,
-        subject: redmineIssue.subject,
-        assignedTo: null,
-        project: null,
-        tracker: null
-      };
-      if (redmineIssue.assigned_to) {
-        issue.assignedTo = redmineIssue.assigned_to;
-      }
-      if (redmineIssue.tracker) {
-        issue.tracker = redmineIssue.tracker.name;
-      }
-      if (redmineIssue.project) {
-        issue.project = projects.find(p => p.id === redmineIssue.project.id);
-      }
-      issues.push(issue);
-    });
-    return issues;
   }
 
   // *************************************************
