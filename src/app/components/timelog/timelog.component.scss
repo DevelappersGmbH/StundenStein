@@ -1,5 +1,6 @@
 input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
   display: none;
+
 }
 
 .total-div{
@@ -7,21 +8,40 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   justify-content: space-between;
 }
 
+.oneline {
+  display: inline-block;
+}
+
 .field {
   margin-left: 5px;
 }
 
-.start-time, .end-time, .tracked-time{
-  width: 45px;
+.issue {
+  width:25%;
+}
+
+.project {
+  width:10%;
+  margin-right: 20px;
+}
+
+.comment {
+  width:25%;
 }
 
 .icon{
   color: #ccc;
 }
 
-
 .icon.active {
   color: limegreen;
+}
+
+.icon.transparent {
+  position:relative;
+  bottom:-5px;
+  color: transparent;
+  margin-right: 5px;
 }
 
 .icon.attention {
@@ -29,15 +49,45 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .icon.warning{
+  position:relative;
+  bottom:-5px;
   color: orangered;
   margin-right: 5px;
 }
 
-::ng-deep mat-form-field.edit .mat-form-field-underline {
+.start-time {
+  position:relative;
+  bottom:-2px;
+}
+
+.end-time {
+  position:relative;
+  bottom:-2px;
+  margin-left:3px;
+}
+
+.spinner{
+  position:relative;
+  bottom:-5px;
+  margin-left: 9px;
+  margin-right: 9px;
+}
+
+.tracked-time {
+  position:relative;
+  bottom:-1px;
+  margin-left:8px;
+}
+
+mat-form-field.edit .mat-form-field-underline {
   display: none;
 }
 
-::ng-deep .cdk-overlay-pane {
+.mat-form-field-infix {
+  width: 100%;
+}
+
+.cdk-overlay-pane {
   width: auto !important;
   max-width: 400px;
 }

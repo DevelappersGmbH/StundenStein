@@ -1,4 +1,6 @@
 export const environment = {
-  production: true,
-  corsProxyUrl: 'https://cors.bublik.rocks/'
+  production: false,
+  corsProxyUrl: 'https://cors.bublik.rocks/',
+  projectsExpireAfterMin: 5,
+  issuesExpireAfterMin: 5
 };

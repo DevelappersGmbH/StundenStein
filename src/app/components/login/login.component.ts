@@ -1,5 +1,6 @@
 import { AuthenticationService } from 'src/app/services/authentication/authentication.service';
 import { Component, OnInit } from '@angular/core';
+import { ErrorService } from 'src/app/services/error/error.service';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -18,9 +19,12 @@ export class LoginComponent implements OnInit {
   constructor(
     private authenticationService: AuthenticationService,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private errorService: ErrorService
   ) {
-    this.isLoggedIn = this.authenticationService.isExpirationDateValid();
+    this.isLoggedIn =
+      this.authenticationService.checkIfRedmineUrlExist() &&
+      this.authenticationService.checkIfAuthTokenExist();
   }
 
   ngOnInit() {}
@@ -38,7 +42,9 @@ export class LoginComponent implements OnInit {
             this.router.navigate([redirect]);
           },
           error => {
-            console.log(error);
+            this.errorService.errorDialog(
+              'Could not log you in! Please check your API access key!'
+            );
           }
         );
     }
