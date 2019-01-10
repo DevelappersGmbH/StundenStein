@@ -10,7 +10,8 @@
 
           <mat-autocomplete #autoIssue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)" [displayWith]="displayIssue" >
             <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.tracker}} #{{issue.id}}: {{issue.subject}} </mat-option>
-          </mat-autocomplete></ng-container>
+          </mat-autocomplete>
+        </ng-container>
         <ng-template #showModeIssue>
           <span class="mat-subheading-2 field issue sp">{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span>
         </ng-template>
@@ -28,7 +29,8 @@
               <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
               <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
             </mat-option>
-          </mat-autocomplete></ng-container>
+          </mat-autocomplete>
+        </ng-container>
         <ng-template #showModeComment>
           <span class="mat-subheading-2 field comment sp">{{ this.logControl.value ? this.logControl.value : "Comment" }}</span>
         </ng-template>
