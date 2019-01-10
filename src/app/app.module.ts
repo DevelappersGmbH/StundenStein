@@ -48,7 +48,6 @@ import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
 import { BrowserFavicons } from './services/favicon/favicon.service';
 import { Favicons } from './services/favicon/favicon.service';
 
-
 @NgModule({
   declarations: [
     AppComponent,
