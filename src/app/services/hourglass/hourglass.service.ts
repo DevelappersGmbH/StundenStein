@@ -194,9 +194,7 @@ export class HourGlassService extends BaseDataService {
   createTimeLog(
     createTimeLogsRequest: HourGlassTimeLogsBulkRequest
   ): Observable<HttpResponse<HourGlassTimeLogsCreateResponse>> {
-    const query = this.getJsonEndpointUrl(
-      this.timeLogsUrl + '/' + this.timeLogsCreateUrl
-    );
+    const query = this.getJsonEndpointUrl(this.timeLogsCreateUrl);
     return this.httpClient.post<HourGlassTimeLogsCreateResponse>(
       query,
       createTimeLogsRequest,
