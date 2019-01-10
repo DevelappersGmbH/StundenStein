@@ -5,7 +5,8 @@ import {
   Input,
   OnChanges,
   SimpleChanges,
-  HostListener
+  HostListener,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
@@ -13,12 +14,12 @@ import { isNull, isUndefined } from 'util';
 
 @HostListener('window:resize')
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-userreports',
   templateUrl: './userreports.component.html',
   styleUrls: ['./userreports.component.scss']
 })
-export class UserReportsComponent
-  implements OnInit, OnChanges {
+export class UserReportsComponent implements OnInit, OnChanges {
   screenHeight;
   screenWidth;
   period = 0;
@@ -59,7 +60,10 @@ export class UserReportsComponent
       );
     }
     if (this.timeLogs.length > 0) {
-      if (this.timeLogs.length === this.lastTimeLogsLength && this.dwmlArray[this.period].length > 0) {
+      if (
+        this.timeLogs.length === this.lastTimeLogsLength &&
+        this.dwmlArray[this.period].length > 0
+      ) {
         this.generalArray = this.dwmlArray[this.period];
       } else {
         this.setWidth(this.setPeriod());
@@ -149,11 +153,27 @@ export class UserReportsComponent
             : element[0] === 'No project assigned';
         })
       ) {
-        width[indexOfWidth][1] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
-        width[indexOfWidth][4] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+        width[indexOfWidth][1] += this.setTime(
+          e.timeStarted,
+          e.timeStopped,
+          e.timeInHours
+        );
+        width[indexOfWidth][4] += this.setTime(
+          e.timeStarted,
+          e.timeStopped,
+          e.timeInHours
+        );
         if (e.billable) {
-          width[indexOfWidth][3] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
-          width[indexOfWidth][5] += this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+          width[indexOfWidth][3] += this.setTime(
+            e.timeStarted,
+            e.timeStopped,
+            e.timeInHours
+          );
+          width[indexOfWidth][5] += this.setTime(
+            e.timeStarted,
+            e.timeStopped,
+            e.timeInHours
+          );
         }
       } else {
         const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
@@ -212,13 +232,14 @@ export class UserReportsComponent
 
   checkBox(event) {
     event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
+    console.log(this.generalArray);
   }
 
   getProjectName(i: number, bool: Boolean): string {
     const pixel =
-      this.screenWidth -
-      20 * (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
-    return this.pixelWidth(this.generalArray[i][!this.bilCheck ? 1 : 3], {
+      (this.screenWidth - 20) *
+      (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
+    return this.pixelWidth(this.generalArray[i][0], {
       size: 14
     }) <= pixel || bool
       ? this.generalArray[i][0]
@@ -261,13 +282,14 @@ export class UserReportsComponent
   }
 
   getPercentage(i): string {
+    const pixel =
+      this.screenWidth -
+      20 * (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
     return this.generalArray[i][!this.bilCheck ? 1 : 3] + ' %';
   }
 
   getBillPercent(i): string {
-    return this.bilCheck
-      ? 100 + '% billable'
-      : this.generalArray[i][1] + '% billable';
+    return this.generalArray[i][3] + '% billable';
   }
 
   getBubblePos(i): string {
@@ -290,7 +312,7 @@ export class UserReportsComponent
     return this.getBubblePos(i) === '83%'
       ? true
       : this.getBubblePos(i) === '0%'
-        ? true
-        : false;
+      ? true
+      : false;
   }
 }
