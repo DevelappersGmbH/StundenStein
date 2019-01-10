@@ -1,18 +1,14 @@
 import {
   Component,
   OnInit,
-  AfterViewInit,
   Input,
-  AfterContentInit,
   OnChanges,
-  SimpleChanges,
-  Injectable
+  SimpleChanges
 } from '@angular/core';
 import { Chart } from 'chart.js';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { FormControl } from '@angular/forms';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
-import { Subject } from 'rxjs';
 import {
   DateAdapter,
   MAT_DATE_FORMATS,
@@ -58,8 +54,7 @@ export const MY_FORMATS = {
     { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }
   ]
 })
-export class ReportsComponent
-  implements OnInit, AfterViewInit, AfterContentInit, OnChanges {
+export class ReportsComponent implements OnInit, OnChanges {
   chart: Chart;
   pieChart = new Array();
   chartData = new Array();
@@ -71,12 +66,12 @@ export class ReportsComponent
   endDate = new Date();
   today = new Date();
   dateInit = new FormControl(moment());
-  firstInit = true;
   detailChartData = new Array();
   detailChartBgColor = new Array();
   detailChartLabel = new Array();
   isVisible = false;
-  MeSeChart: Chart;
+  triggerTime: number;
+  loadingData = true;
 
   constructor(private errorService: ErrorService) {
     // Create the new date
@@ -88,23 +83,15 @@ export class ReportsComponent
     momentInit.set(newDate.toObject());
     this.dateInit = new FormControl(momentInit);
     this.startDate = myDate;
+    Chart.defaults.global.legend.display = false;
+    this.chartPlugin();
   }
 
   @Input() timeLogs: TimeLog[] = [];
 
   ngOnInit() {
-    if (this.firstInit) {
-      this.setOverView(this.setPeriod());
-      this.chart = this.setChart();
-      if (this.timeLogs.length > 0) {
-        this.firstInit = false;
-      }
-    }
+    this.triggerTime = new Date().getTime();
   }
-
-  ngAfterViewInit() {}
-
-  ngAfterContentInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
@@ -119,7 +106,30 @@ export class ReportsComponent
         }
       });
     }
-    this.ngOnInit();
+    if (new Date().getTime() - this.triggerTime > 5000) {
+      this.loadingData = false;
+      this.triggerTime = new Date().getTime();
+      this.setOverView(this.setPeriod());
+      this.chart = this.setChart();
+      this.updateChart();
+    }
+  }
+
+  chartPlugin() {
+    Chart.plugins.register({
+      beforeDraw: function(chartInstance, easing) {
+        if (chartInstance.config.options.tooltips.onlyShowForDatasetIndex) {
+          const tooltipsToDisplay =
+            chartInstance.config.options.tooltips.onlyShowForDatasetIndex;
+          const active = chartInstance.tooltip._active || [];
+          if (active.length > 0) {
+            if (tooltipsToDisplay.indexOf(active[0]._datasetIndex) === -1) {
+              chartInstance.tooltip._model.opacity = 0;
+            }
+          }
+        }
+      }
+    });
   }
 
   setChart() {
@@ -136,13 +146,20 @@ export class ReportsComponent
               this.dateToDDMM(this.endDate),
             data: this.chartData,
             backgroundColor: '#3582ff'
+          },
+          {
+            label: '',
+            data: [],
+            backgroundColor: 'grey'
           }
         ]
       },
       options: {
         scales: {
+          xAxes: [{ stacked: true }],
           yAxes: [
             {
+              stacked: true,
               ticks: {
                 beginAtZero: true
               }
@@ -153,8 +170,27 @@ export class ReportsComponent
         onClick: this.barClick.bind(this),
         onResize: function(chart) {
           chart.update();
-        }
+        },
         // deferred: { delay: 500 }
+        tooltips: {
+          enabled: true,
+          mode: 'single',
+          onlyShowForDatasetIndex: [0],
+          callbacks: {
+            label: function(tooltipItems) {
+                let h, m;
+                const temp = Number(tooltipItems.yLabel);
+                Math.floor(temp) < 10
+                  ? (h = '0' + Math.floor(temp))
+                  : (h = '' + Math.floor(temp));
+                (temp % 1) * 60 < 10
+                  ? (m = '0' + Math.round((temp % 1) * 60))
+                  : (m = '' + Math.round((temp % 1) * 60));
+                const sum = h + ':' + m;
+              return 'You worked ' + sum + ' h';
+            }
+          }
+        }
       }
     });
   }
@@ -205,11 +241,24 @@ export class ReportsComponent
     });
   }
 
+  getRequiredTime(temp: number): string {
+    let h, m;
+    Math.floor(temp) < 10
+      ? (h = '0' + Math.floor(temp))
+      : (h = '' + Math.floor(temp));
+    (temp % 1) * 60 < 10
+      ? (m = '0' + Math.round((temp % 1) * 60))
+      : (m = '' + Math.round((temp % 1) * 60));
+    return h + ':' + m;
+  }
+
   barClick(event, array) {
     if (array !== undefined) {
       if (array[0] !== undefined) {
-        this.setDetailChart(array[0]._index);
-        this.setPieChart();
+        if (this.chart.data.datasets[0].data[array[0]._index] > 0) {
+          this.setDetailChart(array[0]._index);
+          this.setPieChart();
+        }
       }
     }
   }
@@ -290,12 +339,11 @@ export class ReportsComponent
     this.chart = this.setChart();
     this.chart.data.labels = this.chartLabel;
     this.chart.data.datasets = this.setDataSetArray(
-      'Reports from ' + this.dateToDDMM(this.startDate) + ' to ',
+      'Reports from ' + this.dateToDDMM(this.startDate) + ' to ' + this.dateToDDMM(this.endDate),
       this.chartData,
       '#3582ff'
     );
     this.chart.update();
-    console.log(this.chart);
   }
 
   setChartData(temp: Array<any>) {
@@ -308,9 +356,9 @@ export class ReportsComponent
       date2.setDate(this.today.getDate() - i);
       if (temp.find(x => this.checkSameDate(x[1], date2))) {
         const el = temp.find(x => this.checkSameDate(x[1], date2));
-        array.push([el[0]]);
+        array.push(el[0]);
       } else {
-        array.push([0]);
+        array.push(0);
       }
     }
     this.chartData = array;
@@ -333,14 +381,19 @@ export class ReportsComponent
     bgcolor: string
   ): Array<DataSet> {
     const array = new Array();
-    const max = Math.max.apply(Math, data.map(function(o) { return o; }));
+    const max = Math.max.apply(
+      Math,
+      data.map(function(o) {
+        return o;
+      })
+    );
     const temp = new Array();
     data.forEach(e => {
       temp.push(e === 0 ? 0 : max - e);
     });
     array.push(
       { label: label, data: data, backgroundColor: bgcolor },
-      { label: '', data: data, backgroundColor: '#000000' }
+      { label: label, data: temp, backgroundColor: 'rgb(211, 211, 211, 0.3)' }
     );
     return array;
   }
@@ -402,6 +455,5 @@ export class ReportsComponent
       this.detailChartLabel.push(e[0]);
     });
     this.isVisible = true;
-    this.ngAfterViewInit();
   }
 }

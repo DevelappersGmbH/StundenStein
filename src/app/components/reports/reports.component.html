@@ -11,6 +11,13 @@
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
+    <div *ngIf="loadingData" class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+      </div>
     <div class="chart" id="canvasContainer">
       <canvas id="overView" height="40">Your browser does not support canvas element.</canvas>
     </div>
@@ -34,4 +41,3 @@
       </form>
   </mat-card-content>
 </mat-card>
-
