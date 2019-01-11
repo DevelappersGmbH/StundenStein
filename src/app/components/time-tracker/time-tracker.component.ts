@@ -120,10 +120,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     this.currentTrackerTimeString = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
-    this.automaticMode = false;
-    // Block manual mode until implemented
-
-    // this.automaticLock = true;
+    this.automaticMode = true;
     this.manualStartDate = this.now();
     this.manualStopDate = this.now();
 
@@ -623,20 +620,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.manualStartDate.setMinutes(this.manualStartTime.minutes);
       this.manualStopDate.setHours(this.manualStopTime.hours);
       this.manualStopDate.setMinutes(this.manualStopTime.minutes);
-      console.log({
-        id: undefined,
-        timeStarted: this.manualStartDate,
-        timeStopped: this.manualStopDate,
-        comment: this.timeTracker.comment,
-        timeInHours: 0,
-        booked: !isNull(this.timeTracker.project) && !isUndefined(this.timeTracker.project),
-        hourGlassTimeBookingId: undefined,
-        redmineTimeEntryId: undefined,
-        billable: this.timeTracker.billable,
-        issue: this.timeTracker.issue,
-        project: this.timeTracker.project,
-        user: this.userService.getUser()
-      });
       this.dataService.createTimeLog({
         id: undefined,
         timeStarted: this.manualStartDate,
@@ -651,12 +634,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         project: this.timeTracker.project,
         user: this.userService.getUser()
       }).subscribe(result => {
-        console.log(result);
+        this.reloadTriggerSerivce.triggerTimeLogAdded(result);
         this.loggingBlockedByLoading = false;
         this.automaticLock = false;
       }, error => {
-        this.errorService.errorDialog('Couldn\'t create Time Log.');
-        console.log(error);
+        this.errorService.errorDialog(error.error.message[0].replace(/\[.*\]/, ''));
         this.loggingBlockedByLoading = false;
         this.automaticLock = false;
       });
