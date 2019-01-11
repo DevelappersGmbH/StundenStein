@@ -14,7 +14,7 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeIssue>
-            <div class="field issue mat-body sp"><span>{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span></div>
+            <div class="field issue mat-body"><span>{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span></div>
         </ng-template>
 
 
@@ -35,7 +35,7 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeComment>
-          <div class="field comment mat-body sp"><span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
+          <div class="field comment mat-body"><span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
         </ng-template>
       </div>
 
@@ -54,9 +54,9 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeProject>
-          <div class="field project mat-body sp oneline">
+          <div class="field project mat-body oneline">
             <mat-icon class="icon oneline" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
-            <span class="mat-body sp oneline">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+            <span class="mat-body oneline">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
           </div>
         </ng-template>
 

@@ -13,12 +13,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   justify-content: space-between;
 }
 
-.sp{
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-}
 
 .part3{
   flex-grow: 0;
@@ -30,6 +24,9 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .field {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin-left: 15px;
 }
 
@@ -42,6 +39,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   flex-grow: 2;
   flex-shrink: 1;
   margin-right: 10px;
+  align-self: baseline;
 }
 
 .comment {
