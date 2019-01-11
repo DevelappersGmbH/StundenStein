@@ -10,7 +10,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 .flex-container{
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: space-between;
 }
 
 .sp{
@@ -20,7 +20,8 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .part3{
-  display: inline;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 .oneline {
@@ -32,16 +33,19 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .issue {
-  width: 27%;
+  flex-grow: 3;
+  flex-shrink: 1;
 }
 
 .project {
-  width: 10%;
+  flex-grow: 2;
+  flex-shrink: 1;
   margin-right: 10px;
 }
 
 .comment {
-  width: 27%;
+  flex-grow: 3;
+  flex-shrink: 1;
 }
 
 .icon{
@@ -70,17 +74,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   margin-left: 5px;
 }
 
-.start-time {
-  position:relative;
-  bottom:-2px;
-}
-
-.end-time {
-  position:relative;
-  bottom:-2px;
-  margin-left:3px;
-}
-
 .spinner{
   position:relative;
   bottom:-5px;
@@ -90,7 +83,6 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 
 .tracked-time {
   position:relative;
-  bottom:-1px;
   margin-left:8px;
 }
 
