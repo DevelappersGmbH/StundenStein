@@ -7,27 +7,20 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 
 }
 
-.total-div{
+.flex-container{
   display: flex;
-  justify-content: space-between;
-  @media screen and (max-width: $break-medium) {
-    display: inline-block;
-  }
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .sp{
   overflow: hidden;
   text-overflow: ellipsis;
-  position:relative;
-  bottom: -17px;
 
 }
 
-.part3 {
-  display: inline-block;
-  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    display: block;
-  }
+.part3{
+  display: inline;
 }
 
 .oneline {
@@ -40,43 +33,15 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 
 .issue {
   width: 27%;
-  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
-    width: 20%;
-  }
-  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 40%;
-  }
-  @media screen and (max-width: $break-small) {
-    display: block;
-      width: 90%;
-  }
-
 }
 
 .project {
   width: 10%;
   margin-right: 10px;
-  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 15%;
-  }
-  @media screen and (max-width: $break-small) {
-    display: block;
-    width: 90%;
-  }
 }
 
 .comment {
   width: 27%;
-  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
-    width: 20%;
-  }
-  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 35%;
-  }
-  @media screen and (max-width: $break-small) {
-    display: block;
-    width: 90%;
-  }
 }
 
 .icon{
