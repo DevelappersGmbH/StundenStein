@@ -23,6 +23,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDatepickerModule,
   MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
@@ -33,7 +34,6 @@ import {
   MatSlideToggleModule,
   MatToolbarModule,
   MatTabsModule,
-  MatDatepickerModule,
   MatNativeDateModule
 } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';

@@ -10,7 +10,7 @@
           </mat-autocomplete>
         </mat-form-field>
         <mat-form-field class="field field-small">
-          <input type="text" (change)="updateTracker()" [(ngModel)]="timeTracker.comment" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
+          <input type="text" (change)="updateTracker()" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
           <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
             <mat-option *ngFor="let log of filteredLogs | async" [value]="log.id + '$$' + log.comment">
               <span>{{shorten(log.comment, 25)}}</span>
@@ -28,16 +28,42 @@
               </mat-autocomplete>
         </mat-form-field>
       </div>
+      <br *ngIf="!automaticMode"/>
+      <div class="field-container" *ngIf="!automaticMode">
+        <mat-form-field class="field field-small date">
+          <input [max]="now()" matInput [matDatepicker]="picker1" placeholder="Choose start date" [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
+            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+            <mat-datepicker #picker1></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field class="field field-small time">
+          <input [style.color]="manualStartTimeIllegal ? 'red' : 'black'" placeholder="Choose start time" [ngModel]="timeToString(manualStartTime)" (ngModelChange)="manualStartTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+        </mat-form-field>
+      </div>
+      <div class="field-container" *ngIf="!automaticMode">
+        <mat-form-field class="field field-small date">
+          <input [min]="manualStartDate" [max]="now()" matInput [matDatepicker]="picker2" placeholder="Choose end date" [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
+            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+            <mat-datepicker #picker2></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field class="field field-small time">
+          <input [style.color]="manualStopTimeIllegal ? 'red' : 'black'" placeholder="Choose end time" [ngModel]="timeToString(manualStopTime)" (ngModelChange)="manualStopTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
+        </mat-form-field>
+      </div>
+      <br *ngIf="!automaticMode"/>
       <div class="field-container">
-        <span class="field">{{ currentTrackerTimeString }}</span>
+        <span *ngIf="automaticMode" class="field">{{ currentTrackerTimeString }}</span>
         <mat-checkbox name="billable" (change)="updateTracker()" [(ngModel)]="timeTracker.billable" class="field">Billable</mat-checkbox>
         <div class="field">
-          <button *ngIf="this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary" [disabled]="startingBlockedByLoading">Start</button>
-          <button *ngIf="this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+          <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" class="field" mat-flat-button color="primary" [disabled]="startingBlockedByLoading">Start</button>
+          <button *ngIf="automaticMode && this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" class="field" mat-flat-button color="warn">Stop</button>
+          <button *ngIf="!automaticMode" [disabled]="loggingBlockedByLoading" (click)="createLog()" class="field" mat-flat-button color="primary">
+            <span>Save  </span>
+            <mat-icon>save</mat-icon>
+          </button>
         </div>
         <div class="field">
-          <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock" color="accent">Manual Mode</button>
-          <button mat-stroked-button *ngIf="!automaticMode" [disabled]="automaticLock" color="accent">Automatic Mode</button>
+          <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock || this.timeTracker.id !== undefined" (click)="automaticMode = false;" color="accent">Manual Mode</button>
+          <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="automaticLock" color="accent">Automatic Mode</button>
         </div>
       </div>
   </form>

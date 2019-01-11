@@ -159,11 +159,8 @@ export class TimeLogComponent implements OnInit, OnChanges {
     if (!issue) {
       return '';
     }
-
-    const issueWidth = document.getElementById('issue').offsetWidth;
-    return this.shorten(
-      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject,
-      0.15 * issueWidth
+    return (
+      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject
     );
   }
 
@@ -171,23 +168,18 @@ export class TimeLogComponent implements OnInit, OnChanges {
     if (!project) {
       return '';
     }
-    const projectWidth = document.getElementById('project').offsetWidth;
-    return this.shorten(project.name, 0.15 * projectWidth);
+    return project.name;
   }
 
   displayLog = log => {
-    const commentWidth = document.getElementById('comment').offsetWidth;
     if (!log) {
       return '';
     }
     if (!log.includes('$$')) {
-      return this.shorten(log, 0.15 * commentWidth);
+      return log;
     }
 
-    return this.shorten(
-      log.substring(log.indexOf('$$') + 2),
-      0.15 * commentWidth
-    );
+    return log.substring(log.indexOf('$$') + 2);
   }
 
   private filterIssues(value): Issue[] {
@@ -426,7 +418,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     return undefined;
   }
 
-  deleteWarning() {
+  showDeleteWarning() {
     this.loadingDel = true;
     const dialogConfig = new MatDialogConfig();
 
