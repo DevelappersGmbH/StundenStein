@@ -32,7 +32,7 @@ export class MainComponent implements OnInit {
       this.issues = is;
     });
 
-    this.getAllTimeLogsIncrementally();
+    this.getAllTimeLogsIncrementally(this.userService.getUser().id);
 
     this.reloadTriggerService.timeLogAdded.subscribe(timelog => {
       this.timelogs.push(timelog);
@@ -62,16 +62,11 @@ export class MainComponent implements OnInit {
     });
   }
 
-  private getAllTimeLogsIncrementally() {
-    this.dataService.getTimeLogCount().subscribe(count => {
+  private getAllTimeLogsIncrementally(userId: number = -1) {
+    this.dataService.getTimeLogCount(userId).subscribe(count => {
       const limit = 100; // Max of Entries loadable using one request
       const offset = count - limit;
-      this.getTimeLogs(
-        offset >= 0 ? offset : 0,
-        limit,
-        count,
-        this.userService.getUser().id
-      );
+      this.getTimeLogs(offset >= 0 ? offset : 0, limit, count, userId);
     });
   }
 
