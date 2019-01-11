@@ -404,6 +404,17 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.editMode = !this.editMode;
   }
 
+  abort() {
+      if (this.timeLog.booked === false) {
+        /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
+        this.editButton = 'playlist_add';
+      } else {
+        /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
+        this.editButton = 'edit';
+      }
+    this.editMode = !this.editMode;
+  }
+
   private findProject(project): Project {
     if (project) {
       return this.projectOptions.find(entry => entry.id === project.id);

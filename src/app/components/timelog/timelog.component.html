@@ -1,10 +1,9 @@
 
     <form class="total-record">
       <div class="flex-container">
-
           <ng-container *ngIf="editMode; else showModeIssue">
-          <mat-form-field [floatLabel]="'never'" class = "field issue" [ngClass]="{ edit: !editMode }">
-            <input id="issue" type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
+          <mat-form-field [floatLabel]="'never'" class = "field issue" [ngClass]="{ edit: editMode }">
+            <input id="issue" type="text" appEnforcedInputs  matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
@@ -14,14 +13,13 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeIssue>
-            <div class="field issue mat-body"><span>{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span></div>
+            <div class="field issue mat-body"><span>{{ this.issueControl.value ? this.issueControl.value.tracker + ' #' + this.issueControl.value.id.toString() + ': ' + this.issueControl.value.subject : "Issue" }}</span></div>
         </ng-template>
 
 
-        <div class = "field comment">
         <ng-container *ngIf="editMode; else showModeComment">
-          <mat-form-field [floatLabel]="'never'" class = "field comment" [ngClass]="{ edit: !editMode }">
-            <input id="comment" type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+          <mat-form-field [floatLabel]="'never'" class = "field comment" [ngClass]="{ edit: editMode }">
+            <input id="comment" type="text"  matInput (click)="$event.target.select()"
                    [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
           </mat-form-field>
@@ -37,13 +35,12 @@
         <ng-template #showModeComment>
           <div class="field comment mat-body"><span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
         </ng-template>
-      </div>
 
 
         <ng-container *ngIf="editMode; else showModeProject">
-          <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: !editMode }">
-            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
-            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+          <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: editMode }">
+            <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matPrefix>warning</mat-icon>
+            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'"  matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -54,15 +51,15 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeProject>
-          <div class="field project mat-body oneline">
-            <mat-icon class="icon oneline" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
-            <span class="mat-body oneline">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+          <div class="field project mat-body">
+            <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matSuffix>warning</mat-icon>
+            <span [style.color]="this.projectControl.value? this.projectControl.value.color : 'black'">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
           </div>
         </ng-template>
 
         <div class="oneline"><!-- empty space --></div>
 
-        <div class="part3 oneline">
+        <div class="part3">
             <mat-spinner
               class = "spinner"
               *ngIf="trackerSpinning"
@@ -123,6 +120,12 @@
             <mat-icon  class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
+          </div>
+
+          <div class="oneline">
+            <button *ngIf="editMode" mat-icon-button class="button" (click)="abort()">
+              <mat-icon  class="icon attention">close</mat-icon>
+            </button>
           </div>
 
           <div class="oneline">
