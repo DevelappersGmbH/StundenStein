@@ -6,7 +6,9 @@
       [issues]="issues"
       [timeLogs]="timelogs"
     ></app-time-tracker>
-    <app-userreports></app-userreports>
+    <app-userreports
+    [timeLogs]="timelogs"
+    ></app-userreports>
     <app-recent-time-logs
       [projects]="projects"
       [issues]="issues"
