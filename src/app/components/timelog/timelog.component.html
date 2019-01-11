@@ -35,17 +35,17 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeComment>
-          <div class="field issue mat-body sp"><span class="mat-body sp">{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
+          <div class="field comment mat-body sp"><span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
         </ng-template>
       </div>
 
 
         <ng-container *ngIf="editMode; else showModeProject">
           <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: !editMode }">
+            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
             <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
-            <mat-icon class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
           </mat-form-field>
 
           <mat-autocomplete #autoProject="matAutocomplete" (optionSelected)="selectProject($event.option.value)" [displayWith]="displayProject">
@@ -54,7 +54,10 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeProject>
-          <div class="field issue mat-body sp"><span class="mat-body sp">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span></div>
+          <div class="field project mat-body sp oneline">
+            <mat-icon class="icon oneline" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matSuffix>warning</mat-icon>
+            <span class="mat-body sp oneline">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+          </div>
         </ng-template>
 
         <div class="oneline"><!-- empty space --></div>
