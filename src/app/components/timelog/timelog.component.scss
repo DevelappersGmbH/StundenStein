@@ -15,23 +15,42 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   }
 }
 
+.sp{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position:relative;
+  bottom: -17px;
+
+}
+
+.part3 {
+  display: inline-block;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    display: block;
+  }
+}
+
 .oneline {
   display: inline-block;
 }
 
 .field {
   margin-left: 15px;
-  overflow: auto;
 }
 
 .issue {
   width: 27%;
-  @media screen and (max-width: $break-medium) {
-    width: 40%;
-    @media screen and (max-width: $break-small) {
-      width: 90%;
-    }
+  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
+    width: 20%;
   }
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    width: 40%;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
+      width: 90%;
+  }
+
 }
 
 .project {
@@ -41,19 +60,21 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
     width: 15%;
   }
   @media screen and (max-width: $break-small) {
+    display: block;
     width: 90%;
   }
 }
 
 .comment {
   width: 27%;
-  @media screen and (max-width: $break-large) {
+  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
     width: 20%;
   }
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
     width: 35%;
   }
   @media screen and (max-width: $break-small) {
+    display: block;
     width: 90%;
   }
 }
