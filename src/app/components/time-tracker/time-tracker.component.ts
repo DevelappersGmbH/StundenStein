@@ -74,10 +74,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
+      this.logs = [];
       change.currentValue.forEach(log => {
         if (
-          !isUndefined(log.comment) ||
-          !isNull(log.comment) ||
+          !isUndefined(log.comment) &&
+          !isNull(log.comment) &&
           log.comment.length > 0
         ) {
           this.logs.unshift(log);
