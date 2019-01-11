@@ -76,8 +76,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       const change = changes['timeLogs'];
       change.currentValue.forEach(log => {
         if (
-          !isUndefined(log.comment) &&
-          !isNull(log.comment) &&
+          !isUndefined(log.comment) ||
+          !isNull(log.comment) ||
           log.comment.length > 0
         ) {
           this.logs.unshift(log);
@@ -247,6 +247,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   updateTracker(): void {
+    this.timeTracker.comment = this.logCtrl.value;
+    if (this.timeTracker.comment.includes('$$')) {
+      this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
+    }
     if (isUndefined(this.timeTracker.id)) {
       return;
     }
@@ -541,6 +545,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   private updateAutoCompletes(): void {
     this.issueCtrl.setValue(this.timeTracker.issue);
     this.projectCtrl.setValue(this.timeTracker.project);
+    this.logCtrl.setValue(this.timeTracker.comment);
   }
 
   loadTimeTracker() {
@@ -586,6 +591,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
 
   stopTimeTracker(): void {
     this.stoppingBlockedByLoading = true;
+    this.timeTracker.comment = this.logCtrl.value;
+    if (this.timeTracker.comment.includes('$$')) {
+      this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
+    }
     let timeTracker: TimeTracker;
     timeTracker = {
       id: this.timeTracker.id,

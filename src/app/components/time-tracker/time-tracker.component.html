@@ -10,7 +10,7 @@
           </mat-autocomplete>
         </mat-form-field>
         <mat-form-field class="field field-small">
-          <input type="text" (change)="updateTracker()" [(ngModel)]="timeTracker.comment" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
+          <input type="text" (change)="updateTracker()" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
           <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
             <mat-option *ngFor="let log of filteredLogs | async" [value]="log.id + '$$' + log.comment">
               <span>{{shorten(log.comment, 25)}}</span>
