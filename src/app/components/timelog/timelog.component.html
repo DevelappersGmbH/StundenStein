@@ -2,9 +2,8 @@
     <form class="total-record">
       <div class="flex-container">
 
-        <div class = "field issue">
           <ng-container *ngIf="editMode; else showModeIssue">
-          <mat-form-field [floatLabel]="'never'" [ngClass]="{ edit: !editMode }">
+          <mat-form-field [floatLabel]="'never'" class = "field issue" [ngClass]="{ edit: !editMode }">
             <input id="issue" type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
@@ -15,14 +14,13 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeIssue>
-            <span class="mat-body sp">{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span>
+            <div class="field issue mat-body sp"><span>{{ this.issueControl.value ? this.issueControl.value.subject : "Issue" }}</span></div>
         </ng-template>
-        </div>
 
 
         <div class = "field comment">
         <ng-container *ngIf="editMode; else showModeComment">
-          <mat-form-field [floatLabel]="'never'" [ngClass]="{ edit: !editMode }">
+          <mat-form-field [floatLabel]="'never'" class = "field comment" [ngClass]="{ edit: !editMode }">
             <input id="comment" type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
@@ -37,13 +35,13 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeComment>
-            <span class="mat-body sp">{{ this.logControl.value ? this.logControl.value : "Comment" }}</span>
+          <div class="field issue mat-body sp"><span class="mat-body sp">{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
         </ng-template>
       </div>
 
 
-        <div class = "field project"><ng-container *ngIf="editMode; else showModeProject">
-          <mat-form-field [floatLabel]="'never'" [ngClass]="{ edit: !editMode }">
+        <ng-container *ngIf="editMode; else showModeProject">
+          <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: !editMode }">
             <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
@@ -56,9 +54,8 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeProject>
-          <span class="mat-body sp">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+          <div class="field issue mat-body sp"><span class="mat-body sp">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span></div>
         </ng-template>
-        </div>
 
         <div class="oneline"><!-- empty space --></div>
 
