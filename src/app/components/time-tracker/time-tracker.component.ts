@@ -18,6 +18,7 @@ import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { Title } from '@angular/platform-browser';
+import { Time } from '@angular/common';
 import { TrackerService } from 'src/app/services/tracker/tracker.service';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -60,6 +61,13 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   stoppingBlockedByNegativeTime = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
+  loggingBlockedByLoading = false;
+  manualStartDate: Date;
+  manualStopDate: Date;
+  manualStartTime: Time;
+  manualStartTimeIllegal = true;
+  manualStopTime: Time;
+  manualStopTimeIllegal = true;
 
   favIconRunning = false;
 
@@ -113,8 +121,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
     this.automaticMode = true;
-    // Block manual mode until implemented
-    this.automaticLock = true;
+    this.manualStartDate = this.now();
+    this.manualStopDate = this.now();
+
     this.filteredIssues = this.issueCtrl.valueChanges.pipe(
       startWith(''),
       map(issue => (issue ? this._filterIssues(issue) : this.issues.slice()))
@@ -129,6 +138,112 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       startWith(''),
       map(log => (log ? this._filterLogs(log) : this.logs.slice()))
     );
+
+  }
+
+  /**
+   * Validates start and end time selected in manual mode
+   */
+  validateStartStop(): boolean {
+    this.manualStartTimeIllegal = false;
+    this.manualStopTimeIllegal = false;
+    if (isUndefined(this.manualStartTime)) {
+      this.manualStartTimeIllegal = true;
+    }
+    if (isUndefined(this.manualStopTime)) {
+      this.manualStopTimeIllegal = true;
+    }
+    if (!isUndefined(this.manualStartTime) && !isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStartDate, this.manualStopDate)) {
+      if (this.isLater(this.manualStartTime, this.manualStopTime)) {
+        // FAIL: stop before start
+        this.manualStopTimeIllegal = true;
+      }
+      if ( JSON.stringify(this.manualStartTime) === JSON.stringify(this.manualStopTime)) {
+        // FAIL: stop and start equal
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (!isUndefined(this.manualStartTime) &&
+    this.sameday(this.manualStartDate, this.now())) {
+      if (this.isLater(this.manualStartTime, this.currentTime())) {
+        // FAIL: starts before now
+        this.manualStartTimeIllegal = true;
+      }
+    }
+    if (!isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStopDate, this.now())) {
+      if (this.isLater(this.manualStopTime, this.currentTime())) {
+        // FAIL: ends before now
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (this.manualStartTimeIllegal || this.manualStopTimeIllegal) { return false; }
+    return true;
+  }
+
+  /**
+   * Compares if two Date objects represent the same day
+   * @param date1 first date
+   * @param date2 second date
+   */
+  sameday(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate();
+  }
+
+  /**
+   * Tells if a time is later than another one
+   * @param reference time to check
+   * @param compareTo time to compare against
+   */
+  isLater(reference: Time, compareTo: Time): boolean {
+    if (reference.hours > compareTo.hours) { return true; }
+    if (reference.hours === compareTo.hours && reference.minutes > compareTo.minutes) { return true; }
+    return false;
+  }
+
+  /**
+   * Converts a 24hr time string to Time Object
+   * @param value time string (24hr format)
+   */
+  stringToTime(value: string): Time {
+    return {
+      hours: parseInt(value.substring(0, 2), 10) ,
+      minutes: parseInt(value.substring(3, 5), 10)
+    };
+  }
+
+  /**
+   * Converts a Time Object to 24hr time string
+   * @param value time object
+   */
+  timeToString(value: Time): string {
+    if (isUndefined(value) || isUndefined(value.hours)) {
+      return '';
+    }
+    let hrs = value.hours.toString();
+    if (hrs.length < 2) { hrs = '0' + hrs; }
+    let min = value.minutes.toString();
+    if (min.length < 2) { min = '0' + min; }
+    return hrs + ':' + min;
+  }
+
+  /**
+   * Returns a new Date object which is the current date
+   */
+  now(): Date {
+    return new Date();
+  }
+
+  /**
+   * Returns the current time
+   */
+  currentTime(): Time {
+    const dateObj = this.now();
+    return {
+      hours: dateObj.getHours(),
+      minutes: dateObj.getMinutes()
+    };
   }
 
   updateTracker(): void {
@@ -496,4 +611,41 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       }
     );
   }
+
+  createLog(): void {
+    this.loggingBlockedByLoading = true;
+    this.automaticLock = true;
+    if (this.validateStartStop()) {
+      this.manualStartDate.setHours(this.manualStartTime.hours);
+      this.manualStartDate.setMinutes(this.manualStartTime.minutes);
+      this.manualStopDate.setHours(this.manualStopTime.hours);
+      this.manualStopDate.setMinutes(this.manualStopTime.minutes);
+      this.dataService.createTimeLog({
+        id: undefined,
+        timeStarted: this.manualStartDate,
+        timeStopped: this.manualStopDate,
+        comment: this.timeTracker.comment,
+        timeInHours: 0,
+        booked: !isNull(this.timeTracker.project) && !isUndefined(this.timeTracker.project),
+        hourGlassTimeBookingId: undefined,
+        redmineTimeEntryId: undefined,
+        billable: this.timeTracker.billable,
+        issue: this.timeTracker.issue,
+        project: this.timeTracker.project,
+        user: this.userService.getUser()
+      }).subscribe(result => {
+        this.reloadTriggerSerivce.triggerTimeLogAdded(result);
+        this.loggingBlockedByLoading = false;
+        this.automaticLock = false;
+      }, error => {
+        this.errorService.errorDialog(error.error.message[0].replace(/\[.*\]/, ''));
+        this.loggingBlockedByLoading = false;
+        this.automaticLock = false;
+      });
+    } else {
+      this.loggingBlockedByLoading = false;
+      this.automaticLock = false;
+    }
+  }
+
 }

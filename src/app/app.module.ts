@@ -23,6 +23,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDatepickerModule,
   MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
@@ -31,8 +32,9 @@ import {
   MatProgressSpinnerModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
-} from '@angular/material';
+  MatToolbarModule,
+  MatNativeDateModule
+  } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
@@ -88,6 +90,8 @@ import { Favicons } from './services/favicon/favicon.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatBadgeModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatProgressSpinnerModule
   ],
   providers: [
