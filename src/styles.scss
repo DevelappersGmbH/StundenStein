@@ -4,3 +4,9 @@
 body {
   margin: 0;
 }
+
+// custom style for the error-dialog has to be set in the global scss
+.custom-dialog-container2 .mat-dialog-container {
+  border: 1px solid #d62c36;
+}
+

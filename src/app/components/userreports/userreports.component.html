@@ -1,23 +1,30 @@
 <mat-card>
-  <mat-card-title>User Reports</mat-card-title>
   <mat-card-content>
     <mat-form-field>
       <mat-select [(value)]="selected" (selectionChange)="selectedOption()">
-        <mat-option value="day">Day</mat-option>
-        <mat-option value="week">Week</mat-option>
-        <mat-option value="month">Month</mat-option>
+        <mat-option value = "0">Day</mat-option>
+        <mat-option value = "1">Week</mat-option>
+        <mat-option value = "2">Month</mat-option>
+        <mat-option value = "3">Last Month</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-checkbox class="checkbox" (change)="checkBox($event)" [ngModel]="bilCheck">Show only billable</mat-checkbox>
     <br /><br />
-    <div *ngIf="projectExists">
-   <table >
+    <div *ngIf="projectExists()">
+        <table >
+          <tr>
+            <td *ngFor="let arrays of generalArray; let i = index" id="chart{{i}}" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i), 'height': '0px'}">
+            </td>
+          </tr>
+        </table>
+      </div>
+    <div *ngIf="projectExists()">
+      <table >
         <tr>
-          <td *ngFor="let arrays of tdArray[actualSelect]; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}" (mouseover)="bubbleHover(1, i)" (mouseout)="bubbleHover(0, i)">
-            <a><div *ngIf="true">{{getProjectData(i, false)}}</div>
-            <div *ngIf="hoverBubbleRight === 0" class="bubblePosition hoverBubble hoBu" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i, true)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
-            <div *ngIf="hoverBubbleRight === 1" class="bubblePosition hoverBubble hoBu1" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i, true)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
-            <div *ngIf="hoverBubbleRight === 2" class="bubblePosition hoverBubble hoBu2" [ngStyle]="{'margin-left': bubblePos(i)}">{{getProjectData(i, true)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
+          <td *ngFor="let arrays of generalArray; let i = index" class="legend" [ngStyle]="{'width': getWidth(i), 'color': getColor(i)}">
+            <a><div *ngIf="true">{{getProjectName(i, false)}}</div>
+            <div *ngIf="!bubbleAtBorder(i)" class="bubblePosition hoverBubble" [ngStyle]="{'margin-left': getBubblePos(i)}">{{getProjectName(i, true)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
+            <div *ngIf="bubbleAtBorder(i)" class="bubblePositionBorder hoverBubbleBorder" [ngStyle]="{'margin-left': getBubblePos(i)}">{{getProjectName(i, true)}}<br /><div class="divide_line"></div>You worked {{getRequiredTime(i)}} h<div class="placeholder"></div>{{getPercentage(i)}} of total time<div class="placeholder"></div><div class="getBill">({{getBillPercent(i)}})</div></div>
           </a>
           </td>
         </tr>
@@ -28,7 +35,7 @@
       <div *ngIf="projectExists()">
     <table >
       <tr>
-        <td *ngFor="let arrays of tdArray[actualSelect]; let i = index" class="chart" [ngStyle]="{'width': getWidth(i), 'background-color': getColor(i)}">
+        <td *ngFor="let arrays of generalArray; let i = index" class="chart" [ngStyle]="{'width': getWidth(i), 'background-color': getColor(i)}">
         </td>
       </tr>
     </table>

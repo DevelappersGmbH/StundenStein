@@ -45,8 +45,9 @@ a {
 .checkbox {
   margin: 0 0 0 20px;
 }
+
 /* bubble style */
-.hoverBubble {
+.hoverBubble, .hoverBubbleBorder {
   background: #333333;
   color: #ffffff;
   cursor: pointer;
@@ -66,7 +67,7 @@ a {
   transition: all 0.25s;
 }
 
-.bubblePosition {
+.bubblePosition, .bubblePositionBorder {
   bottom: 45%;
   height: inherit;
   left: 0;
@@ -75,6 +76,7 @@ a {
   width: 15%;
   max-width: 15%;
 }
+
 .hoverBubble:after,
 .bubblePosition:after {
   border: 8px solid transparent;
@@ -86,15 +88,7 @@ a {
   margin: 0 auto;
   position: absolute;
   width: 0px;
-}
-.hoBu:after {
   right: 0;
-}
-.hoBu1:after {
-  right: -90%;
-}
-.hoBu2:after {
-  right: 90%;
 }
 
 /* bubble hover */
@@ -106,4 +100,16 @@ a:hover .hoverBubble {
   -ms-transition: all 0.25s;
   -o-transition: all 0.25s;
   transition: all 0.25s;
+}
+a:hover .hoverBubbleBorder {
+  opacity: 1;
+  visibility: visible;
+  -webkit-transition: all 0.25s;
+  -moz-transition: all 0.25s;
+  -ms-transition: all 0.25s;
+  -o-transition: all 0.25s;
+  transition: all 0.25s;
+}
+::ng-deep .mat-form-field{
+  width: 10vw;
 }

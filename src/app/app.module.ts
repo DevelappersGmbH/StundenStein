@@ -23,6 +23,7 @@ import {
   MatButtonModule,
   MatCardModule,
   MatCheckboxModule,
+  MatDatepickerModule,
   MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
@@ -31,16 +32,23 @@ import {
   MatProgressSpinnerModule,
   MatSelectModule,
   MatSlideToggleModule,
-  MatToolbarModule
+  MatToolbarModule,
+  MatNativeDateModule
   } from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
+import { ReloadTriggerService } from './services/reload-trigger.service';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TimeLogComponent } from './components/timelog/timelog.component';
 import { TimeTrackerComponent } from './components/time-tracker/time-tracker.component';
 import { UserReportsComponent } from './components/userreports/userreports.component';
 import { UserService } from './services/user/user.service';
+import { ErrorDialogComponent } from './errorpopup/error-dialog.component';
+import { ErrorService } from './services/error/error.service';
+import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
+import { BrowserFavicons } from './services/favicon/favicon.service';
+import { Favicons } from './services/favicon/favicon.service';
 
 @NgModule({
   declarations: [
@@ -53,7 +61,8 @@ import { UserService } from './services/user/user.service';
     UserReportsComponent,
     RecentTimeLogsComponent,
     DeleteWarningComponent,
-    EnforcedInputsDirective
+    EnforcedInputsDirective,
+    ErrorDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -81,6 +90,8 @@ import { UserService } from './services/user/user.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatBadgeModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     MatProgressSpinnerModule
   ],
   providers: [
@@ -95,9 +106,31 @@ import { UserService } from './services/user/user.service';
     Title,
     UserService,
     CookieService,
-    DatePipe
+    DatePipe,
+    ErrorService,
+    ReloadTriggerService,
+    {
+      provide: Favicons,
+      useClass: BrowserFavicons
+    },
+    {
+      provide: BROWSER_FAVICONS_CONFIG,
+      useValue: {
+        icons: {
+          'running': {
+            type: 'image/png',
+            href: '../assets/icons/baseline_timelapse_white_18dp_red.png'
+          },
+          'idle': {
+            type: 'image/png',
+            href: '../assets/icons/baseline_timer_white_18dp.png'
+          }
+        },
+        cacheBusting: true
+      }
+    }
   ],
   bootstrap: [AppComponent],
-  entryComponents: [DeleteWarningComponent]
+  entryComponents: [DeleteWarningComponent, ErrorDialogComponent]
 })
 export class AppModule {}

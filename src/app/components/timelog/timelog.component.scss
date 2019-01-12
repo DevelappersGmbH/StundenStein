@@ -1,20 +1,87 @@
+$break-small: 700px;
+$break-medium: 992px;
+$break-large: 1240px;
+
 input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
   display: none;
+
 }
 
 .total-div{
   display: flex;
   justify-content: space-between;
+  @media screen and (max-width: $break-medium) {
+    display: inline-block;
+  }
+}
+
+.sp{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position:relative;
+  bottom: -17px;
+
+}
+
+.part3 {
+  display: inline-block;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    display: block;
+  }
+}
+
+.oneline {
+  display: inline-block;
 }
 
 .field {
-  margin-left: 5px;
+  margin-left: 15px;
+}
+
+.issue {
+  width: 27%;
+  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
+    width: 20%;
+  }
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    width: 40%;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
+      width: 90%;
+  }
+
+}
+
+.project {
+  width: 10%;
+  margin-right: 10px;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    width: 15%;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
+    width: 90%;
+  }
+}
+
+.comment {
+  width: 27%;
+  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
+    width: 20%;
+  }
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    width: 35%;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
+    width: 90%;
+  }
 }
 
 .icon{
   color: #ccc;
 }
-
 
 .icon.active {
   color: limegreen;
@@ -24,7 +91,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   position:relative;
   bottom:-5px;
   color: transparent;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .icon.attention {
@@ -35,24 +102,47 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   position:relative;
   bottom:-5px;
   color: orangered;
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
-.field.end-time, .start-time {
+.start-time {
   position:relative;
   bottom:-2px;
 }
 
-.field.tracked-time {
+.end-time {
   position:relative;
-  bottom:-1px;
+  bottom:-2px;
+  margin-left:3px;
 }
 
-::ng-deep mat-form-field.edit .mat-form-field-underline {
+.spinner{
+  position:relative;
+  bottom:-5px;
+  margin-left: 9px;
+  margin-right: 9px;
+}
+
+.tracked-time {
+  position:relative;
+  bottom:-1px;
+  margin-left:8px;
+}
+
+mat-form-field.edit .mat-form-field-underline {
   display: none;
 }
 
-::ng-deep .cdk-overlay-pane {
+.mat-form-field-infix {
+  width: 100%;
+}
+
+.mat-input-element {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cdk-overlay-pane {
   width: auto !important;
   max-width: 400px;
 }
