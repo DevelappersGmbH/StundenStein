@@ -34,8 +34,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   browserSize;
   browserWidth;
   setBrowserWidthOnInit;
-  dwmlArray = [[], [], [], []];
-  lastTimeLogsLength = 0;
 
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
@@ -58,18 +56,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
       this.errorService.errorDialog(
         'Did not receive data from the dataService, wich distributes the project data.'
       );
-    }
-    if (this.timeLogs.length > 0) {
-      if (
-        this.timeLogs.length === this.lastTimeLogsLength &&
-        this.dwmlArray[this.period].length > 0
-      ) {
-        this.generalArray = this.dwmlArray[this.period];
-      } else {
+    } else if (this.timeLogs.length > 0) {
         this.setWidth(this.setPeriod());
-      }
     }
-    this.lastTimeLogsLength = this.timeLogs.length;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -133,17 +122,14 @@ export class UserReportsComponent implements OnInit, OnChanges {
     d.setHours(0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil(
-      ((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7
-    );
-    return weekNo;
+    return Math.ceil(((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7);
   }
 
   setWidth(array: any[]) {
     let indexOfWidth,
       counter = 0,
       counterBillable = 0;
-    const width = [];
+    const width = new Array();
     array.forEach(e => {
       if (
         width.find(function(element, index) {
@@ -153,27 +139,12 @@ export class UserReportsComponent implements OnInit, OnChanges {
             : element[0] === 'No project assigned';
         })
       ) {
-        width[indexOfWidth][1] += this.setTime(
-          e.timeStarted,
-          e.timeStopped,
-          e.timeInHours
-        );
-        width[indexOfWidth][4] += this.setTime(
-          e.timeStarted,
-          e.timeStopped,
-          e.timeInHours
-        );
+        const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+        width[indexOfWidth][1] += time;
+        width[indexOfWidth][4] += time;
         if (e.billable) {
-          width[indexOfWidth][3] += this.setTime(
-            e.timeStarted,
-            e.timeStopped,
-            e.timeInHours
-          );
-          width[indexOfWidth][5] += this.setTime(
-            e.timeStarted,
-            e.timeStopped,
-            e.timeInHours
-          );
+          width[indexOfWidth][3] += time;
+          width[indexOfWidth][5] += time;
         }
       } else {
         const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
@@ -196,7 +167,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
       e[3] = Math.round((e[3] / counterBillable) * 100);
     });
     width.sort((a, b) => b[1] - a[1]);
-    this.dwmlArray[this.period] = width;
     this.generalArray = width;
   }
 
@@ -227,12 +197,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
       ? this.checkSameDayTimelog(start, stop, time)
       : this.period === 1
       ? this.checkSameWeekTimelog(start, stop, time)
-      : this.checkSameWeekTimelog(start, stop, time);
+      : this.checkSameMonthTimelog(start, stop, time);
   }
 
   checkBox(event) {
     event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
-    console.log(this.generalArray);
   }
 
   getProjectName(i: number, bool: Boolean): string {
@@ -261,9 +230,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   projectExists() {
-    return isUndefined(this.generalArray) || this.generalArray.length === 0
-      ? false
-      : true;
+    return !(isUndefined(this.generalArray) || this.generalArray.length === 0);
   }
 
   getRequiredTime(i): string {
@@ -274,27 +241,24 @@ export class UserReportsComponent implements OnInit, OnChanges {
     }
     Math.floor(temp) < 10
       ? (h = '0' + Math.floor(temp))
-      : (h = '' + Math.floor(temp));
+      : (h = Math.floor(temp));
     (temp % 1) * 60 < 10
       ? (m = '0' + Math.round((temp % 1) * 60))
-      : (m = '' + Math.round((temp % 1) * 60));
+      : (m = Math.round((temp % 1) * 60));
     return h + ':' + m;
   }
 
   getPercentage(i): string {
-    const pixel =
-      this.screenWidth -
-      20 * (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
     return this.generalArray[i][!this.bilCheck ? 1 : 3] + ' %';
   }
 
   getBillPercent(i): string {
-    return this.generalArray[i][3] + '% billable';
+    return (this.generalArray[i][1] <= this.generalArray[i][3]
+    ? '100% billable'
+    : this.generalArray[i][3] / this.generalArray[i][1] * 100 + '% billable');
   }
 
   getBubblePos(i): string {
-    const el1 = document.getElementById('chart' + i); // .style.cssText = "--my-var: #000";
-    el1.style.cssText += 'right: 0';
     const temp = this.setBrowserWidthOnInit === this.browserSize.width ? 16 : 0;
     const browserWidth = this.browserSize.width - temp;
     const el = document.getElementById('chart' + i);
@@ -305,7 +269,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
       ) -
       8.5 +
       0.5 * i;
-    return value > 80 ? '83%' : value < 5.5 ? '0%' : value + '%';
+    return value > 83 ? '83%' : value < 5.5 ? '0%' : value + '%';
   }
 
   bubbleAtBorder(i) {
