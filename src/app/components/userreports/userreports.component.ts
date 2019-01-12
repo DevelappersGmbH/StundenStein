@@ -12,7 +12,6 @@ import { ErrorService } from '../../services/error/error.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { isNull, isUndefined } from 'util';
 
-@HostListener('window:resize')
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-userreports',
@@ -20,35 +19,32 @@ import { isNull, isUndefined } from 'util';
   styleUrls: ['./userreports.component.scss']
 })
 export class UserReportsComponent implements OnInit, OnChanges {
-  screenHeight;
   screenWidth;
   period = 0;
   date = new Date();
   bilCheck = false;
-  periodArray = [];
-  generalArray = [];
+  generalArray = new Array();
   selected = '0';
   pixelWidth;
   elementPosition;
   getSize;
-  browserSize;
-  browserWidth;
-  setBrowserWidthOnInit;
+  firstInit = true;
 
+  // constructor is loading various npm packages for scaling due to the info bubble
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
     this.elementPosition = require('element-position');
     this.getSize = require('get-size');
-    this.browserSize = require('browser-size')();
-    this.setBrowserWidthOnInit = this.browserSize.width;
     this.onResize();
   }
 
   @Input() timeLogs: TimeLog[] = [];
 
+  // function called when window is resizing due to the info bubble
+  @HostListener('window:resize', ['$event'])
   onResize() {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
+    this.screenWidth = window.innerWidth + (this.firstInit ? 14 : 0);
+    this.firstInit = false;
   }
 
   ngOnInit() {
@@ -57,10 +53,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
         'Did not receive data from the dataService, wich distributes the project data.'
       );
     } else if (this.timeLogs.length > 0) {
-        this.setWidth(this.setPeriod());
+      // calculating the data
+      this.setWidth(this.setPeriod());
     }
   }
-
+  // function is called when @Input variable is updated
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
@@ -77,16 +74,22 @@ export class UserReportsComponent implements OnInit, OnChanges {
     this.ngOnInit();
   }
 
+  // filtering the timelogs suitable to the time period that was selected by the user
   setPeriod() {
     return this.period === 0
       ? this.timeLogs.filter(x => this.checkDay(x))
       : this.period === 1
-      ? this.timeLogs.filter(x => this.checkWeek(x))
+      ? this.timeLogs.filter(x => this.checkYesterday(x))
       : this.period === 2
+      ? this.timeLogs.filter(x => this.checkWeek(x))
+      : this.period === 3
+      ? this.timeLogs.filter(x => this.checkLastWeek(x))
+      : this.period === 4
       ? this.timeLogs.filter(x => this.checkMonth(x))
       : this.timeLogs.filter(x => this.checkLastMonth(x));
   }
 
+  // the following functions check if the timelog that is passed from the setPeriod function is in corresponding period
   checkDay(value: TimeLog) {
     return (
       this.date.getDate() === value.timeStopped.getDate() &&
@@ -95,10 +98,31 @@ export class UserReportsComponent implements OnInit, OnChanges {
     );
   }
 
+  checkYesterday(value: TimeLog) {
+    const date = new Date(new Date().setDate(this.date.getDate() - 1));
+    return (
+      date.getDate() === value.timeStopped.getDate() &&
+      date.getMonth() === value.timeStopped.getMonth() &&
+      date.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
   checkWeek(value: TimeLog) {
     return (
       this.getWeekNumber(value.timeStopped) === this.getWeekNumber(this.date) &&
       this.date.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkLastWeek(value: TimeLog) {
+    return (
+      this.getWeekNumber(value.timeStopped) ===
+        this.getWeekNumber(
+          new Date(new Date().setDate(this.date.getDate() - 7))
+        ) &&
+      this.date.getFullYear() -
+        (this.getWeekNumber(this.date) === 1 ? 1 : 0) ===
+        value.timeStopped.getFullYear()
     );
   }
 
@@ -114,9 +138,10 @@ export class UserReportsComponent implements OnInit, OnChanges {
       ? value.timeStopped.getMonth() === 11 &&
           this.date.getFullYear() - 1 === value.timeStopped.getFullYear()
       : this.date.getMonth() - 1 === value.timeStopped.getMonth() &&
-          this.date.getFullYear() - 1 === value.timeStopped.getFullYear();
+          this.date.getFullYear() === value.timeStopped.getFullYear();
   }
 
+  // claculates the week number of a passed date object
   getWeekNumber(d: Date): number {
     d = new Date(+d);
     d.setHours(0, 0, 0);
@@ -125,6 +150,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
     return Math.ceil(((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7);
   }
 
+  // setting up and sorting an array that contains all the data the component needs to resort to
   setWidth(array: any[]) {
     let indexOfWidth,
       counter = 0,
@@ -170,6 +196,16 @@ export class UserReportsComponent implements OnInit, OnChanges {
     this.generalArray = width;
   }
 
+  // checks if a timelog is passing midnight and returns the duration of a timlog in hours
+  setTime(start: Date, stop: Date, time: number): number {
+    return this.period === 0
+      ? this.checkSameDayTimelog(start, stop, time)
+      : this.period === 1
+      ? this.checkSameWeekTimelog(start, stop, time)
+      : this.checkSameMonthTimelog(start, stop, time);
+  }
+
+  // the following functions are called by the setTime function in order to compare two date objects if they contain the same day
   checkSameDayTimelog(start: Date, stop: Date, time: number) {
     return start.getDate() === stop.getDate() &&
       start.getMonth() === stop.getMonth() &&
@@ -192,18 +228,26 @@ export class UserReportsComponent implements OnInit, OnChanges {
           ((stop.getMinutes() / 3) * 5) / 100;
   }
 
-  setTime(start: Date, stop: Date, time: number): number {
-    return this.period === 0
-      ? this.checkSameDayTimelog(start, stop, time)
-      : this.period === 1
-      ? this.checkSameWeekTimelog(start, stop, time)
-      : this.checkSameMonthTimelog(start, stop, time);
-  }
-
+  // called when the "show only billable" checkbox is clicked by user
   checkBox(event) {
+    this.onResize();
     event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
   }
 
+  selectedOption() {
+    this.onResize();
+    this.period = Number(this.selected);
+    this.bilCheck = false;
+    this.ngOnInit();
+  }
+
+  projectExists() {
+    return !(isUndefined(this.generalArray) || this.generalArray.length === 0);
+  }
+
+  // the following "get"-function returns are corresponding to the project id "i"
+
+  // returns the project name
   getProjectName(i: number, bool: Boolean): string {
     const pixel =
       (this.screenWidth - 20) *
@@ -215,24 +259,17 @@ export class UserReportsComponent implements OnInit, OnChanges {
       : this.generalArray[i][0].charAt(0);
   }
 
+  // returns the width of the table td
   getWidth(i: number): string {
     return this.generalArray[i][!this.bilCheck ? 1 : 3] + '%';
   }
 
+  // returns the project color for the table td and the shown name
   getColor(i: number): string {
     return this.generalArray[i][2];
   }
 
-  selectedOption() {
-    this.period = Number(this.selected);
-    this.bilCheck = false;
-    this.ngOnInit();
-  }
-
-  projectExists() {
-    return !(isUndefined(this.generalArray) || this.generalArray.length === 0);
-  }
-
+  // the following functions return data shown in the bubble that is popping up by hovering over a project
   getRequiredTime(i): string {
     let h, m;
     const temp = this.generalArray[i][!this.bilCheck ? 4 : 5];
@@ -253,25 +290,30 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   getBillPercent(i): string {
-    return (this.generalArray[i][1] <= this.generalArray[i][3]
-    ? '100% billable'
-    : this.generalArray[i][3] / this.generalArray[i][1] * 100 + '% billable');
+    return this.generalArray[i][1] <= this.generalArray[i][3] || this.bilCheck
+      ? '100% billable'
+      : Math.round((this.generalArray[i][3] / this.generalArray[i][1]) * 100) +
+          '% billable';
   }
 
+  // returning the percentaged number of the position of the bubble explained above
   getBubblePos(i): string {
-    const temp = this.setBrowserWidthOnInit === this.browserSize.width ? 16 : 0;
-    const browserWidth = this.browserSize.width - temp;
     const el = document.getElementById('chart' + i);
     const pos = this.elementPosition.getCoordinates(el);
-    const value =
-      Math.round(
-        ((pos.left + this.getSize(el).width / 2) / browserWidth) * 100
-      ) -
-      8.5 +
-      0.5 * i;
-    return value > 83 ? '83%' : value < 5.5 ? '0%' : value + '%';
+    const posFirstLeft = this.elementPosition.getCoordinates(
+      document.getElementById('chart0')
+    );
+    const posLastRight = this.elementPosition.getCoordinates(
+      document.getElementById('chart' + (this.generalArray.length - 1))
+    );
+    let value =
+      ((pos.left + this.getSize(el).width / 2) / this.screenWidth) * 100 - 9;
+    value += value * 0.025;
+    return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }
 
+  /*didnt found an efficient method for the corresponding position for the bubble arrow
+    at the border of the screen so I just decided to dont show it there*/
   bubbleAtBorder(i) {
     return this.getBubblePos(i) === '83%'
       ? true
