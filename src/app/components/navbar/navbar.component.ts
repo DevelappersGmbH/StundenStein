@@ -2,6 +2,7 @@ import { AuthenticationService } from 'src/app/services/authentication/authentic
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { UserService } from 'src/app/services/user/user.service';
+import { TrackerService } from 'src/app/services/tracker/tracker.service';
 
 @Component({
   selector: 'app-navbar',
@@ -14,7 +15,8 @@ export class NavbarComponent implements OnInit {
   constructor(
     private authenticationService: AuthenticationService,
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private trackerService: TrackerService
   ) {}
 
   ngOnInit() {
@@ -22,6 +24,7 @@ export class NavbarComponent implements OnInit {
   }
 
   logout() {
+    this.trackerService.logout();
     this.authenticationService.logout();
     this.router.navigate(['/login']);
   }
