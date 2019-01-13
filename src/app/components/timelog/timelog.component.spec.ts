@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TimelogComponent } from './timelog.component';
+import { TimeLogComponent } from './timelog.component';
 
 describe('TimelogComponent', () => {
   let component: TimelogComponent;
