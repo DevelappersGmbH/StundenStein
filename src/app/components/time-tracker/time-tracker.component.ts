@@ -8,7 +8,7 @@ import {
 import { DataService } from 'src/app/services/data/data.service';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { Favicons } from 'src/app/services/favicon/favicon.service';
-import { forkJoin, interval, Observable } from 'rxjs';
+import { forkJoin, interval, Observable, Subscription } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { isNull, isUndefined } from 'util';
 import { Issue } from 'src/app/model/issue.interface';
@@ -68,6 +68,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   manualStartTimeIllegal = true;
   manualStopTime: Time;
   manualStopTimeIllegal = true;
+  timer: Subscription;
 
   favIconRunning = false;
 
@@ -98,7 +99,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.updateAutoCompletes();
       this.stoppingBlockedByLoading = false;
     });
-    interval(1000).subscribe(val => {
+    this.timer = interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
           (new Date().valueOf() -
@@ -117,6 +118,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           this.favIconRunning = false;
         }
       }
+    });
+    this.trackerService.logoutEvent.subscribe(logout => {
+      this.timer.unsubscribe();
+      this.titleService.setTitle('StundenStein');
+      this.faviconService.activate('idle');
     });
     this.currentTrackerTimeString = '00:00:00';
     this.titleService.setTitle('StundenStein');
