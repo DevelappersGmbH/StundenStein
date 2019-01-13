@@ -1,11 +1,11 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+  import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RecentTimeLogsComponent } from './recent-time-logs.component';
 import { UserServiceMock } from '../../services/mocked-services/UserServiceMock.spec';
 import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.spec';
 import { UserService } from 'src/app/services/user/user.service';
 import { DataService } from 'src/app/services/data/data.service';
 import { MatBadgeModule, MatListModule, MatProgressSpinnerModule} from '@angular/material';
-import { NO_ERRORS_SCHEMA }  from '@angular/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 describe('RecentTimeLogsComponent', () => {
   let component: RecentTimeLogsComponent;
@@ -38,9 +38,9 @@ describe('RecentTimeLogsComponent', () => {
   });
 
   it('should have correct dateList', () => {
-    let correctDateList = new Array();
-    correctDateList.push(new Date("October 1, 2018"))
+    const correctDateList = new Array();
+    correctDateList.push(new Date('October 1, 2018'));
     component.ngOnInit();
     expect(component.dateList).toBe(correctDateList);
-  })
+  });
 });
