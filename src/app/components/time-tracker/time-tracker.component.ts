@@ -51,6 +51,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     issue: null,
     project: null
   };
+  initialTrackerLoadFinished = false;
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
   logCtrl = new FormControl();
@@ -562,7 +563,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             this.timeTracker = t;
             this.ensureSelectedIssueIsFromIssueList();
             this.ensureSelectedProjectIsFromProjectList();
-            this.stoppingBlockedByLoading = false;
           } else {
             this.timeTracker = {
               billable: true,
@@ -570,10 +570,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               issue: null,
               project: null
             };
-            this.stoppingBlockedByLoading = false;
           }
           this.updateAutoCompletes();
           this.stoppingBlockedByLoading = false;
+          this.initialTrackerLoadFinished = true;
         });
     });
   }
