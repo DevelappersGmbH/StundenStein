@@ -155,7 +155,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
     let indexOfWidth,
       counter = 0,
       counterBillable = 0;
-    const width = new Array();
+    let width = new Array();
     array.forEach(e => {
       if (
         width.find(function(element, index) {
@@ -192,8 +192,21 @@ export class UserReportsComponent implements OnInit, OnChanges {
       e[1] = Math.round((e[1] / counter) * 100);
       e[3] = Math.round((e[3] / counterBillable) * 100);
     });
-    width.sort((a, b) => b[1] - a[1]);
+    width.sort((a, b) => a[0].localeCompare(b[0]));
+    const npaValue = width.find(function(element) {
+      return element[0] === 'No project assigned';
+    });
+    if (npaValue !== undefined) {
+      width = width.filter(x => this.npaFinder(x));
+      width.push(npaValue);
+    }
     this.generalArray = width;
+  }
+
+  // due to the filter function above
+
+  npaFinder(element: Array<any>) {
+    return element[0] !== 'No project assigned';
   }
 
   // checks if a timelog is passing midnight and returns the duration of a timlog in hours
