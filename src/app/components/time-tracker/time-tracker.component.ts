@@ -59,6 +59,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   filteredLogs: Observable<TimeLog[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
+  componentBlockedByInitialTrackerLoad = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
   loggingBlockedByLoading = false;
@@ -89,6 +90,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    this.issueCtrl.disable();
+    this.logCtrl.disable();
+    this.projectCtrl.disable();
     this.trackerService.reTrackingInProgress.subscribe(isTracking => {
       this.stoppingBlockedByLoading = isTracking;
     });
@@ -568,7 +572,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             this.timeTracker = t;
             this.ensureSelectedIssueIsFromIssueList();
             this.ensureSelectedProjectIsFromProjectList();
-            this.stoppingBlockedByLoading = false;
           } else {
             this.timeTracker = {
               billable: true,
@@ -576,12 +579,22 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               issue: null,
               project: null
             };
-            this.stoppingBlockedByLoading = false;
           }
           this.updateAutoCompletes();
           this.stoppingBlockedByLoading = false;
+          this.initialTrackerLoadFinished();
         });
     });
+  }
+
+  /**
+   * Enables GUI interaction after tracker has been loaded initially
+   */
+  private initialTrackerLoadFinished(): void {
+    this.componentBlockedByInitialTrackerLoad = false;
+    this.issueCtrl.enable();
+    this.logCtrl.enable();
+    this.projectCtrl.enable();
   }
 
   startTimeTracker(): void {
