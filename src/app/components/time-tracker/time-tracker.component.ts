@@ -69,6 +69,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   manualStopTime: Time;
   manualStopTimeIllegal = true;
   timer: Subscription;
+  trackerReloading: Subscription;
+  lastTrackerUpdate: Date = this.now();
 
   favIconRunning = false;
 
@@ -99,6 +101,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.updateAutoCompletes();
       this.stoppingBlockedByLoading = false;
     });
+    this.trackerReloading = interval(10000).subscribe( val => {
+      this.loadTimeTrackerChanges();
+    });
     this.timer = interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
@@ -121,6 +126,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
     this.trackerService.logoutEvent.subscribe(logout => {
       this.timer.unsubscribe();
+      this.trackerReloading.unsubscribe();
       this.titleService.setTitle('StundenStein');
       this.faviconService.activate('idle');
     });
@@ -254,6 +260,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   updateTracker(): void {
+    this.lastTrackerUpdate = this.now();
     this.timeTracker.comment = this.logCtrl.value;
     if (this.timeTracker.comment.includes('$$')) {
       this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
@@ -273,11 +280,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.updateTimeTracker(timeTracker).subscribe(
       t => {
+        this.lastTrackerUpdate = this.now();
         if (!isNull(t) && !isUndefined(t)) {
           this.timeTracker = t;
           this.ensureSelectedIssueIsFromIssueList();
           this.ensureSelectedProjectIsFromProjectList();
-          this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
             billable: true,
@@ -285,8 +292,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             issue: null,
             project: null
           };
-          this.stoppingBlockedByLoading = false;
         }
+        this.stoppingBlockedByLoading = false;
         this.updateAutoCompletes();
       },
       error => {
@@ -584,6 +591,39 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
   }
 
+  loadTimeTrackerChanges(): boolean {
+    if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+      Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5 ) {
+      return false;
+    }
+    const calls: Observable<any>[] = [
+      this.dataService.getProjects(),
+      this.dataService.getIssues()
+    ];
+    forkJoin(calls).subscribe(x => {
+      this.dataService
+        .getTimeTrackerByUserId(this.userService.getUser().id)
+        .subscribe(t => {
+          let trackerUpdate: Partial<TimeTracker>;
+          if (!isNull(t) && !isUndefined(t)) {
+            trackerUpdate = t;
+          } else {
+            trackerUpdate = {
+              billable: true,
+              comment: '',
+              issue: null,
+              project: null
+            };
+          }
+          if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+            Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5) {
+            return false;
+          }
+          this.lastTrackerUpdate = this.now();
+        });
+    });
+  }
+
   startTimeTracker(): void {
     this.startingBlockedByLoading = true;
     this.dataService
@@ -597,6 +637,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   stopTimeTracker(): void {
+    this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
     this.timeTracker.comment = this.logCtrl.value;
     if (this.timeTracker.comment.includes('$$')) {
@@ -613,6 +654,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe(
       data => {
+        this.lastTrackerUpdate = this.now();
         if (data === undefined || data === null) {
           this.errorService.errorDialog('Couldn\'t stop time tracker');
           this.stoppingBlockedByLoading = false;
