@@ -587,6 +587,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
   }
 
+  /**
+   * Enables GUI interaction after tracker has been loaded initially
+   */
   private initialTrackerLoadFinished(): void {
     this.componentBlockedByInitialTrackerLoad = false;
     this.issueCtrl.enable();
