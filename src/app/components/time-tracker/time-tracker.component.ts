@@ -712,6 +712,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           return dataChanged;
         });
     });
+  }
 
   /**
    * Enables GUI interaction after tracker has been loaded initially
