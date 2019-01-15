@@ -5,7 +5,7 @@ import { DataService } from 'src/app/services/data/data.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimeTrackerComponent } from './time-tracker.component';
-import { NO_ERRORS_SCHEMA } from '@angular/compiler/src/core';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { UserService } from 'src/app/services/user/user.service';
 import { DataServiceMock } from 'src/app/services/mocked-services/DataServiceMock.spec';
 
