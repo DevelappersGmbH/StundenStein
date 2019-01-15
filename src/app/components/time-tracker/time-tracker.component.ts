@@ -620,6 +620,70 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             return false;
           }
           this.lastTrackerUpdate = this.now();
+          let dataChanged = false;
+          if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
+            || (isUndefined(this.timeTracker.id) && !isUndefined(trackerUpdate.id))) {
+              this.timeTracker = trackerUpdate;
+              this.updateAutoCompletes();
+              dataChanged = true;
+            }
+          if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
+            && (isUndefined(trackerUpdate.id) || isNull(trackerUpdate.id))) {
+            return false;
+          }
+          if (this.timeTracker.id !== trackerUpdate.id) {
+            this.timeTracker = trackerUpdate;
+            this.updateAutoCompletes();
+            dataChanged = true;
+          }
+          if (
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              (isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              !(isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+              this.timeTracker.issue.id !== trackerUpdate.issue.id
+            ) {
+              this.timeTracker.issue = trackerUpdate.issue;
+              this.issueCtrl.setValue(this.timeTracker.issue);
+              dataChanged = true;
+          }
+          if (
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              (isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              !(isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+              this.timeTracker.project.id !== trackerUpdate.project.id
+            ) {
+              this.timeTracker.project = trackerUpdate.project;
+              this.projectCtrl.setValue(this.timeTracker.project);
+              dataChanged = true;
+          }
+          if (this.timeTracker.timeStarted !== trackerUpdate.timeStarted) {
+            this.timeTracker.timeStarted = trackerUpdate.timeStarted;
+            dataChanged = true;
+          }
+          if (this.timeTracker.billable !== trackerUpdate.billable) {
+            this.timeTracker.billable = trackerUpdate.billable;
+            dataChanged = true;
+          }
+          if (this.timeTracker.comment !== trackerUpdate.comment) {
+            this.timeTracker.comment = trackerUpdate.comment;
+            this.logCtrl.setValue(this.timeTracker.comment);
+            dataChanged = true;
+          }
+          return dataChanged;
         });
     });
   }
