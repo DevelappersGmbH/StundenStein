@@ -70,6 +70,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   manualStopTime: Time;
   manualStopTimeIllegal = true;
   timer: Subscription;
+  trackerReloading: Subscription;
+  lastTrackerUpdate: Date = this.now();
 
   favIconRunning = false;
 
@@ -103,6 +105,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.updateAutoCompletes();
       this.stoppingBlockedByLoading = false;
     });
+    this.trackerReloading = interval(10000).subscribe( val => {
+      this.loadTimeTrackerChanges();
+    });
     this.timer = interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
@@ -125,6 +130,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
     this.trackerService.logoutEvent.subscribe(logout => {
       this.timer.unsubscribe();
+      this.trackerReloading.unsubscribe();
       this.titleService.setTitle('StundenStein');
       this.faviconService.activate('idle');
     });
@@ -258,6 +264,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   updateTracker(): void {
+    this.lastTrackerUpdate = this.now();
     this.timeTracker.comment = this.logCtrl.value;
     if (this.timeTracker.comment.includes('$$')) {
       this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
@@ -277,11 +284,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.updateTimeTracker(timeTracker).subscribe(
       t => {
+        this.lastTrackerUpdate = this.now();
         if (!isNull(t) && !isUndefined(t)) {
           this.timeTracker = t;
           this.ensureSelectedIssueIsFromIssueList();
           this.ensureSelectedProjectIsFromProjectList();
-          this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
             billable: true,
@@ -289,8 +296,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             issue: null,
             project: null
           };
-          this.stoppingBlockedByLoading = false;
         }
+        this.stoppingBlockedByLoading = false;
         this.updateAutoCompletes();
       },
       error => {
@@ -588,6 +595,126 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   /**
+   * Gets the current TimeTracker from the API and makes local changes if necessary
+   * @return Changes have been applied
+   */
+  loadTimeTrackerChanges(): boolean {
+    // Check if there is a reload happening or has been recently (last 5sec)
+    if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+      Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5 ) {
+      return false;
+    }
+    // Prepare TimeTracker query
+    const calls: Observable<any>[] = [
+      this.dataService.getProjects(),
+      this.dataService.getIssues()
+    ];
+    forkJoin(calls).subscribe(x => {
+      this.dataService
+        .getTimeTrackerByUserId(this.userService.getUser().id)
+        .subscribe(t => {
+          // Put current remote tracker data to trackerUpdate variable
+          let trackerUpdate: Partial<TimeTracker>;
+          if (!isNull(t) && !isUndefined(t)) {
+            trackerUpdate = t;
+          } else {
+            trackerUpdate = {
+              billable: true,
+              comment: '',
+              issue: null,
+              project: null
+            };
+          }
+          // Check again if there is a reload happening or has been recently (last 5sec)
+          if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+            Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5) {
+            return false;
+          }
+          // Set tracker update to now
+          this.lastTrackerUpdate = this.now();
+          // Create flag to indicate if anything has changed
+          let dataChanged = false;
+          // Check if local tracker is unset (undefined or null), or if IDs don't match
+          if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
+            || (isUndefined(this.timeTracker.id) && !isUndefined(trackerUpdate.id))) {
+              this.timeTracker = trackerUpdate;
+              this.updateAutoCompletes();
+              dataChanged = true;
+            }
+          // Check if both local and remote IDs are unset
+          if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
+            && (isUndefined(trackerUpdate.id) || isNull(trackerUpdate.id))) {
+            return false;
+          }
+          // Check again if IDs don't match
+          if (this.timeTracker.id !== trackerUpdate.id) {
+            this.timeTracker = trackerUpdate;
+            this.updateAutoCompletes();
+            dataChanged = true;
+          }
+          // Check for inequality of issue
+          if (
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              (isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              !(isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              this.timeTracker.issue.id !== trackerUpdate.issue.id
+            )) {
+              this.timeTracker.issue = trackerUpdate.issue;
+              this.issueCtrl.setValue(this.timeTracker.issue);
+              dataChanged = true;
+          }
+          // Check for inequality of project
+          if (
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              (isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              !(isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              this.timeTracker.project.id !== trackerUpdate.project.id
+            )) {
+              this.timeTracker.project = trackerUpdate.project;
+              this.projectCtrl.setValue(this.timeTracker.project);
+              dataChanged = true;
+          }
+          // Check for inequality of timeStarted
+          if (this.timeTracker.timeStarted !== trackerUpdate.timeStarted) {
+            this.timeTracker.timeStarted = trackerUpdate.timeStarted;
+            dataChanged = true;
+          }
+          // Check for inequality of billable
+          if (this.timeTracker.billable !== trackerUpdate.billable) {
+            this.timeTracker.billable = trackerUpdate.billable;
+            dataChanged = true;
+          }
+          // Check for inequality of comment
+          if (this.timeTracker.comment !== trackerUpdate.comment) {
+            this.timeTracker.comment = trackerUpdate.comment;
+            this.logCtrl.setValue(this.timeTracker.comment);
+            dataChanged = true;
+          }
+          // Return flag that indicates if changes have been applied
+          return dataChanged;
+        });
+    });
+  }
+
+  /**
    * Enables GUI interaction after tracker has been loaded initially
    */
   private initialTrackerLoadFinished(): void {
@@ -610,6 +737,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   stopTimeTracker(): void {
+    this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
     this.timeTracker.comment = this.logCtrl.value;
     if (this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
@@ -626,6 +754,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe(
       data => {
+        this.lastTrackerUpdate = this.now();
         if (data === undefined || data === null) {
           this.errorService.errorDialog('Couldn\'t stop time tracker');
           this.stoppingBlockedByLoading = false;
