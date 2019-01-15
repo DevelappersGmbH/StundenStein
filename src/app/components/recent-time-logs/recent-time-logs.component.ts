@@ -44,6 +44,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     this.listLoading = true;
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
+      console.log(change.currentValue);
       this.timeLogObservablesList = change.currentValue;
       this.seperateDates();
       this.countUnbookedTimeLogs();
