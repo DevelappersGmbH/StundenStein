@@ -59,6 +59,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   filteredLogs: Observable<TimeLog[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
+  componentBlockedByInitialTrackerLoad = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
   loggingBlockedByLoading = false;
@@ -91,6 +92,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    this.issueCtrl.disable();
+    this.logCtrl.disable();
+    this.projectCtrl.disable();
     this.trackerService.reTrackingInProgress.subscribe(isTracking => {
       this.stoppingBlockedByLoading = isTracking;
     });
@@ -575,7 +579,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             this.timeTracker = t;
             this.ensureSelectedIssueIsFromIssueList();
             this.ensureSelectedProjectIsFromProjectList();
-            this.stoppingBlockedByLoading = false;
           } else {
             this.timeTracker = {
               billable: true,
@@ -583,10 +586,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               issue: null,
               project: null
             };
-            this.stoppingBlockedByLoading = false;
           }
           this.updateAutoCompletes();
           this.stoppingBlockedByLoading = false;
+          this.initialTrackerLoadFinished();
         });
     });
   }
@@ -709,6 +712,15 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           return dataChanged;
         });
     });
+
+  /**
+   * Enables GUI interaction after tracker has been loaded initially
+   */
+  private initialTrackerLoadFinished(): void {
+    this.componentBlockedByInitialTrackerLoad = false;
+    this.issueCtrl.enable();
+    this.logCtrl.enable();
+    this.projectCtrl.enable();
   }
 
   startTimeTracker(): void {
@@ -727,7 +739,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
     this.timeTracker.comment = this.logCtrl.value;
-    if (this.timeTracker.comment.includes('$$')) {
+    if (this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
       this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
     }
     let timeTracker: TimeTracker;
