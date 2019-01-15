@@ -591,11 +591,17 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     });
   }
 
+  /**
+   * Gets the current TimeTracker from the API and makes local changes if necessary
+   * @return Changes have been applied
+   */
   loadTimeTrackerChanges(): boolean {
+    // Check if there is a reload happening or has been recently (last 5sec)
     if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
       Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5 ) {
       return false;
     }
+    // Prepare TimeTracker query
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
       this.dataService.getIssues()
@@ -604,6 +610,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.dataService
         .getTimeTrackerByUserId(this.userService.getUser().id)
         .subscribe(t => {
+          // Put current remote tracker data to trackerUpdate variable
           let trackerUpdate: Partial<TimeTracker>;
           if (!isNull(t) && !isUndefined(t)) {
             trackerUpdate = t;
@@ -615,27 +622,34 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               project: null
             };
           }
+          // Check again if there is a reload happening or has been recently (last 5sec)
           if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
             Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5) {
             return false;
           }
+          // Set tracker update to now
           this.lastTrackerUpdate = this.now();
+          // Create flag to indicate if anything has changed
           let dataChanged = false;
+          // Check if local tracker is unset (undefined or null), or if IDs don't match
           if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
             || (isUndefined(this.timeTracker.id) && !isUndefined(trackerUpdate.id))) {
               this.timeTracker = trackerUpdate;
               this.updateAutoCompletes();
               dataChanged = true;
             }
+          // Check if both local and remote IDs are unset
           if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
             && (isUndefined(trackerUpdate.id) || isNull(trackerUpdate.id))) {
             return false;
           }
+          // Check again if IDs don't match
           if (this.timeTracker.id !== trackerUpdate.id) {
             this.timeTracker = trackerUpdate;
             this.updateAutoCompletes();
             dataChanged = true;
           }
+          // Check for inequality of issue
           if (
             (
               !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
@@ -655,6 +669,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               this.issueCtrl.setValue(this.timeTracker.issue);
               dataChanged = true;
           }
+          // Check for inequality of project
           if (
             (
               !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
@@ -674,19 +689,23 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               this.projectCtrl.setValue(this.timeTracker.project);
               dataChanged = true;
           }
+          // Check for inequality of timeStarted
           if (this.timeTracker.timeStarted !== trackerUpdate.timeStarted) {
             this.timeTracker.timeStarted = trackerUpdate.timeStarted;
             dataChanged = true;
           }
+          // Check for inequality of billable
           if (this.timeTracker.billable !== trackerUpdate.billable) {
             this.timeTracker.billable = trackerUpdate.billable;
             dataChanged = true;
           }
+          // Check for inequality of comment
           if (this.timeTracker.comment !== trackerUpdate.comment) {
             this.timeTracker.comment = trackerUpdate.comment;
             this.logCtrl.setValue(this.timeTracker.comment);
             dataChanged = true;
           }
+          // Return flag that indicates if changes have been applied
           return dataChanged;
         });
     });
