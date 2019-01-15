@@ -647,8 +647,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               !(isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
             )
             ||
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
               this.timeTracker.issue.id !== trackerUpdate.issue.id
-            ) {
+            )) {
               this.timeTracker.issue = trackerUpdate.issue;
               this.issueCtrl.setValue(this.timeTracker.issue);
               dataChanged = true;
@@ -664,8 +666,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               !(isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
             )
             ||
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
               this.timeTracker.project.id !== trackerUpdate.project.id
-            ) {
+            )) {
               this.timeTracker.project = trackerUpdate.project;
               this.projectCtrl.setValue(this.timeTracker.project);
               dataChanged = true;
