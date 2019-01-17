@@ -10,8 +10,6 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 describe('RecentTimeLogsComponent', () => {
   let component: RecentTimeLogsComponent;
   let fixture: ComponentFixture<RecentTimeLogsComponent>;
-  let userService: UserService;
-  let dataService: DataService;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -27,8 +25,6 @@ describe('RecentTimeLogsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(RecentTimeLogsComponent);
     component = fixture.componentInstance;
-    userService = TestBed.get(UserService);
-    dataService = TestBed.get(DataService);
     fixture.detectChanges();
   });
 
@@ -37,10 +33,15 @@ describe('RecentTimeLogsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have correct dateList', () => {
-    const correctDateList = new Array();
-    correctDateList.push(new Date('October 1, 2018'));
+  it('should compare dates correctly', () => {
     component.ngOnInit();
-    expect(component.dateList).toBe(correctDateList);
+    let d1 = new Date('December 17, 2018 03: 24: 00');
+    let d2 = new Date('December 17, 2018 03: 24: 00');
+    expect(component.compareDatesEqual(d1, d2)).toBeTruthy();
+    d2 = new Date('December 18, 2018 03: 24: 00');
+    expect(component.compareDatesEqual(d1, d2)).toBeFalsy();
+    d1 = new Date('December 17, 2018 03: 24: 00');
+    d2 = new Date('December 17, 2018 06: 49: 01');
+    expect(component.compareDatesEqual(d1, d2)).toBeTruthy();
   });
 });
