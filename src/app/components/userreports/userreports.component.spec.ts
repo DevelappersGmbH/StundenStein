@@ -26,11 +26,18 @@ describe('UserReportsComponent', () => {
   });
 
   it('should create', () => {
-    // component.timeLogs = DataServiceMock.getMockTimeLog();
+    component.ngOnInit();
     expect(component).toBeTruthy();
   });
 
   it('should set generalArray correctly', () => {
-
+    const correctGeneralArray = new Array();
+    correctGeneralArray.push('TestProject', 100, 'Red', 100, 5, 5);
+    component.date = DataServiceMock.getMockTimeLog().timeStopped;
+    const temp = new Array();
+    temp.push(DataServiceMock.getMockTimeLog());
+    component.timeLogs = temp;
+    component.ngOnInit();
+    expect(component.generalArray).toBe([correctGeneralArray]);
   });
 });

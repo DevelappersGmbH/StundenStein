@@ -11,6 +11,7 @@ import {
 import { ErrorService } from '../../services/error/error.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { isNull, isUndefined } from 'util';
+// import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.spec';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +49,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // console.log(this.mock.getMockTimeLog());
     if (isUndefined(this.timeLogs)) {
       this.errorService.errorDialog(
         'Did not receive data from the dataService, wich distributes the project data.'
@@ -71,6 +73,39 @@ export class UserReportsComponent implements OnInit, OnChanges {
         }
       });
     }
+    const mockUser = {
+      name: 'TestUser',
+      id: 99
+    };
+
+    const mockProject = {
+      id: 2,
+      name: 'TestProject',
+      color: 'Red'
+    };
+
+    const mockIssue = {
+      id: 3,
+      subject: 'TestIssue',
+      tracker: 'TestTracker',
+      project: mockProject,
+      assignedTo: mockUser
+    };
+    this.date = new Date('October 2, 2018 16:00:00');
+    this.timeLogs = [{
+      id: 1,
+      timeStarted: new Date('October 2, 2018 11:00:00'),
+      timeStopped: new Date('October 2, 2018 16:00:00'),
+      comment: 'Testcomment 1',
+      timeInHours: 29,
+      booked: true,
+      hourGlassTimeBookingId: 1,
+      redmineTimeEntryId: 1,
+      billable: true,
+      issue: mockIssue,
+      project: mockProject,
+      user: mockUser
+    }];
     this.ngOnInit();
   }
 
