@@ -739,6 +739,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       });
   }
 
+  /**
+   * Stops the running tracker and starts a new one with empty data
+   */
   stopAndNew(): void {
     this.stopTimeTracker(true);
   }
