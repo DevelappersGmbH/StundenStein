@@ -1,5 +1,5 @@
 import { UserServiceMock } from './../../services/mocked-services/UserServiceMock.spec';
-import { FormControl } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material';
 import { DataService } from 'src/app/services/data/data.service';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
@@ -15,7 +15,7 @@ describe('TimeTrackerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ MatFormFieldModule, FormControl ],
+      imports: [ MatFormFieldModule, ReactiveFormsModule, FormsModule ],
       declarations: [ TimeTrackerComponent ],
       providers: [{provide : DataService, useClass: DataServiceMock}, {provide: UserService, useClass: UserServiceMock}],
       schemas: [ NO_ERRORS_SCHEMA ]
