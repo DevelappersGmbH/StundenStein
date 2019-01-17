@@ -770,7 +770,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           this.stoppingBlockedByLoading = false;
         } else {
           this.reloadTriggerSerivce.triggerTimeLogAdded(data);
-          this.loadTimeTracker(true);
+          this.loadTimeTracker(startNewAfterwards);
         }
       },
       error => {
