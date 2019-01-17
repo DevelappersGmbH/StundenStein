@@ -79,6 +79,9 @@
             <mat-icon>save</mat-icon>
           </button>
         </div>
+        <div class="field" *ngIf="automaticMode && this.timeTracker.id !== undefined">
+          <button [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopAndNew()" mat-flat-button color="warn">Stop and new</button>
+        </div>
         <div class="field">
           <button mat-stroked-button *ngIf="automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock || this.timeTracker.id !== undefined" (click)="automaticMode = false;" color="primary">Manual Mode</button>
           <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock" color="primary">Automatic Mode</button>
