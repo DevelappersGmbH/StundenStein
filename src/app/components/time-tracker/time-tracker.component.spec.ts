@@ -15,7 +15,6 @@ describe('TimeTrackerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      imports: [ MatFormFieldModule, ReactiveFormsModule, FormsModule ],
       declarations: [ TimeTrackerComponent ],
       providers: [{provide : DataService, useClass: DataServiceMock}, {provide: UserService, useClass: UserServiceMock}],
       schemas: [ NO_ERRORS_SCHEMA ]
