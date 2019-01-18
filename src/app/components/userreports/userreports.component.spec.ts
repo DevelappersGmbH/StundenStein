@@ -44,6 +44,7 @@ describe('UserReportsComponent', () => {
     const temp = new Array();
     temp.push(DataServiceMock.getMockTimeLog());
     component.timeLogs = temp;
+    console.log(component.timeLogs);
     component.ngOnInit();
     expect(component.generalArray).toBe([correctGeneralArray]);
   });
