@@ -20,10 +20,16 @@ export class TrackerService {
   ) {
     this.reTrackingInProgress = new EventEmitter();
     this.trackerModified = new EventEmitter();
+    this.logoutEvent = new EventEmitter();
   }
 
   public reTrackingInProgress: EventEmitter<boolean>;
   public trackerModified: EventEmitter<TimeTracker>;
+  public logoutEvent: EventEmitter<boolean>;
+
+  logout() {
+    this.logoutEvent.emit(true);
+  }
 
   private triggerInProgress(inProgress: boolean) {
     this.reTrackingInProgress.emit(inProgress);
