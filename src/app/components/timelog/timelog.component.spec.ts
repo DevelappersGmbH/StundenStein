@@ -36,24 +36,24 @@ describe('TimeLogComponent', () => {
 
   it('should set edit button icon to edit when project set and to assignment when not', () => {
     component.projectControl.setValue(undefined);
-    expect(component.editMode).toBe('assignment');
+    expect(component.editMode).toMatch('assignment');
     component.projectControl.setValue(project);
-    expect(component.editMode).toBe('edit');
+    expect(component.editMode).toMatch('edit');
   });
 
   it('should set booked to true when project set and vice versa', () => {
     component.projectControl.setValue(undefined);
-    expect(component.timeLog.booked).toBe('false');
+    expect(component.timeLog.booked).toMatch('false');
     component.projectControl.setValue(project);
-    expect(component.timeLog.booked).toBe('true');
+    expect(component.timeLog.booked).toMatch('true');
   });
 
   it('should set warning class to transparent when project set and vice versa', () => {
     const warning = fixture.debugElement.nativeElement.querySelector('#warning');
     component.projectControl.setValue(undefined);
-    expect(warning.className).toBe('warning');
+    expect(warning.className).toMatch('warning');
     component.projectControl.setValue(project);
-    expect(warning.className).toBe('transparent');
+    expect(warning.className).toMatch('transparent');
   });
 
   it('tracked time should be updated if edit button clicked', () => {
