@@ -1,4 +1,4 @@
-$break-small: 705px;
+$break-small: 700px;
 $break-medium: 992px;
 
 input[type="time"]::-webkit-clear-button,
@@ -23,7 +23,7 @@ input[type="time"]::-webkit-clear-button,
   flex-grow: 0;
   flex-shrink: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 0 0;
+    flex: 1 0 45%;
     order: 2;
   }
   @media screen and (max-width: $break-small) {
@@ -48,7 +48,7 @@ input[type="time"]::-webkit-clear-button,
   flex-shrink: 1;
   flex-basis: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 0;
+    flex: 1 1 45%;
     order: 1;
   }
 }
