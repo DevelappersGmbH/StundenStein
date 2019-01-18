@@ -22,9 +22,9 @@ const mockIssue = {
 const mockTimeLog = {
   id: 1,
   timeStarted: new Date('October 1, 2018 11:00:00'),
-  timeStopped: new Date('October 2, 2018 16:00:00'),
+  timeStopped: new Date('October 1, 2018 16:00:00'),
   comment: 'Testcomment 1',
-  timeInHours: 29,
+  timeInHours: 5,
   booked: true,
   hourGlassTimeBookingId: 1,
   redmineTimeEntryId: 1,
