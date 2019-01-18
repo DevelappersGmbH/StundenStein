@@ -13,7 +13,10 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeIssue>
-            <div class="field issue mat-body"><span>{{ this.issueControl.value ? this.issueControl.value.tracker + ' #' + this.issueControl.value.id.toString() + ': ' + this.issueControl.value.subject : "Issue" }}</span></div>
+            <div class="field issue mat-body" [style.color] = "timeLog.issue? 'black' : '#938d8d'">
+              <span>{{ this.issueControl.value ? this.issueControl.value.tracker + ' #' +
+                this.issueControl.value.id.toString() + ': ' + this.issueControl.value.subject : "Issue" }}</span>
+            </div>
         </ng-template>
 
 
@@ -33,14 +36,16 @@
           </mat-autocomplete>
         </ng-container>
         <ng-template #showModeComment>
-          <div class="field comment mat-body"><span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span></div>
+          <div class="field comment mat-body" [style.color] = "timeLog.comment? 'black' : '#938d8d'">
+            <span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span>
+          </div>
         </ng-template>
 
 
         <ng-container *ngIf="editMode; else showModeProject">
           <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: editMode }">
             <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matPrefix>warning</mat-icon>
-            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'"  matInput (click)="$event.target.select()"
+            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : '#938d8d'"  matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -53,7 +58,7 @@
         <ng-template #showModeProject>
           <div class="field project mat-body">
             <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matSuffix>warning</mat-icon>
-            <span [style.color]="this.projectControl.value? this.projectControl.value.color : 'black'">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+            <span [style.color]="this.projectControl.value? this.projectControl.value.color : '#938d8d'">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
           </div>
         </ng-template>
 
@@ -78,7 +83,7 @@
 
           <div class="oneline">
             <ng-container *ngIf="editMode; else showModeStart">
-            <mat-form-field [ngClass]="{ edit: !editMode }">
+            <mat-form-field class="start-time" [ngClass]="{ edit: !editMode }">
               <input [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
                      [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
             </mat-form-field>
@@ -92,7 +97,7 @@
 
           <div class="oneline">
             <ng-container *ngIf="editMode; else showModeEnd">
-          <mat-form-field [ngClass]="{ edit: !editMode }">
+          <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
             <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
