@@ -15,6 +15,7 @@ describe('TimeTrackerComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: [],
       declarations: [ TimeTrackerComponent ],
       providers: [{provide : DataService, useClass: DataServiceMock}, {provide: UserService, useClass: UserServiceMock}],
       schemas: [ NO_ERRORS_SCHEMA ]
