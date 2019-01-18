@@ -29,8 +29,7 @@ import { User } from '../../model/user.interface';
 @Component({
   selector: 'app-timelog',
   templateUrl: './timelog.component.html',
-  styleUrls: ['./timelog.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit, OnChanges {
   constructor(
@@ -145,7 +144,6 @@ export class TimeLogComponent implements OnInit, OnChanges {
     });
   }
 
-
   /*truncate the subjects shown in autocomplete dropdowns*/
   shorten(value: string, maxLength: number, abbr: string = '…'): string {
     if (!value) {
@@ -161,9 +159,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     if (!issue) {
       return '';
     }
-    return (
-      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject
-    );
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject = project => {
@@ -419,13 +415,13 @@ export class TimeLogComponent implements OnInit, OnChanges {
 
   /*exit edit mode without saving*/
   abort() {
-      if (this.timeLog.booked === false) {
-        /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
-        this.editButton = 'playlist_add';
-      } else {
-        /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
-        this.editButton = 'edit';
-      }
+    if (this.timeLog.booked === false) {
+      /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
+      this.editButton = 'playlist_add';
+    } else {
+      /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
+      this.editButton = 'edit';
+    }
     this.editMode = !this.editMode;
   }
 

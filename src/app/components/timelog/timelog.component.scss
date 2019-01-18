@@ -1,12 +1,13 @@
 $break-small: 480px;
 $break-medium: 992px;
 
-input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+input[type="time"]::-webkit-clear-button,
+::-webkit-outer-spin-button,
+::-webkit-inner-spin-button {
   display: none;
-
 }
 
-.flex-container{
+.flex-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -18,7 +19,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   }
 }
 
-.part3{
+.part3 {
   flex-grow: 0;
   flex-shrink: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
@@ -45,7 +46,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   flex-grow: 3;
   flex-shrink: 1;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 38%
+    flex: 1 1 38%;
   }
 }
 
@@ -54,7 +55,7 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   flex-shrink: 1;
   margin-right: 10px;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 15%
+    flex: 1 1 15%;
   }
   @media screen and (max-width: $break-small) {
     margin-top: 5px;
@@ -65,49 +66,23 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
   flex-grow: 3;
   flex-shrink: 1;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 38%
+    flex: 1 1 38%;
   }
   @media screen and (max-width: $break-small) {
     margin-top: 5px;
   }
 }
 
-.icon{
-  color: #ccc;
-}
-
-.icon.active {
-  color: limegreen;
-}
-
-.icon.transparent {
-  position:relative;
-  bottom:-5px;
-  color: transparent;
-  margin-left: 5px;
-}
-
-.icon.attention {
-  color: orangered;
-}
-
-.icon.warning{
-  position:relative;
-  bottom:-5px;
-  color: orangered;
-  margin-left: 5px;
-}
-
-.spinner{
-  position:relative;
-  bottom:-5px;
+.spinner {
+  position: relative;
+  bottom: -5px;
   margin-left: 9px;
   margin-right: 9px;
 }
 
 .tracked-time {
-  position:relative;
-  margin-left:15px;
+  position: relative;
+  margin-left: 15px;
 }
 
 .mat-form-field-infix {
