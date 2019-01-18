@@ -5,6 +5,7 @@ import {MatDialog} from '@angular/material';
 import {ViewContainerRef, NO_ERRORS_SCHEMA} from '@angular/core';
 import {DeleteWarningComponent} from '../delete-warning/delete-warning.component';
 import {detectChanges} from '@angular/core/src/render3';
+import {FormsModule} from '@angular/forms';
 
 describe('TimeLogComponent', () => {
   let dialog: MatDialog;
@@ -19,6 +20,7 @@ describe('TimeLogComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ TimeLogComponent ],
+      imports: [FormsModule],
       schemas: [ NO_ERRORS_SCHEMA]
     })
     .compileComponents();
