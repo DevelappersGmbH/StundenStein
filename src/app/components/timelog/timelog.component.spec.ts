@@ -2,7 +2,7 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TimeLogComponent } from './timelog.component';
 import {Project} from '../../model/project.interface';
 import {MatDialog} from '@angular/material';
-import {ViewContainerRef} from '@angular/core';
+import {ViewContainerRef, NO_ERRORS_SCHEMA} from '@angular/core';
 import {DeleteWarningComponent} from '../delete-warning/delete-warning.component';
 import {detectChanges} from '@angular/core/src/render3';
 
@@ -18,7 +18,8 @@ describe('TimeLogComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TimeLogComponent ]
+      declarations: [ TimeLogComponent ],
+      schemas: [ NO_ERRORS_SCHEMA]
     })
     .compileComponents();
   }));
