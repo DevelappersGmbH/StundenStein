@@ -5,27 +5,21 @@ import { flatMap, map, share } from 'rxjs/operators';
 import { forkJoin, Observable, of } from 'rxjs';
 import { HourGlassMapper } from 'src/app/model/mappers/hourglass-mapper';
 import { HourGlassService } from '../hourglass/hourglass.service';
-import { HourGlassTimeBooking } from 'src/app/redmine-model/hourglass-time-booking.interface';
 import { HourGlassTimeLog } from 'src/app/redmine-model/hourglass-time-log.interface';
 import { HourGlassTimeLogBookRequest } from 'src/app/redmine-model/requests/hourglass-time-log-book-request.interface';
 import { HourGlassTimeLogRequest } from 'src/app/redmine-model/requests/hourglass-time-log-request.interface';
 import { HourGlassTimeLogsBulkRequest } from 'src/app/redmine-model/requests/hourglass-time-logs-bulk-request.interface';
-import { HourGlassTimeTracker } from 'src/app/redmine-model/hourglass-time-tracker.interface';
 import { HourGlassTimeTrackers } from 'src/app/redmine-model/hourglass-time-trackers.interface';
 import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from 'src/app/model/project.interface';
-import { RedmineIssue } from 'src/app/redmine-model/redmine-issue.interface';
 import { RedmineMapper } from 'src/app/model/mappers/redmine-mapper';
-import { RedmineProject } from 'src/app/redmine-model/redmine-project.interface';
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineTimeEntryActivities } from 'src/app/redmine-model/redmine-time-entry-activities.interface';
-import { RedmineTimeEntryActivity } from 'src/app/redmine-model/redmine-time-entry-activity.interface';
 import { RedmineTimeEntryRequest } from 'src/app/redmine-model/requests/redmine-time-entry-request.interface';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
-import { User } from 'src/app/model/user.interface';
 import { UserService } from '../user/user.service';
 
 @Injectable({
