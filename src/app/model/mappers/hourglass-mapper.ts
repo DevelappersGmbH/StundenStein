@@ -73,6 +73,46 @@ export class HourGlassMapper {
     return timeTracker;
   }
 
+  mapTimeTrackerToHourGlassTimeTracker(
+    timeTracker: TimeTracker,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): HourGlassTimeTracker {
+    const hgtracker: HourGlassTimeTracker = {
+      id: timeTracker.id,
+      user_id: this.userService.getUser().id,
+      start: timeTracker.timeStarted.toISOString(),
+      activity_id: this.redmineMapper.mapBillableToRedmineTimeEntryActivityId(
+        timeTracker.billable,
+        redmineTimeEntryActivities
+      ),
+      comments: timeTracker.comment,
+      issue_id:
+        timeTracker.issue && timeTracker.issue.id ? timeTracker.issue.id : null,
+      project_id:
+        timeTracker.project && timeTracker.project.id
+          ? timeTracker.project.id
+          : null
+    };
+    return hgtracker;
+  }
+
+  mapPartialTimeTrackerToPartialHourGlassTimeTracker(
+    timeTracker: Partial<TimeTracker>,
+    redmineTimeEntryActivities: RedmineTimeEntryActivities
+  ): Partial<HourGlassTimeTracker> {
+    const hgtracker: Partial<HourGlassTimeTracker> = {
+      comments: timeTracker.comment,
+      issue_id: timeTracker.issue ? timeTracker.issue.id : undefined,
+      project_id: timeTracker.project ? timeTracker.project.id : undefined,
+      id: timeTracker.id ? timeTracker.id : undefined,
+      activity_id: this.redmineMapper.mapBillableToRedmineTimeEntryActivityId(
+        timeTracker.billable,
+        redmineTimeEntryActivities
+      )
+    };
+    return hgtracker;
+  }
+
   mapHourGlassTimeLogsAndBookingsToTimeLogs(results: any[]) {
     const timelogs: TimeLog[] = [];
     const hourglassTimeLogs: HourGlassTimeLog[] = results[0];
@@ -146,45 +186,5 @@ export class HourGlassMapper {
       ),
       redmineTimeEntryId: null
     };
-  }
-
-  mapTimeTrackerToHourGlassTimeTracker(
-    timeTracker: TimeTracker,
-    redmineTimeEntryActivities: RedmineTimeEntryActivities
-  ): HourGlassTimeTracker {
-    const hgtracker: HourGlassTimeTracker = {
-      id: timeTracker.id,
-      user_id: this.userService.getUser().id,
-      start: timeTracker.timeStarted.toISOString(),
-      activity_id: this.redmineMapper.mapBillableToRedmineTimeEntryActivityId(
-        timeTracker.billable,
-        redmineTimeEntryActivities
-      ),
-      comments: timeTracker.comment,
-      issue_id:
-        timeTracker.issue && timeTracker.issue.id ? timeTracker.issue.id : null,
-      project_id:
-        timeTracker.project && timeTracker.project.id
-          ? timeTracker.project.id
-          : null
-    };
-    return hgtracker;
-  }
-
-  mapPartialTimeTrackerToPartialHourGlassTimeTracker(
-    timeTracker: Partial<TimeTracker>,
-    redmineTimeEntryActivities: RedmineTimeEntryActivities
-  ): Partial<HourGlassTimeTracker> {
-    const hgtracker: Partial<HourGlassTimeTracker> = {
-      comments: timeTracker.comment,
-      issue_id: timeTracker.issue ? timeTracker.issue.id : undefined,
-      project_id: timeTracker.project ? timeTracker.project.id : undefined,
-      id: timeTracker.id ? timeTracker.id : undefined,
-      activity_id: this.redmineMapper.mapBillableToRedmineTimeEntryActivityId(
-        timeTracker.billable,
-        redmineTimeEntryActivities
-      )
-    };
-    return hgtracker;
   }
 }
