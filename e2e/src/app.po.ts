@@ -10,42 +10,42 @@ export class AppPage {
   }
 
   getTLIssue() {
-    return element(by.css('#issue'));
+    return element(by.id('issue'));
   }
 
   getTLComment() {
-    return element(by.css('#comment'));
+    return element(by.id('comment'));
   }
 
   getTLProject() {
-    return element(by.css('#project'));
+    return element(by.id('project'));
   }
 
   getTLPlayBtn() {
-    return element(by.css('#btnPlay'));
+    return element(by.id('btnPlay'));
   }
 
   getTLBillBtn() {
-    return element(by.css('#btnBill'));
+    return element(by.id('btnBill'));
   }
 
   getTLStartTime() {
-    return element(by.css('#startTime'));
+    return element(by.id('startTime'));
   }
 
   getTLEndTime() {
-    return element(by.css('#endTime'));
+    return element(by.id('endTime'));
   }
 
   getTLTrackedTime() {
-    return element(by.css('#trackedTime'));
+    return element(by.id('trackedTime'));
   }
 
   getTLEditBtn() {
-    return element(by.css('#btnEdit'));
+    return element(by.id('btnEdit'));
   }
 
   getTLDelBtn() {
-    return element(by.css('#btnDel'));
+    return element(by.id('btnDel'));
   }
 }
