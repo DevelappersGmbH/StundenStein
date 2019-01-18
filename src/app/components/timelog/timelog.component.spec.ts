@@ -1,27 +1,77 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TimeLogComponent } from './timelog.component';
 import {Project} from '../../model/project.interface';
-import {MatDialog} from '@angular/material';
-import {ViewContainerRef, NO_ERRORS_SCHEMA} from '@angular/core';
+import {MatAutocompleteModule, MatDialog, MatDialogModule} from '@angular/material';
+import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {DeleteWarningComponent} from '../delete-warning/delete-warning.component';
 import {detectChanges} from '@angular/core/src/render3';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {HttpClientModule} from '@angular/common/http';
+import {CookieService} from 'ngx-cookie-service';
+import {DatePipe} from '@angular/common';
+import {BrowserAnimationsModule, NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {User} from '../../model/user.interface';
+import {Issue} from '../../model/issue.interface';
+import {TimeLog} from '../../model/time-log.interface';
+import {BrowserDynamicTestingModule} from '@angular/platform-browser-dynamic/testing';
 
 describe('TimeLogComponent', () => {
   let dialog: MatDialog;
   let component: TimeLogComponent;
   let fixture: ComponentFixture<TimeLogComponent>;
+  const user: User = {
+    name: 'TestUser',
+    id: 99
+  };
   const project: Project = {
     id: 1,
     name: 'prototypeProject',
     color: 'blue'
   };
 
+  const issue: Issue = {
+    id: 3,
+    subject: 'TestIssue',
+    tracker: 'TestTracker',
+    project: project,
+    assignedTo: user
+  };
+
+  const timeLog: TimeLog = {
+    id: 1,
+    timeStarted: new Date('October 1, 2018 11:00:00'),
+    timeStopped: new Date('October 1, 2018 16:00:00'),
+    comment: 'Testcomment 1',
+    timeInHours: 5,
+    booked: true,
+    hourGlassTimeBookingId: 1,
+    redmineTimeEntryId: 1,
+    billable: true,
+    issue: issue,
+    project: project,
+    user: user
+  };
+
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ TimeLogComponent ],
-      imports: [FormsModule],
+      declarations: [ TimeLogComponent, DeleteWarningComponent ],
+      imports: [FormsModule,
+        MatAutocompleteModule,
+        MatDialogModule,
+        ReactiveFormsModule,
+        HttpClientModule,
+        BrowserAnimationsModule,
+        NoopAnimationsModule],
+      providers: [
+        CookieService,
+        DatePipe
+      ],
       schemas: [ NO_ERRORS_SCHEMA]
+    })
+    TestBed.overrideModule(BrowserDynamicTestingModule, {
+      set: {
+        entryComponents: [DeleteWarningComponent]
+      }
     })
     .compileComponents();
   }));
@@ -30,38 +80,42 @@ describe('TimeLogComponent', () => {
     dialog = TestBed.get(MatDialog);
     fixture = TestBed.createComponent(TimeLogComponent);
     component = fixture.componentInstance;
+    component.timeLog = timeLog;
     fixture.detectChanges();
+    component.projectControl.setValue(undefined);
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should set edit button icon to edit when project set and to assignment when not', () => {
-    component.projectControl.setValue(undefined);
-    expect(component.editMode).toMatch('assignment');
-    component.projectControl.setValue(project);
-    expect(component.editMode).toMatch('edit');
+  it('should set edit button icon to edit when project set and to playlist_add when not', () => {
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = undefined;
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    expect(component.editButton).toMatch('playlist_add');
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = project;
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    expect(component.editButton).toMatch('edit');
   });
 
   it('should set booked to true when project set and vice versa', () => {
-    component.projectControl.setValue(undefined);
-    expect(component.timeLog.booked).toMatch('false');
-    component.projectControl.setValue(project);
-    expect(component.timeLog.booked).toMatch('true');
-  });
-
-  it('should set warning class to transparent when project set and vice versa', () => {
-    const warning = fixture.debugElement.nativeElement.querySelector('#warning');
-    component.projectControl.setValue(undefined);
-    expect(warning.className).toMatch('warning');
-    component.projectControl.setValue(project);
-    expect(warning.className).toMatch('transparent');
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = undefined;
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    expect(component.timeLog.booked).toBeFalsy();
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = project;
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    expect(component.timeLog.booked).toBeTruthy();
   });
 
   it('tracked time should be updated if edit button clicked', () => {
     spyOn(component, 'calculateTime');
     component.ngOnInit();
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = project;
     fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
     expect(component.calculateTime).toHaveBeenCalled();
   });
@@ -69,6 +123,8 @@ describe('TimeLogComponent', () => {
   it('updates should be sent via data service if edit button clicked', () => {
     spyOn(component, 'updateTimeLog');
     component.ngOnInit();
+    fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
+    component.timeLog.project = project;
     fixture.debugElement.nativeElement.querySelector('#btnEdit').click();
     expect(component.updateTimeLog).toHaveBeenCalled();
   });
@@ -91,6 +147,7 @@ describe('TimeLogComponent', () => {
         // do nothing
       }
     });
+    dialogRef.close();
   });
 
 });
