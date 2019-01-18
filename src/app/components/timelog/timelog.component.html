@@ -78,7 +78,7 @@
 
           <div class="oneline">
             <ng-container *ngIf="editMode; else showModeStart">
-            <mat-form-field [ngClass]="{ edit: !editMode }">
+            <mat-form-field class="start-time" [ngClass]="{ edit: !editMode }">
               <input [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
                      [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
             </mat-form-field>
@@ -92,7 +92,7 @@
 
           <div class="oneline">
             <ng-container *ngIf="editMode; else showModeEnd">
-          <mat-form-field [ngClass]="{ edit: !editMode }">
+          <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
             <input [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>

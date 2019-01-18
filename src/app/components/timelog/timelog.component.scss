@@ -1,4 +1,4 @@
-$break-small: 480px;
+$break-small: 705px;
 $break-medium: 992px;
 
 input[type="time"]::-webkit-clear-button,
@@ -23,7 +23,8 @@ input[type="time"]::-webkit-clear-button,
   flex-grow: 0;
   flex-shrink: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex-basis: 100%;
+    flex: 1 0 0;
+    order: 2;
   }
   @media screen and (max-width: $break-small) {
     margin-top: -15px;
@@ -45,17 +46,22 @@ input[type="time"]::-webkit-clear-button,
 .issue {
   flex-grow: 3;
   flex-shrink: 1;
+  flex-basis: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 38%;
+    flex: 1 1 0;
+    order: 1;
   }
 }
 
 .project {
   flex-grow: 2;
   flex-shrink: 1;
+  flex-basis: 0;
   margin-right: 10px;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 15%;
+    flex: 1 1 100%;
+    order: 4;
+    margin-top: 7px;
   }
   @media screen and (max-width: $break-small) {
     margin-top: 5px;
@@ -65,8 +71,10 @@ input[type="time"]::-webkit-clear-button,
 .comment {
   flex-grow: 3;
   flex-shrink: 1;
+  flex-basis: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    flex: 1 1 38%;
+    flex: 1 1 100%;
+    order: 3;
   }
   @media screen and (max-width: $break-small) {
     margin-top: 5px;
@@ -83,6 +91,14 @@ input[type="time"]::-webkit-clear-button,
 .tracked-time {
   position: relative;
   margin-left: 15px;
+}
+
+.start-time {
+  width: 65px;
+}
+
+.end-time {
+  width: 65px;
 }
 
 .mat-form-field-infix {
