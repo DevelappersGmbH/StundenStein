@@ -67,7 +67,7 @@ export class MainComponent implements OnInit {
       });
     });
 
-    this.reloadTriggerService.loadMoreTimeLogs.subscribe(
+    this.reloadTriggerService.loadMoreTimeLogs.subscribe(x =>
       this.loadMoreTimeLogs()
     );
   }
@@ -105,7 +105,13 @@ export class MainComponent implements OnInit {
           } else {
             this.timelogs.push(log);
           }
-          this.timelogs = this.timelogs.slice();
+          this.timelogs = this.timelogs
+            .sort((a, b) => {
+              return (
+                <any>new Date(b.timeStarted) - <any>new Date(a.timeStarted)
+              );
+            })
+            .slice();
         });
         const count: number = itemsToDownload - logs.length;
         const newoffset: number = count - this.pageSize;
