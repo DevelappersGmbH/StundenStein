@@ -37,6 +37,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   @Input() projects: Project[];
   @Input() issues: Issue[];
   @Input() timeLogs: TimeLog[];
+  @Input() allTimeLogsLoaded: boolean;
 
   ngOnInit() {}
 
