@@ -49,7 +49,6 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
-    console.log(this.dateList);
   }
 
   seperateDates() {
@@ -79,6 +78,10 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
     newDate.setUTCDate(date.getUTCDate());
     newDate.setUTCMonth(date.getUTCMonth());
     newDate.setUTCFullYear(date.getUTCFullYear());
+    newDate.setUTCHours(0);
+    newDate.setUTCMinutes(0);
+    newDate.setUTCSeconds(0);
+    newDate.setUTCMilliseconds(0);
     return newDate;
   }
 
