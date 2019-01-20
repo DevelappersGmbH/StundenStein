@@ -22,3 +22,6 @@
     </mat-card-content>
   </mat-card>
 </div>
+<div class="container2">
+  <button mat-raised-button color="primary" *ngIf="!listLoading && !allTimeLogsLoaded" (click)="loadMoreTimeLogs()">Load more</button>
+</div>
