@@ -49,6 +49,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
+    console.log(this.dateList);
   }
 
   seperateDates() {
@@ -64,13 +65,21 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
         }
       });
       if (!dateExists) {
-        newDate = timeLog.timeStarted;
+        newDate = this.createEmptyDate(timeLog.timeStarted);
         seperateDates.push(newDate);
         this.timeLogMap.set(newDate, new Array());
       }
       this.timeLogMap.get(newDate).push(timeLog);
     });
     this.dateList = seperateDates;
+  }
+
+  createEmptyDate(date: Date) {
+    const newDate = new Date();
+    newDate.setUTCDate(date.getUTCDate());
+    newDate.setUTCMonth(date.getUTCMonth());
+    newDate.setUTCFullYear(date.getUTCFullYear());
+    return newDate;
   }
 
   compareDatesEqual(d1: Date, d2: Date) {
