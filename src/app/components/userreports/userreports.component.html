@@ -1,11 +1,14 @@
 <mat-card>
+  <mat-card-title>User Reports</mat-card-title>
   <mat-card-content>
     <mat-form-field>
       <mat-select [(value)]="selected" (selectionChange)="selectedOption()">
         <mat-option value = "0">Day</mat-option>
-        <mat-option value = "1">Week</mat-option>
-        <mat-option value = "2">Month</mat-option>
-        <mat-option value = "3">Last Month</mat-option>
+        <mat-option value = "1">Yesterday</mat-option>
+        <mat-option value = "2">Week</mat-option>
+        <mat-option value = "3">Last Week</mat-option>
+        <mat-option value = "4">Month</mat-option>
+        <mat-option value = "5">Last Month</mat-option>
       </mat-select>
     </mat-form-field>
     <mat-checkbox class="checkbox" (change)="checkBox($event)" [ngModel]="bilCheck">Show only billable</mat-checkbox>

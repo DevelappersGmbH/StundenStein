@@ -44,6 +44,7 @@ describe('UserReportsComponent', () => {
   });
 
   it('should create', () => {
+    component.ngOnInit();
     expect(component).toBeTruthy();
   });
 });
