@@ -59,52 +59,42 @@ export class ReportsComponent implements OnInit, OnChanges {
   pieChart = new Array();
   chartData = new Array();
   chartLabel = new Array();
+  periodArray = new Array();
   minDate = new Date(2000, 0, 1);
   maxDate = new Date(new Date().setHours(0, 0, 0, 0));
-  date = new FormControl(moment());
-  startDate = new Date(new Date().setHours(0, 0, 0, 0));
+  date: FormControl;
+  startDate: Date;
   endDate = new Date(new Date().setHours(0, 0, 0, 0));
   today = new Date(new Date().setHours(0, 0, 0, 0));
-  dateInit = new FormControl(moment());
+  dateInit: FormControl;
   detailChartData = new Array();
   detailChartBgColor = new Array();
   detailChartLabel = new Array();
   isVisible = false;
 
   constructor(private errorService: ErrorService) {
-    // Create the new date
     const myDate = new Date(new Date().setHours(0, 0, 0, 0));
-    const momentInit = moment();
     myDate.setDate(this.today.getDate() - 7);
-    const newDate = moment(myDate);
-    // Inject it into the initial moment object
-    momentInit.set(newDate.toObject());
-    this.dateInit = new FormControl(momentInit);
     this.startDate = myDate;
+    this.dateInit = new FormControl(moment(this.startDate));
+    this.date = new FormControl(moment(this.endDate));
     Chart.defaults.global.legend.display = false;
     this.chartPlugin();
   }
 
   @Input() timeLogs: TimeLog[] = [];
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.periodArray = this.setPeriod();
+    this.setOverView(this.periodArray);
+    this.updateChart();
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
-      change.currentValue.forEach(log => {
-        if (
-          !isUndefined(log.comment) &&
-          !isNull(log.comment) &&
-          log.comment.length > 0
-        ) {
-          this.timeLogs.unshift(log);
-        }
-      });
     }
-    this.setOverView(this.setPeriod());
-    this.chart = this.setChart();
-    this.updateChart();
+    this.ngOnInit();
   }
 
   chartPlugin() {
@@ -124,124 +114,24 @@ export class ReportsComponent implements OnInit, OnChanges {
     });
   }
 
-  setChart() {
-    return new Chart('overView', {
-      type: 'bar',
-      data: {
-        labels: this.chartLabel,
-        datasets: [
-          {
-            label:
-              'Reports from ' +
-              this.dateToDDMM(this.startDate) +
-              ' to ' +
-              this.dateToDDMM(this.endDate),
-            data: this.chartData,
-            backgroundColor: '#3582ff'
-          },
-          {
-            label: '',
-            data: [],
-            backgroundColor: 'grey'
-          }
-        ]
-      },
-      options: {
-        scales: {
-          xAxes: [{ stacked: true }],
-          yAxes: [
-            {
-              stacked: true,
-              ticks: {
-                beginAtZero: true
-              }
-            }
-          ]
-        },
-        responsive: true,
-        onClick: this.barClick.bind(this),
-        onResize: function(chart) {
-          chart.update();
-        },
-        // deferred: { delay: 500 }
-        tooltips: {
-          enabled: true,
-          mode: 'single',
-          onlyShowForDatasetIndex: [0],
-          callbacks: {
-            label: function(tooltipItems) {
-              let h, m;
-              const temp = Number(tooltipItems.yLabel);
-              Math.floor(temp) < 10
-                ? (h = '0' + Math.floor(temp))
-                : (h = '' + Math.floor(temp));
-              (temp % 1) * 60 < 10
-                ? (m = '0' + Math.round((temp % 1) * 60))
-                : (m = '' + Math.round((temp % 1) * 60));
-              const sum = h + ':' + m;
-              return 'You worked ' + sum + ' h';
-            }
-          }
-        }
-      }
-    });
-  }
-
-  setPieChart() {
-    this.pieChart = new Chart('canvas2', {
-      type: 'doughnut',
-      data: {
-        labels: this.detailChartLabel,
-        datasets: [
-          {
-            // label: 'Reports from ' + this.dateToDDMM(this.today),
-            data: this.detailChartData,
-            backgroundColor: this.detailChartBgColor
-          }
-        ]
-      },
-      options: {
-        cutoutPercentage: 30,
-        title: {
-          text: 'Detail Report',
-          display: true
-        },
-        scales: {
-          xAxes: [
-            {
-              display: false
-            }
-          ],
-          yAxes: [
-            {
-              display: false,
-              ticks: {
-                beginAtZero: true
-              }
-            }
-          ]
-        },
-        legend: {
-          display: false
-        },
-        tooltips: {
-          enabeled: false
-        },
-        responsive: true,
-        aspectRatio: 3
-      }
-    });
-  }
-
-  getRequiredTime(temp: number): string {
-    let h, m;
-    Math.floor(temp) < 10
-      ? (h = '0' + Math.floor(temp))
-      : (h = '' + Math.floor(temp));
-    (temp % 1) * 60 < 10
-      ? (m = '0' + Math.round((temp % 1) * 60))
-      : (m = '' + Math.round((temp % 1) * 60));
-    return h + ':' + m;
+  addEvent(event: MatDatepickerInputEvent<any>, bool: Boolean) {
+    const startDateBackup = this.startDate;
+    const endDateBackup = this.endDate;
+    bool ? (this.startDate = event.value._d) : (this.endDate = event.value._d);
+    if (this.startDate.getTime() + 2 * 86400000 > this.endDate.getTime()) {
+      this.startDate = startDateBackup;
+      this.endDate = endDateBackup;
+      this.date = new FormControl(moment(this.endDate));
+      this.dateInit = new FormControl(moment(this.startDate));
+      this.startDate.getTime() > this.endDate.getTime()
+        ? this.errorService.errorDialog(
+            'End date has to be higher than start date.'
+          )
+        : this.errorService.errorDialog(
+            'There has to be at least a difference of two days.'
+          );
+    }
+    this.ngOnInit();
   }
 
   barClick(event, array) {
@@ -264,22 +154,6 @@ export class ReportsComponent implements OnInit, OnChanges {
     return day + '.' + month;
   }
 
-  addEvent(event: MatDatepickerInputEvent<any>, bool: Boolean) {
-    const startDateBackup = this.startDate;
-    const endDateBackup = this.endDate;
-    bool ? (this.startDate = event.value._d) : (this.endDate = event.value._d);
-    if (this.startDate.getTime() > this.endDate.getTime()) {
-      this.startDate = startDateBackup;
-      this.endDate = endDateBackup;
-      this.errorService.errorDialog(
-        'End date has to be higher than start date.'
-      );
-    }
-    console.log(this.startDate);
-    console.log(this.endDate);
-    this.setOverView(this.setPeriod()), this.updateChart();
-  }
-
   checkDay(start: Date, stop: Date) {
     return start.getTime() <= stop.getTime();
   }
@@ -289,9 +163,11 @@ export class ReportsComponent implements OnInit, OnChanges {
   }
 
   arrayFilter(x: TimeLog) {
+    const time = x.timeStopped;
+    time.setHours(0, 0, 0, 0);
     return (
-      x.timeStopped.getTime() >= this.startDate.getTime() &&
-      x.timeStopped.getTime() <= this.endDate.getTime()
+      time.getTime() >= this.startDate.getTime() &&
+      time.getTime() <= this.endDate.getTime()
     );
   }
 
@@ -326,7 +202,7 @@ export class ReportsComponent implements OnInit, OnChanges {
     this.setChartLabel();
   }
 
-  updateChart() {
+  updateChart(): void {
     const container = document.getElementById('canvasContainer');
     const oldInstance = document.getElementById('overView');
     container.removeChild(oldInstance);
@@ -336,25 +212,18 @@ export class ReportsComponent implements OnInit, OnChanges {
     container.appendChild(newInstance);
     this.chart = this.setChart();
     this.chart.data.labels = this.chartLabel;
-    this.chart.data.datasets = this.setDataSetArray(
-      'Reports from ' +
-        this.dateToDDMM(this.startDate) +
-        ' to ' +
-        this.dateToDDMM(this.endDate),
-      this.chartData,
-      '#3582ff'
-    );
+    this.chart.data.datasets = this.setDataSetArray(this.chartData, '#3582ff');
     this.chart.update();
   }
 
-  setChartData(temp: Array<any>) {
+  setChartData(temp: Array<any>): void {
     const array = new Array();
     const diff = Math.floor(
       (this.endDate.getTime() - this.startDate.getTime()) / 1000 / 60 / 60 / 24
     );
     for (let i = diff; i >= 0; i--) {
       const date2 = new Date(new Date().setHours(0, 0, 0, 0));
-      date2.setDate(this.today.getDate() - i);
+      date2.setDate(this.endDate.getDate() - i);
       if (temp.find(x => this.checkSameDate(x[1], date2))) {
         const el = temp.find(x => this.checkSameDate(x[1], date2));
         array.push(el[0]);
@@ -376,11 +245,7 @@ export class ReportsComponent implements OnInit, OnChanges {
     this.chartLabel = array;
   }
 
-  setDataSetArray(
-    label: string,
-    data: Array<number>,
-    bgcolor: string
-  ): Array<DataSet> {
+  setDataSetArray(data: Array<number>, bgcolor: string): Array<DataSet> {
     const array = new Array();
     const max = Math.max.apply(
       Math,
@@ -393,26 +258,17 @@ export class ReportsComponent implements OnInit, OnChanges {
       temp.push(e === 0 ? 0 : max - e);
     });
     array.push(
-      { label: label, data: data, backgroundColor: bgcolor },
-      { label: label, data: temp, backgroundColor: 'rgb(211, 211, 211, 0.3)' }
+      { data: data, backgroundColor: bgcolor },
+      { data: temp, backgroundColor: 'rgb(211, 211, 211, 0.7)' }
     );
     return array;
-  }
-
-  setDataSet(label: string, data: Array<number>, bgcolor: string): DataSet {
-    return {
-      label: label,
-      data: data,
-      backgroundColor: bgcolor
-    };
   }
 
   setDetailChart(idx: number) {
     let indexOfWidth: number;
     const temp = new Array();
     const date = new Date(+this.startDate + idx * 86400000);
-    let array = this.setPeriod();
-    array = array.filter(function(element) {
+    const array = this.periodArray.filter(function(element) {
       return (
         element.timeStopped.getDate() === date.getDate() &&
         element.timeStopped.getMonth() === date.getMonth() &&
@@ -456,5 +312,132 @@ export class ReportsComponent implements OnInit, OnChanges {
       this.detailChartLabel.push(e[0]);
     });
     this.isVisible = true;
+  }
+
+  setChart() {
+    return new Chart('overView', {
+      type: 'bar',
+      data: {
+        labels: this.chartLabel,
+        datasets: [
+          {
+            data: this.chartData,
+            backgroundColor: '#3582ff'
+          },
+          {
+            data: [],
+            backgroundColor: 'rgb(211, 211, 211, 0.7)'
+          }
+        ]
+      },
+      options: {
+        scales: {
+          xAxes: [{ stacked: true }],
+          yAxes: [
+            {
+              stacked: true,
+              ticks: {
+                beginAtZero: true
+              }
+            }
+          ]
+        },
+        responsive: true,
+        onClick: this.barClick.bind(this),
+        onResize: function(chart) {
+          chart.update();
+        },
+        tooltips: {
+          displayColors: false,
+          enabled: true,
+          mode: 'single',
+          callbacks: {
+            label: function(tooltipItems, data) {
+              console.log(data);
+              console.log(tooltipItems);
+              let h, m;
+              const temp = Number(data.datasets[0].data[tooltipItems.index]);
+              Math.floor(temp) < 10
+                ? (h = '0' + Math.floor(temp))
+                : (h = '' + Math.floor(temp));
+              (temp % 1) * 60 < 10
+                ? (m = '0' + Math.round((temp % 1) * 60))
+                : (m = '' + Math.round((temp % 1) * 60));
+              const sum = h + ':' + m;
+              return 'You worked ' + sum + ' h';
+            }
+          }
+        }
+      }
+    });
+  }
+
+  setPieChart() {
+    this.pieChart = new Chart('canvas2', {
+      type: 'doughnut',
+      data: {
+        labels: this.detailChartLabel,
+        datasets: [
+          {
+            // label: 'Reports from ' + this.dateToDDMM(this.today),
+            data: this.detailChartData,
+            backgroundColor: this.detailChartBgColor
+          }
+        ]
+      },
+      options: {
+        cutoutPercentage: 30,
+        scales: {
+          xAxes: [
+            {
+              display: false
+            }
+          ],
+          yAxes: [
+            {
+              display: false,
+              ticks: {
+                beginAtZero: true
+              }
+            }
+          ]
+        },
+        legend: {
+          display: false
+        },
+        tooltips: {
+          mode: 'label',
+          callbacks: {
+            label: function(tooltipItem, data) {
+              console.log(data);
+              const indice = tooltipItem.index;
+              let h, m;
+              const temp = Number(data.datasets[0].data[indice]);
+              Math.floor(temp) < 10
+                ? (h = '0' + Math.floor(temp))
+                : (h = '' + Math.floor(temp));
+              (temp % 1) * 60 < 10
+                ? (m = '0' + Math.round((temp % 1) * 60))
+                : (m = '' + Math.round((temp % 1) * 60));
+              const sum = h + ':' + m;
+              return 'You worked ' + sum + ' h (' + data.labels[indice] + ')';
+            }
+          }
+        },
+        responsive: true,
+        aspectRatio: 3
+      }
+    });
+  }
+
+  getRequiredTime(temp: number): string {
+    let h, m;
+    Math.floor(temp) < 10
+      ? (h = '0' + Math.floor(temp))
+      : (h = '' + Math.floor(temp));
+    (temp % 1) * 60 < 10
+      ? (m = '0' + Math.round((temp % 1) * 60))
+      : (m = '' + Math.round((temp % 1) * 60));
+    return h + ':' + m;
   }
 }
