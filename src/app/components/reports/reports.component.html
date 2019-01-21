@@ -1,0 +1,36 @@
+<mat-card>
+  <mat-card-title>Reports</mat-card-title>
+  <mat-card-content>
+    <mat-form-field>
+      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="dateInit" (dateChange)="addEvent($event, true)" placeholder="Start date">
+      <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+      <mat-datepicker #dp1></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateChange)="addEvent($event, false)" placeholder="End date">
+      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+      <mat-datepicker #dp2></mat-datepicker>
+    </mat-form-field>
+    <div class="chart" id="canvasContainer">
+      <canvas id="overView" height="40">Your browser does not support canvas element.</canvas>
+    </div>
+    <form [style.display]="isVisible ? 'block' : 'none'">
+        <mat-divider></mat-divider>
+        <div class="placeholder"></div>
+        <table class="detailChartTable">
+          <tr>
+            <td>
+              <mat-list role="list">
+                <mat-list-item *ngFor=" let arrays of detailChartLabel; let i = index" role="listitem" [ngStyle]="{'color': detailChartBgColor[i]}">{{detailChartLabel[i]}}</mat-list-item>
+              </mat-list>
+            </td>
+            <td>
+              <div class="chart-container-small">
+                <canvas id="canvas2">Your browser does not support canvas element.</canvas>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </form>
+  </mat-card-content>
+</mat-card>

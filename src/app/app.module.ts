@@ -33,8 +33,9 @@ import {
   MatSelectModule,
   MatSlideToggleModule,
   MatToolbarModule,
+  MatTabsModule,
   MatNativeDateModule
-  } from '@angular/material';
+} from '@angular/material';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { NgModule } from '@angular/core';
 import { RecentTimeLogsComponent } from './components/recent-time-logs/recent-time-logs.component';
@@ -46,6 +47,7 @@ import { UserReportsComponent } from './components/userreports/userreports.compo
 import { UserService } from './services/user/user.service';
 import { ErrorDialogComponent } from './errorpopup/error-dialog.component';
 import { ErrorService } from './services/error/error.service';
+import { ReportsComponent } from './components/reports/reports.component';
 import { BROWSER_FAVICONS_CONFIG } from './services/favicon/favicon.service';
 import { BrowserFavicons } from './services/favicon/favicon.service';
 import { Favicons } from './services/favicon/favicon.service';
@@ -62,7 +64,8 @@ import { Favicons } from './services/favicon/favicon.service';
     RecentTimeLogsComponent,
     DeleteWarningComponent,
     EnforcedInputsDirective,
-    ErrorDialogComponent
+    ErrorDialogComponent,
+    ReportsComponent
   ],
   imports: [
     BrowserModule,
@@ -90,9 +93,10 @@ import { Favicons } from './services/favicon/favicon.service';
     ReactiveFormsModule,
     MatDialogModule,
     MatBadgeModule,
+    MatProgressSpinnerModule,
+    MatTabsModule,
     MatDatepickerModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule
+    MatNativeDateModule
   ],
   providers: [
     AuthenticationService,
