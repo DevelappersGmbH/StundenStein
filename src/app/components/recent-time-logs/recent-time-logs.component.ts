@@ -64,13 +64,25 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
         }
       });
       if (!dateExists) {
-        newDate = timeLog.timeStarted;
+        newDate = this.createEmptyDate(timeLog.timeStarted);
         seperateDates.push(newDate);
         this.timeLogMap.set(newDate, new Array());
       }
       this.timeLogMap.get(newDate).push(timeLog);
     });
     this.dateList = seperateDates;
+  }
+
+  createEmptyDate(date: Date) {
+    const newDate = new Date();
+    newDate.setUTCDate(date.getUTCDate());
+    newDate.setUTCMonth(date.getUTCMonth());
+    newDate.setUTCFullYear(date.getUTCFullYear());
+    newDate.setUTCHours(0);
+    newDate.setUTCMinutes(0);
+    newDate.setUTCSeconds(0);
+    newDate.setUTCMilliseconds(0);
+    return newDate;
   }
 
   compareDatesEqual(d1: Date, d2: Date) {
