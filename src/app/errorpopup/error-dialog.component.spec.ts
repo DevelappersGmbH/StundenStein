@@ -1,5 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule, MatDividerModule } from '@angular/material';
+import { MatDividerModule } from '@angular/material';
+import { MatDialogModule } from '@angular/material/dialog';
 import { ErrorDialogComponent } from './error-dialog.component';
 
 describe('ErrorDialogComponent', () => {

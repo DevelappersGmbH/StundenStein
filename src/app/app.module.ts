@@ -17,6 +17,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './components/login/login.component';
 import { LoginRoutingModule } from './components/login/login-routing.module';
 import { MainComponent } from './components/main/main.component';
+import { MatDialogModule } from '@angular/material/dialog';
 import {
   MatAutocompleteModule,
   MatBadgeModule,
@@ -24,7 +25,6 @@ import {
   MatCardModule,
   MatCheckboxModule,
   MatDatepickerModule,
-  MatDialogModule,
   MatFormFieldModule,
   MatIconModule,
   MatInputModule,
