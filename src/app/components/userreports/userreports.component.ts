@@ -1,16 +1,16 @@
-declare var require: any;
 import {
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
+  HostListener,
   Input,
   OnChanges,
-  SimpleChanges,
-  HostListener,
-  ChangeDetectionStrategy
-} from '@angular/core';
+  OnInit,
+  SimpleChanges
+  } from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
-import { TimeLog } from 'src/app/model/time-log.interface';
 import { isNull, isUndefined } from 'util';
+import { TimeLog } from 'src/app/model/time-log.interface';
+declare var require: any;
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,15 +61,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
-      change.currentValue.forEach(log => {
-        if (
-          !isUndefined(log.comment) &&
-          !isNull(log.comment) &&
-          log.comment.length > 0
-        ) {
-          this.timeLogs.unshift(log);
-        }
-      });
     }
     this.ngOnInit();
   }

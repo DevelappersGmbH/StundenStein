@@ -68,20 +68,23 @@
       <div class="field-container" [ngClass]="{ maxsizeHidden: !automaticMode }">
         <span *ngIf="automaticMode" class="field">{{ currentTrackerTimeString }}</span>
         <div class="field">
-          <button name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
+          <button [disabled]="componentBlockedByInitialTrackerLoad" name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
             class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon></button>
         </div>
         <div class="field">
-          <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" mat-flat-button color="primary" [disabled]="startingBlockedByLoading">Start</button>
-          <button *ngIf="automaticMode && this.timeTracker.id !== undefined" [disabled]="stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" mat-flat-button color="warn">Stop</button>
-          <button *ngIf="!automaticMode" [disabled]="loggingBlockedByLoading" (click)="createLog()" mat-flat-button color="primary">
+          <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" mat-flat-button color="primary" [disabled]="componentBlockedByInitialTrackerLoad || startingBlockedByLoading">Start</button>
+          <button *ngIf="automaticMode && this.timeTracker.id !== undefined" [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" mat-flat-button color="warn">Stop</button>
+          <button *ngIf="!automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || loggingBlockedByLoading" (click)="createLog()" mat-flat-button color="primary">
             <span>Save  </span>
             <mat-icon>save</mat-icon>
           </button>
         </div>
+        <div class="field" *ngIf="automaticMode && this.timeTracker.id !== undefined">
+          <button [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopAndNew()" mat-flat-button color="warn">Stop and new</button>
+        </div>
         <div class="field">
-          <button mat-stroked-button *ngIf="automaticMode" [disabled]="automaticLock || this.timeTracker.id !== undefined" (click)="automaticMode = false;" color="primary">Manual Mode</button>
-          <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="automaticLock" color="primary">Automatic Mode</button>
+          <button mat-stroked-button *ngIf="automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock || this.timeTracker.id !== undefined" (click)="automaticMode = false;" color="primary">Manual Mode</button>
+          <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock" color="primary">Automatic Mode</button>
         </div>
       </div>
   </form>
