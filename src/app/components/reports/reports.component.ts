@@ -60,22 +60,20 @@ export class ReportsComponent implements OnInit, OnChanges {
   chartData = new Array();
   chartLabel = new Array();
   minDate = new Date(2000, 0, 1);
-  maxDate = new Date();
+  maxDate = new Date(new Date().setHours(0, 0, 0, 0));
   date = new FormControl(moment());
-  startDate = new Date();
-  endDate = new Date();
-  today = new Date();
+  startDate = new Date(new Date().setHours(0, 0, 0, 0));
+  endDate = new Date(new Date().setHours(0, 0, 0, 0));
+  today = new Date(new Date().setHours(0, 0, 0, 0));
   dateInit = new FormControl(moment());
   detailChartData = new Array();
   detailChartBgColor = new Array();
   detailChartLabel = new Array();
   isVisible = false;
-  triggerTime: number;
-  loadingData = true;
 
   constructor(private errorService: ErrorService) {
     // Create the new date
-    const myDate = new Date();
+    const myDate = new Date(new Date().setHours(0, 0, 0, 0));
     const momentInit = moment();
     myDate.setDate(this.today.getDate() - 7);
     const newDate = moment(myDate);
@@ -89,9 +87,7 @@ export class ReportsComponent implements OnInit, OnChanges {
 
   @Input() timeLogs: TimeLog[] = [];
 
-  ngOnInit() {
-    this.triggerTime = new Date().getTime();
-  }
+  ngOnInit() {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
@@ -106,13 +102,9 @@ export class ReportsComponent implements OnInit, OnChanges {
         }
       });
     }
-    if (new Date().getTime() - this.triggerTime > 5000) {
-      this.loadingData = false;
-      this.triggerTime = new Date().getTime();
-      this.setOverView(this.setPeriod());
-      this.chart = this.setChart();
-      this.updateChart();
-    }
+    this.setOverView(this.setPeriod());
+    this.chart = this.setChart();
+    this.updateChart();
   }
 
   chartPlugin() {
@@ -178,15 +170,15 @@ export class ReportsComponent implements OnInit, OnChanges {
           onlyShowForDatasetIndex: [0],
           callbacks: {
             label: function(tooltipItems) {
-                let h, m;
-                const temp = Number(tooltipItems.yLabel);
-                Math.floor(temp) < 10
-                  ? (h = '0' + Math.floor(temp))
-                  : (h = '' + Math.floor(temp));
-                (temp % 1) * 60 < 10
-                  ? (m = '0' + Math.round((temp % 1) * 60))
-                  : (m = '' + Math.round((temp % 1) * 60));
-                const sum = h + ':' + m;
+              let h, m;
+              const temp = Number(tooltipItems.yLabel);
+              Math.floor(temp) < 10
+                ? (h = '0' + Math.floor(temp))
+                : (h = '' + Math.floor(temp));
+              (temp % 1) * 60 < 10
+                ? (m = '0' + Math.round((temp % 1) * 60))
+                : (m = '' + Math.round((temp % 1) * 60));
+              const sum = h + ':' + m;
               return 'You worked ' + sum + ' h';
             }
           }
@@ -273,13 +265,19 @@ export class ReportsComponent implements OnInit, OnChanges {
   }
 
   addEvent(event: MatDatepickerInputEvent<any>, bool: Boolean) {
+    const startDateBackup = this.startDate;
+    const endDateBackup = this.endDate;
     bool ? (this.startDate = event.value._d) : (this.endDate = event.value._d);
-    this.startDate.getTime() > this.endDate.getTime()
-      ? this.errorService.errorDialog(
-          'End date has to be higher than start date.'
-        )
-      : this.setOverView(this.setPeriod()),
-      this.updateChart();
+    if (this.startDate.getTime() > this.endDate.getTime()) {
+      this.startDate = startDateBackup;
+      this.endDate = endDateBackup;
+      this.errorService.errorDialog(
+        'End date has to be higher than start date.'
+      );
+    }
+    console.log(this.startDate);
+    console.log(this.endDate);
+    this.setOverView(this.setPeriod()), this.updateChart();
   }
 
   checkDay(start: Date, stop: Date) {
@@ -339,7 +337,10 @@ export class ReportsComponent implements OnInit, OnChanges {
     this.chart = this.setChart();
     this.chart.data.labels = this.chartLabel;
     this.chart.data.datasets = this.setDataSetArray(
-      'Reports from ' + this.dateToDDMM(this.startDate) + ' to ' + this.dateToDDMM(this.endDate),
+      'Reports from ' +
+        this.dateToDDMM(this.startDate) +
+        ' to ' +
+        this.dateToDDMM(this.endDate),
       this.chartData,
       '#3582ff'
     );
@@ -352,7 +353,7 @@ export class ReportsComponent implements OnInit, OnChanges {
       (this.endDate.getTime() - this.startDate.getTime()) / 1000 / 60 / 60 / 24
     );
     for (let i = diff; i >= 0; i--) {
-      const date2 = new Date();
+      const date2 = new Date(new Date().setHours(0, 0, 0, 0));
       date2.setDate(this.today.getDate() - i);
       if (temp.find(x => this.checkSameDate(x[1], date2))) {
         const el = temp.find(x => this.checkSameDate(x[1], date2));
