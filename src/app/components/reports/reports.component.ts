@@ -353,8 +353,6 @@ export class ReportsComponent implements OnInit, OnChanges {
           mode: 'single',
           callbacks: {
             label: function(tooltipItems, data) {
-              console.log(data);
-              console.log(tooltipItems);
               let h, m;
               const temp = Number(data.datasets[0].data[tooltipItems.index]);
               Math.floor(temp) < 10
@@ -409,7 +407,6 @@ export class ReportsComponent implements OnInit, OnChanges {
           mode: 'label',
           callbacks: {
             label: function(tooltipItem, data) {
-              console.log(data);
               const indice = tooltipItem.index;
               let h, m;
               const temp = Number(data.datasets[0].data[indice]);
