@@ -8,6 +8,7 @@ export class ReloadTriggerService {
   public timeLogAdded: EventEmitter<TimeLog>;
   public timeLogUpdated: EventEmitter<TimeLog>;
   public timeLogDeleted: EventEmitter<number>;
+  public loadMoreTimeLogs = new EventEmitter();
 
   constructor() {
     this.timeLogAdded = new EventEmitter();
@@ -25,5 +26,9 @@ export class ReloadTriggerService {
 
   public triggerTimeLogDeleted(id: number) {
     this.timeLogDeleted.emit(id);
+  }
+
+  public triggerLoadMoreTimeLogs() {
+    this.loadMoreTimeLogs.emit();
   }
 }

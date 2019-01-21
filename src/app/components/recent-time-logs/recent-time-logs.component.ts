@@ -1,3 +1,4 @@
+import { ReloadTriggerService } from './../../services/reload-trigger.service';
 import {
   Component,
   Input,
@@ -19,7 +20,8 @@ import { UserService } from 'src/app/services/user/user.service';
 export class RecentTimeLogsComponent implements OnInit, OnChanges {
   constructor(
     private dataService: DataService,
-    private userService: UserService
+    private userService: UserService,
+    private reloadTriggerService: ReloadTriggerService
   ) {
     this.listLoading = true;
     this.numberOfUnbookedTimeLogs = 0;
@@ -37,6 +39,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   @Input() projects: Project[];
   @Input() issues: Issue[];
   @Input() timeLogs: TimeLog[];
+  @Input() allTimeLogsLoaded: boolean;
 
   ngOnInit() {}
 
@@ -108,5 +111,9 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       });
       this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
     });
+  }
+
+  loadMoreTimeLogs() {
+    this.reloadTriggerService.triggerLoadMoreTimeLogs();
   }
 }
