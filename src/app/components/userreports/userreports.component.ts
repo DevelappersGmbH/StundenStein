@@ -181,7 +181,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
     });
     width.forEach(e => {
       e[1] = Math.round((e[1] / counter) * 100);
-      e[3] = Math.round((e[3] / counterBillable) * 100);
+      e[3] === 0
+      ? e[3] = 0
+      : e[3] = Math.round((e[3] / counterBillable) * 100);
     });
     width.sort((a, b) => a[0].localeCompare(b[0]));
     const npaValue = width.find(function(element) {
