@@ -129,6 +129,14 @@ describe('RecentTimeLogsComponent', () => {
     expect(component.compareDatesEqual(d1, d2)).toBeTruthy();
   });
 
+  it('should create an empty date correctly', () => {
+    const d1 = new Date('December 17, 2018 03: 24: 00');
+    component.ngOnInit();
+    expect(component.createEmptyDate(d1)).toEqual(
+      new Date('December 17, 2018 01: 00: 00')
+    );
+  });
+
   it('should count number of unbookedTimeLogs correctly', () => {
     const timeLogMap = new Map();
     timeLogMap.set(new Date('October 1, 2018 03: 24: 00'), [
@@ -145,10 +153,38 @@ describe('RecentTimeLogsComponent', () => {
     component.timeLogMap = timeLogMap;
     component.countUnbookedTimeLogs();
     expect(component.numberOfUnbookedTimeLogs).toBe(2);
-    expect(component.unbookedTimeLogsMap.keys()).toEqual(unbookedTimeLogsMap.keys());
-    unbookedTimeLogsMap.forEach((n: number, d: Date) => {
-        expect(component.unbookedTimeLogsMap.get(d)).toEqual(unbookedTimeLogsMap.get(d));
-    });
-    // expect(component.unbookedTimeLogsMap).toEqual(unbookedTimeLogsMap);
+    expect(component.unbookedTimeLogsMap).toEqual(unbookedTimeLogsMap);
+  });
+
+  it('should seperate dates correctly', () => {
+    let list = [];
+    component.timeLogList = [];
+    component.ngOnInit();
+    component.seperateDates();
+    expect(component.dateList).toEqual(list);
+    component.timeLogList = [mockTimeLog1];
+    component.seperateDates();
+    expect(
+      component.compareDatesEqual(
+        component.dateList[0],
+        new Date('October 1, 2018 2:00:00')
+      )
+    ).toBeTruthy();
+    component.timeLogList = [mockTimeLog1, mockTimeLog3, mockTimeLog4];
+    component.seperateDates();
+    list = [];
+    list.push(new Date('October 1, 2018 2:00:00'));
+    list.push(new Date('October 4, 2018 2:00:00'));
+    list.push(new Date('October 5, 2018 2:00:00'));
+    component.timeLogList = [
+      mockTimeLog1,
+      mockTimeLog2,
+      mockTimeLog3,
+      mockTimeLog4
+    ];
+    component.seperateDates();
+    list.forEach( (value: Date, index: number) => {
+          expect(component.compareDatesEqual(component.dateList[index], value)).toBeTruthy();
+      });
   });
 });

@@ -115,7 +115,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
     });
   }
-
+  // triggers MainC. to load the next 100 logs if available
   loadMoreTimeLogs() {
     this.loadingMoreTimeLogs = true;
     this.reloadTriggerService.triggerLoadMoreTimeLogs();
