@@ -181,7 +181,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
     });
     width.forEach(e => {
       e[1] = Math.round((e[1] / counter) * 100);
-      e[3] = Math.round((e[3] / counterBillable) * 100);
+      e[3] === 0
+      ? e[3] = 0
+      : e[3] = Math.round((e[3] / counterBillable) * 100);
     });
     width.sort((a, b) => a[0].localeCompare(b[0]));
     const npaValue = width.find(function(element) {
@@ -195,7 +197,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   // due to the filter function above
-
   npaFinder(element: Array<any>) {
     return element[0] !== 'No project assigned';
   }
@@ -238,6 +239,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
     event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
   }
 
+  // called when sth from the dropdown is selected
   selectedOption() {
     this.onResize();
     this.period = Number(this.selected);
@@ -245,8 +247,14 @@ export class UserReportsComponent implements OnInit, OnChanges {
     this.ngOnInit();
   }
 
+  // returns false if there is no project for the selected period
   projectExists() {
-    return !(isUndefined(this.generalArray) || this.generalArray.length === 0);
+    const check = this.bilCheck ? !this.generalArray.every(x => this.noProjectIsBillable(x)) : true;
+    return !isUndefined(this.generalArray) && this.generalArray.length > 0 && check;
+  }
+
+  noProjectIsBillable(e): boolean {
+    return e[3] === 0;
   }
 
   // the following "get"-function returns are corresponding to the project id "i"
