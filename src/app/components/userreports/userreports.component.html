@@ -6,8 +6,8 @@
         <mat-option value="1">Yesterday</mat-option>
         <mat-option value="2">Week</mat-option>
         <mat-option value="3">Last Week</mat-option>
-        <mat-option value="4">Month</mat-option>
-        <mat-option value="5">Last Month</mat-option>
+        <!--<mat-option value="4">Month</mat-option>
+        <mat-option value="5">Last Month</mat-option>-->
       </mat-select>
     </mat-form-field>
     <mat-checkbox
@@ -17,6 +17,8 @@
       >Show only billable</mat-checkbox
     >
     <br /><br />
+    <div *ngIf="projectExists()" style="font-size: 16px">Total time: {{getTotalTime(false)}} ({{getTotalTime(true)}} billable)</div>
+    <br />
     <div *ngIf="projectExists()">
       <table>
         <tr>
