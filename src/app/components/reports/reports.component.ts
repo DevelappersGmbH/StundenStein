@@ -357,7 +357,7 @@ export class ReportsComponent implements OnInit, OnChanges {
     container.removeChild(oldInstance);
     const newInstance = document.createElement('canvas');
     newInstance.setAttribute('id', 'overView');
-    newInstance.setAttribute('height', '40');
+    newInstance.setAttribute('height', '60');
     container.appendChild(newInstance);
     this.chart = this.setChart();
     this.chart.data.labels = this.chartLabel;
@@ -586,7 +586,7 @@ export class ReportsComponent implements OnInit, OnChanges {
           }
         },
         responsive: true,
-        aspectRatio: 3
+        aspectRatio: 1.5
       }
     });
   }

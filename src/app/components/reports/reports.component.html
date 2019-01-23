@@ -34,9 +34,20 @@
       Show only billable
     </mat-checkbox>
     <h3>Total time: {{getTotalTime(true)}} h ({{getTotalTime(false)}} h billable)</h3>
-    <div class="chart" id="canvasContainer">
-      <canvas id="overView" height="40">Your browser does not support canvas element.</canvas>
-    </div>
+    <table class="detailChartTable">
+        <tr>
+          <td class="mainchart">
+            <div class="chart" id="canvasContainer">
+              <canvas id="overView" height="40">Your browser does not support canvas element.</canvas>
+            </div>
+          </td>
+          <td class="subchart">
+            <div class="chart-container-small canvas2">
+            <canvas id="canvas2">Your browser does not support canvas element.</canvas>
+            </div>
+          </td>
+        </tr>
+      </table>
     <mat-divider></mat-divider><br />
     <mat-accordion>
         <mat-expansion-panel [expanded]="!detailChartVisible()">
@@ -51,11 +62,6 @@
               <mat-list role="list">
                 <mat-list-item *ngFor=" let arrays of detailChartLabel; let i = index" role="listitem" [ngStyle]="{'color': detailChartBgColor[i]}">{{detailChartLabel[i]}}</mat-list-item>
               </mat-list>
-            </td>
-            <td>
-              <div class="chart-container-small canvas2">
-              <canvas id="canvas2">Your browser does not support canvas element.</canvas>
-              </div>
             </td>
           </tr>
         </table>
