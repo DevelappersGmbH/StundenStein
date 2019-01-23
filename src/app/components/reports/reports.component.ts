@@ -70,7 +70,14 @@ export class ReportsComponent implements OnInit, OnChanges {
   detailChartData = new Array();
   detailChartBgColor = new Array();
   detailChartLabel = new Array();
-  isVisible = false;
+  isVisible = true;
+  bilCheck = false;
+  selected = 'Select a period';
+  projects = new FormControl();
+  projectList: Array<string>;
+  generalArray = new Array();
+  projectSelection: Array<string>;
+  pixelWidth;
 
   constructor(private errorService: ErrorService) {
     const myDate = new Date(new Date().setHours(0, 0, 0, 0));
@@ -86,8 +93,11 @@ export class ReportsComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.periodArray = this.setPeriod();
+    this.setProjectList();
     this.setOverView(this.periodArray);
     this.updateChart();
+    this.setDetailChart();
+    this.setPieChart();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -115,34 +125,141 @@ export class ReportsComponent implements OnInit, OnChanges {
   }
 
   addEvent(event: MatDatepickerInputEvent<any>, bool: Boolean) {
+    this.resetFilter();
     const startDateBackup = this.startDate;
     const endDateBackup = this.endDate;
     bool ? (this.startDate = event.value._d) : (this.endDate = event.value._d);
-    if (this.startDate.getTime() + 2 * 86400000 > this.endDate.getTime()) {
+    this.dateInputValidation(startDateBackup, endDateBackup);
+    this.ngOnInit();
+  }
+
+  barClick(event, array) {}
+
+  dateInputValidation(startDateBackup, endDateBackup) {
+    if (this.startDate.getTime() > this.endDate.getTime()) {
       this.startDate = startDateBackup;
       this.endDate = endDateBackup;
       this.date = new FormControl(moment(this.endDate));
       this.dateInit = new FormControl(moment(this.startDate));
-      this.startDate.getTime() > this.endDate.getTime()
-        ? this.errorService.errorDialog(
-            'End date has to be higher than start date.'
-          )
-        : this.errorService.errorDialog(
-            'There has to be at least a difference of two days.'
-          );
+      this.errorService.errorDialog(
+        'End date has to be higher than start date.'
+      );
     }
+  }
+
+  checkBox(event) {
+    event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
     this.ngOnInit();
   }
 
-  barClick(event, array) {
-    if (array !== undefined) {
-      if (array[0] !== undefined) {
-        if (this.chart.data.datasets[0].data[array[0]._index] > 0) {
-          this.setDetailChart(array[0]._index);
-          this.setPieChart();
-        }
+  selectedOption() {
+    this.resetFilter();
+    const startDateBackup = this.startDate;
+    const endDateBackup = this.endDate;
+    switch (this.selected) {
+      case '0': {
+        this.timeLogs.filter(x => this.checkWeek(x));
+        this.startDate = this.getMonday(this.today);
+        this.endDate = this.today;
+        break;
+      }
+      case '1': {
+        this.timeLogs.filter(x => this.checkLastWeek(x));
+        this.startDate = this.getMonday(this.today);
+        this.startDate = new Date(this.startDate.getTime() - 7 * 86400000);
+        this.endDate = new Date(this.getMonday(this.today).getTime() - 1 * 86400000);
+        break;
+      }
+      case '2': {
+        this.timeLogs.filter(x => this.checkMonth(x));
+        this.startDate = new Date(
+          this.today.getFullYear(),
+          this.today.getMonth(),
+          1
+        );
+        this.endDate = new Date(
+          this.today.getFullYear(),
+          this.today.getMonth() + 1,
+          0
+        );
+        break;
+      }
+      case '3': {
+        this.timeLogs.filter(x => this.checkLastMonth(x));
+        this.startDate = new Date(
+          this.today.getFullYear(),
+          this.today.getMonth(),
+          1
+        );
+        this.startDate.setMonth(this.startDate.getMonth() - 1);
+        this.endDate = new Date(
+          this.today.getFullYear(),
+          this.today.getMonth() + 1,
+          0
+        );
+        this.endDate.setMonth(this.endDate.getMonth() - 1);
+        break;
       }
     }
+    this.dateInit = new FormControl(moment(this.startDate));
+    this.date = new FormControl(moment(this.endDate));
+    this.dateInputValidation(startDateBackup, endDateBackup);
+    this.ngOnInit();
+  }
+
+  resetFilter() {
+    this.projects.reset();
+    this.bilCheck = false;
+  }
+
+  getMonday(d) {
+    d = new Date(d);
+    const day = d.getDay(),
+      diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    return new Date(d.setDate(diff));
+  }
+
+  checkWeek(value: TimeLog) {
+    return (
+      this.getWeekNumber(value.timeStopped) ===
+        this.getWeekNumber(this.today) &&
+      this.today.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkLastWeek(value: TimeLog) {
+    return (
+      this.getWeekNumber(value.timeStopped) ===
+        this.getWeekNumber(
+          new Date(new Date().setDate(this.today.getDate() - 7))
+        ) &&
+      this.today.getFullYear() -
+        (this.getWeekNumber(this.today) === 1 ? 1 : 0) ===
+        value.timeStopped.getFullYear()
+    );
+  }
+
+  checkMonth(value: TimeLog) {
+    return (
+      this.today.getMonth() === value.timeStopped.getMonth() &&
+      this.today.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkLastMonth(value: TimeLog) {
+    return this.today.getMonth() === 0
+      ? value.timeStopped.getMonth() === 11 &&
+          this.today.getFullYear() - 1 === value.timeStopped.getFullYear()
+      : this.today.getMonth() - 1 === value.timeStopped.getMonth() &&
+          this.today.getFullYear() === value.timeStopped.getFullYear();
+  }
+
+  getWeekNumber(d: Date): number {
+    d = new Date(+d);
+    d.setHours(0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil(((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7);
   }
 
   dateToDDMM(date: Date) {
@@ -183,23 +300,55 @@ export class ReportsComponent implements OnInit, OnChanges {
     let indexOfWidth: number;
     const temp = new Array();
     array.forEach(e => {
-      if (
-        temp.find(function(element, index) {
-          indexOfWidth = index;
-          return (
-            element[1].getDate() === e.timeStopped.getDate() &&
-            element[1].getMonth() === e.timeStopped.getMonth() &&
-            element[1].getFullYear() === e.timeStopped.getFullYear()
-          );
-        })
-      ) {
-        temp[indexOfWidth][0] += e.timeInHours;
-      } else {
-        temp.push([Math.round(e.timeInHours * 100) / 100, e.timeStopped]);
+      const name = e.project !== null ? e.project.name : 'No project assigned';
+      const bool =
+        this.projectSelection !== undefined
+          ? this.projectSelection.length === 0
+            ? true
+            : this.projectSelection.includes(name)
+          : true;
+      if (bool && (this.bilCheck ? e.billable : true)) {
+        if (
+          temp.find(function(element, index) {
+            indexOfWidth = index;
+            return (
+              element[1].getDate() === e.timeStopped.getDate() &&
+              element[1].getMonth() === e.timeStopped.getMonth() &&
+              element[1].getFullYear() === e.timeStopped.getFullYear()
+            );
+          })
+        ) {
+          temp[indexOfWidth][0] += e.timeInHours;
+        } else {
+          temp.push([Math.round(e.timeInHours * 100) / 100, e.timeStopped]);
+        }
       }
     });
     this.setChartData(temp);
     this.setChartLabel();
+  }
+
+  getTotalTime(bool: boolean): string {
+    let temp = 0;
+    this.periodArray.forEach(e => {
+      bool ? (temp += e.timeInHours) : (temp += e.billable ? e.timeInHours : 0);
+    });
+    return this.getRequiredTime(temp);
+  }
+
+  setProjectList() {
+    const array = new Array();
+    this.periodArray.forEach(e => {
+      const name = e.project !== null ? e.project.name : 'No project assigned';
+      if (!array.includes(name)) {
+        array.push(name);
+      }
+    });
+    this.projectList = array;
+  }
+
+  selectedProject() {
+    this.ngOnInit();
   }
 
   updateChart(): void {
@@ -222,8 +371,7 @@ export class ReportsComponent implements OnInit, OnChanges {
       (this.endDate.getTime() - this.startDate.getTime()) / 1000 / 60 / 60 / 24
     );
     for (let i = diff; i >= 0; i--) {
-      const date2 = new Date(new Date().setHours(0, 0, 0, 0));
-      date2.setDate(this.endDate.getDate() - i);
+      const date2 = new Date(this.endDate.getTime() - i * 86400000);
       if (temp.find(x => this.checkSameDate(x[1], date2))) {
         const el = temp.find(x => this.checkSameDate(x[1], date2));
         array.push(el[0]);
@@ -259,23 +407,15 @@ export class ReportsComponent implements OnInit, OnChanges {
     });
     array.push(
       { data: data, backgroundColor: bgcolor },
-      { data: temp, backgroundColor: 'rgb(211, 211, 211, 0.7)' }
+      { data: temp, backgroundColor: 'rgba(53, 130, 255, 0.1)' }
     );
     return array;
   }
 
-  setDetailChart(idx: number) {
+  setDetailChart() {
     let indexOfWidth: number;
     const temp = new Array();
-    const date = new Date(+this.startDate + idx * 86400000);
-    const array = this.periodArray.filter(function(element) {
-      return (
-        element.timeStopped.getDate() === date.getDate() &&
-        element.timeStopped.getMonth() === date.getMonth() &&
-        element.timeStopped.getFullYear() === date.getFullYear()
-      );
-    });
-    array.forEach(e => {
+    this.periodArray.forEach(e => {
       if (
         temp.find(function(element, index) {
           indexOfWidth = index;
@@ -299,6 +439,7 @@ export class ReportsComponent implements OnInit, OnChanges {
         ]);
       }
     });
+    this.generalArray = temp;
     this.setDetailChartDatas(temp);
   }
 
@@ -307,11 +448,22 @@ export class ReportsComponent implements OnInit, OnChanges {
     this.detailChartData.splice(0, this.detailChartData.length);
     this.detailChartLabel.splice(0, this.detailChartLabel.length);
     array.forEach(e => {
-      this.detailChartData.push(Math.round(e[1] * 100) / 100);
+      this.detailChartData.push(Math.round(e[this.bilCheck ? 3 : 1] * 100) / 100);
       this.detailChartBgColor.push(e[2]);
       this.detailChartLabel.push(e[0]);
     });
-    this.isVisible = true;
+  }
+
+  detailChartVisible() {
+    return this.periodArray.length > 0
+      ? this.bilCheck
+        ? !this.periodArray.every(this.includesNonBillable)
+        : true
+      : true;
+  }
+
+  includesNonBillable(element) {
+    return !element.billable;
   }
 
   setChart() {
@@ -326,18 +478,30 @@ export class ReportsComponent implements OnInit, OnChanges {
           },
           {
             data: [],
-            backgroundColor: 'rgb(211, 211, 211, 0.7)'
+            backgroundColor: 'rgba(53, 130, 255, 0.1)'
           }
         ]
       },
       options: {
         scales: {
-          xAxes: [{ stacked: true }],
+          xAxes: [
+            {
+              stacked: true,
+              scaleLabel: {
+                display: true,
+                labelString: 'days in dd.mm. format'
+              }
+            }
+          ],
           yAxes: [
             {
               stacked: true,
               ticks: {
                 beginAtZero: true
+              },
+              scaleLabel: {
+                display: true,
+                labelString: 'time in hours'
               }
             }
           ]

@@ -1,22 +1,50 @@
 <mat-card>
   <mat-card-title>Reports</mat-card-title>
   <mat-card-content>
-    <mat-form-field>
-      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="dateInit" (dateChange)="addEvent($event, true)" placeholder="Start date">
+    <mat-form-field class="mat-form-field periodselection">
+      <mat-select [(value)]="selected" (selectionChange)="selectedOption()" placeholder="Select a period">
+        <mat-option value="0">Week</mat-option>
+        <mat-option value="1">Last Week</mat-option>
+        <mat-option value="2">Month</mat-option>
+        <mat-option value="3">Last Month</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field style="width: 11vw; margin-right: 5px">
+      <input matInput [max]="maxDate" [matDatepicker]="dp1" [formControl]="dateInit" (dateChange)="addEvent($event, true)" placeholder="Start date" readonly>
       <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
       <mat-datepicker #dp1></mat-datepicker>
     </mat-form-field>
-    <mat-form-field>
-      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateChange)="addEvent($event, false)" placeholder="End date">
+    <mat-form-field style="width: 11vw; margin-right: 20px">
+      <input matInput [max]="maxDate" [matDatepicker]="dp2" [formControl]="date" (dateChange)="addEvent($event, false)" placeholder="End date" readonly>
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
+    <mat-form-field>
+      <mat-select [(value)]="projectSelection" (selectionChange)="selectedProject()" placeholder="Filter projects" [formControl]="projects" multiple>
+          <mat-select-trigger>
+              {{projects.value ? projects.value[0] : ''}}
+              <span *ngIf="projects.value?.length > 1" class="example-additional-selection">
+                (+{{projects.value.length - 1}} {{projects.value?.length === 2 ? 'other' : 'others'}})
+              </span>
+            </mat-select-trigger>
+        <mat-option *ngFor="let project of projectList" [value]="project">{{project}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <mat-checkbox class="checkbox" (change)="checkBox($event)" [ngModel]="bilCheck">
+      Show only billable
+    </mat-checkbox>
+    <h3>Total time: {{getTotalTime(true)}} h ({{getTotalTime(false)}} h billable)</h3>
     <div class="chart" id="canvasContainer">
       <canvas id="overView" height="40">Your browser does not support canvas element.</canvas>
     </div>
-    <form [style.display]="isVisible ? 'block' : 'none'">
-        <mat-divider></mat-divider>
-        <div class="placeholder"></div>
+    <mat-divider></mat-divider><br />
+    <mat-accordion>
+        <mat-expansion-panel [expanded]="!detailChartVisible()">
+          <div class="no_project">No projects for this period or filters found.</div>
+        </mat-expansion-panel>
+        </mat-accordion>
+    <mat-accordion>
+    <mat-expansion-panel [expanded]="detailChartVisible()">
         <table class="detailChartTable">
           <tr>
             <td>
@@ -25,12 +53,13 @@
               </mat-list>
             </td>
             <td>
-              <div class="chart-container-small">
-                <canvas id="canvas2">Your browser does not support canvas element.</canvas>
+              <div class="chart-container-small canvas2">
+              <canvas id="canvas2">Your browser does not support canvas element.</canvas>
               </div>
             </td>
           </tr>
         </table>
-      </form>
+    </mat-expansion-panel>
+    </mat-accordion>
   </mat-card-content>
 </mat-card>
