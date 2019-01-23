@@ -566,7 +566,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     this.logCtrl.setValue(this.timeTracker.comment);
   }
 
-  loadTimeTracker() {
+  loadTimeTracker(startNewIfNone = false) {
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
       this.dataService.getIssues()
@@ -586,6 +586,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               issue: null,
               project: null
             };
+            if (startNewIfNone) {
+              this.startTimeTracker();
+            }
           }
           this.updateAutoCompletes();
           this.stoppingBlockedByLoading = false;
@@ -736,7 +739,14 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       });
   }
 
-  stopTimeTracker(): void {
+  /**
+   * Stops the running tracker and starts a new one with empty data
+   */
+  stopAndNew(): void {
+    this.stopTimeTracker(true);
+  }
+
+  stopTimeTracker(startNewAfterwards = false): void {
     this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
     this.timeTracker.comment = this.logCtrl.value;
@@ -760,7 +770,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           this.stoppingBlockedByLoading = false;
         } else {
           this.reloadTriggerSerivce.triggerTimeLogAdded(data);
-          this.loadTimeTracker();
+          this.loadTimeTracker(startNewAfterwards);
         }
       },
       error => {

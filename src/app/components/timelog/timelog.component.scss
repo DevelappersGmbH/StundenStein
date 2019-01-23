@@ -1,32 +1,34 @@
 $break-small: 700px;
 $break-medium: 992px;
-$break-large: 1240px;
 
-input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
+input[type="time"]::-webkit-clear-button,
+::-webkit-outer-spin-button,
+::-webkit-inner-spin-button {
   display: none;
-
 }
 
-.total-div{
+.flex-container {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  @media screen and (max-width: $break-medium) {
-    display: inline-block;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex-wrap: wrap;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
   }
 }
 
-.sp{
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position:relative;
-  bottom: -17px;
-
-}
-
 .part3 {
-  display: inline-block;
+  flex-grow: 0;
+  flex-shrink: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    display: block;
+    flex: 1 0 45%;
+    order: 2;
+  }
+  @media screen and (max-width: $break-small) {
+    margin-top: -15px;
+    margin-bottom: 20px;
   }
 }
 
@@ -35,102 +37,72 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .field {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin-left: 15px;
 }
 
 .issue {
-  width: 27%;
-  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
-    width: 20%;
-  }
+  flex-grow: 3;
+  flex-shrink: 1;
+  flex-basis: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 40%;
+    flex: 1 1 45%;
+    order: 1;
   }
-  @media screen and (max-width: $break-small) {
-    display: block;
-      width: 90%;
-  }
-
 }
 
 .project {
-  width: 10%;
+  flex-grow: 2;
+  flex-shrink: 1;
+  flex-basis: 0;
   margin-right: 10px;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 15%;
+    flex: 1 1 100%;
+    order: 4;
+    margin-top: 7px;
   }
   @media screen and (max-width: $break-small) {
-    display: block;
-    width: 90%;
+    margin-top: 5px;
   }
 }
 
 .comment {
-  width: 27%;
-  @media screen and (min-width: $break-medium) and (max-width: $break-large) {
-    width: 20%;
-  }
+  flex-grow: 3;
+  flex-shrink: 1;
+  flex-basis: 0;
   @media screen and (min-width: $break-small) and (max-width: $break-medium) {
-    width: 35%;
+    flex: 1 1 100%;
+    order: 3;
   }
   @media screen and (max-width: $break-small) {
-    display: block;
-    width: 90%;
+    margin-top: 5px;
   }
 }
 
-.icon{
-  color: #ccc;
-}
-
-.icon.active {
-  color: limegreen;
-}
-
-.icon.transparent {
-  position:relative;
-  bottom:-5px;
-  color: transparent;
-  margin-left: 5px;
-}
-
-.icon.attention {
-  color: orangered;
-}
-
-.icon.warning{
-  position:relative;
-  bottom:-5px;
-  color: orangered;
-  margin-left: 5px;
-}
-
-.start-time {
-  position:relative;
-  bottom:-2px;
-}
-
-.end-time {
-  position:relative;
-  bottom:-2px;
-  margin-left:3px;
-}
-
-.spinner{
-  position:relative;
-  bottom:-5px;
+.spinner {
+  position: relative;
+  bottom: -5px;
   margin-left: 9px;
   margin-right: 9px;
 }
 
 .tracked-time {
-  position:relative;
-  bottom:-1px;
-  margin-left:8px;
+  position: relative;
+  margin-left: 15px;
 }
 
-mat-form-field.edit .mat-form-field-underline {
-  display: none;
+.start-time {
+  width: 65px;
+}
+
+.end-time {
+  width: 65px;
+}
+
+.warning{
+  margin-right: 3px;
 }
 
 .mat-form-field-infix {

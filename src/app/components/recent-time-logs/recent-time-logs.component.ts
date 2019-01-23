@@ -1,10 +1,11 @@
+import { ReloadTriggerService } from './../../services/reload-trigger.service';
 import {
   Component,
   Input,
   OnChanges,
   OnInit,
   SimpleChanges
-  } from '@angular/core';
+} from '@angular/core';
 import { Issue } from 'src/app/model/issue.interface';
 import { Project } from './../../model/project.interface';
 import { TimeLog } from 'src/app/model/time-log.interface';
@@ -15,7 +16,7 @@ import { TimeLog } from 'src/app/model/time-log.interface';
   styleUrls: ['./recent-time-logs.component.scss']
 })
 export class RecentTimeLogsComponent implements OnInit, OnChanges {
-  constructor() {
+  constructor(private reloadTriggerService: ReloadTriggerService) {
     this.listLoading = true;
     this.numberOfUnbookedTimeLogs = 0;
     this.timeLogMap = new Map();
@@ -28,10 +29,12 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   unbookedTimeLogsMap: Map<Date, number>; // maps number of unbooked timeLogs to each date (for Badge on each date)
   numberOfUnbookedTimeLogs: number; // for Badge at headline
   listLoading: boolean; // loading spinner
+  loadingMoreTimeLogs: boolean; // shows if load-more button should be visible
 
   @Input() projects: Project[];
   @Input() issues: Issue[];
   @Input() timeLogs: TimeLog[];
+  @Input() allTimeLogsLoaded: boolean;
 
   ngOnInit() {}
 
@@ -45,6 +48,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
+    this.loadingMoreTimeLogs = false;
   }
 
   // creates array with all existing dates, maps arrya of corresponding timeLogs to each date
@@ -63,7 +67,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       });
       // create new array and insert it at the date
       if (!dateExists) {
-        newDate = timeLog.timeStarted;
+        newDate = this.createEmptyDate(timeLog.timeStarted);
         seperateDates.push(newDate);
         this.timeLogMap.set(newDate, new Array());
       }
@@ -71,6 +75,18 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.timeLogMap.get(newDate).push(timeLog);
     });
     this.dateList = seperateDates; // create the new dateList
+  }
+
+  createEmptyDate(date: Date) {
+    const newDate = new Date();
+    newDate.setUTCDate(date.getUTCDate());
+    newDate.setUTCMonth(date.getUTCMonth());
+    newDate.setUTCFullYear(date.getUTCFullYear());
+    newDate.setUTCHours(0);
+    newDate.setUTCMinutes(0);
+    newDate.setUTCSeconds(0);
+    newDate.setUTCMilliseconds(0);
+    return newDate;
   }
 
   // compare two dates, ignoring hours, minutes and seconds
@@ -98,5 +114,10 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       });
       this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
     });
+  }
+
+  loadMoreTimeLogs() {
+    this.loadingMoreTimeLogs = true;
+    this.reloadTriggerService.triggerLoadMoreTimeLogs();
   }
 }

@@ -25,8 +25,8 @@ export class AuthenticationService {
     let newExpirationDate = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
-      currentDate.getDate(),
-      currentDate.getHours() + 4,
+      currentDate.getDate() + 5,
+      currentDate.getHours(),
       currentDate.getMinutes()
     );
     if (rememberMe) {
