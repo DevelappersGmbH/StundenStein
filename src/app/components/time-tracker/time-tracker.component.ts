@@ -266,7 +266,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   updateTracker(stopTrackerAfterwards = false, startNewTrackerAfterStoppingIt = false): void {
     this.lastTrackerUpdate = this.now();
     this.timeTracker.comment = this.logCtrl.value;
-    if (this.timeTracker.comment.includes('$$')) {
+    if (this.timeTracker.comment !== null && this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
       this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
     }
     if (isUndefined(this.timeTracker.id)) {
