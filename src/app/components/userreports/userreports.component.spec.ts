@@ -48,4 +48,9 @@ describe('UserReportsComponent', () => {
     component.ngOnInit();
     expect(component.generalArray).toEqual([correctGeneralArray]);
   });
+
+  it('should set time correctly to hh:mm format', () => {
+    component.ngOnInit();
+    expect(component.getRequiredTime(0)).toBe('05:00');
+  });
 });

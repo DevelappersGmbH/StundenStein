@@ -63,49 +63,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
-      change.currentValue.forEach(log => {
-        if (
-          !isUndefined(log.comment) &&
-          !isNull(log.comment) &&
-          log.comment.length > 0
-        ) {
-          this.timeLogs.unshift(log);
-        }
-      });
     }
-    const mockUser = {
-      name: 'TestUser',
-      id: 99
-    };
-
-    const mockProject = {
-      id: 2,
-      name: 'TestProject',
-      color: 'Red'
-    };
-
-    const mockIssue = {
-      id: 3,
-      subject: 'TestIssue',
-      tracker: 'TestTracker',
-      project: mockProject,
-      assignedTo: mockUser
-    };
-    this.date = new Date('October 2, 2018 16:00:00');
-    this.timeLogs = [{
-      id: 1,
-      timeStarted: new Date('October 2, 2018 11:00:00'),
-      timeStopped: new Date('October 2, 2018 16:00:00'),
-      comment: 'Testcomment 1',
-      timeInHours: 29,
-      booked: true,
-      hourGlassTimeBookingId: 1,
-      redmineTimeEntryId: 1,
-      billable: true,
-      issue: mockIssue,
-      project: mockProject,
-      user: mockUser
-    }];
     this.ngOnInit();
   }
 
