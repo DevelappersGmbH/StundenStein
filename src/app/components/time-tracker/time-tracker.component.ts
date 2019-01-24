@@ -771,7 +771,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   stopTimeTracker(startNewAfterwards = false, updateBeforeExecution = true): void {
     // Check if update has to be performed first
     if (updateBeforeExecution) {
-      this.doUpdateIfNecessaryAndStop();
+      this.doUpdateIfNecessaryAndStop(startNewAfterwards);
       return;
     }
     this.lastTrackerUpdate = this.now();
