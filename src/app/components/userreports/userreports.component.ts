@@ -29,12 +29,12 @@ export class UserReportsComponent implements OnInit, OnChanges {
   elementPosition;
   getSize;
   firstInit = true;
+  elementLeft: number;
+  elementWidth: number;
 
   // constructor is loading various npm packages for scaling due to the info bubble
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
-    this.elementPosition = require('element-position');
-    this.getSize = require('get-size');
     this.onResize();
   }
 
@@ -325,8 +325,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
   // returning the percentaged number of the position of the bubble explained above
   getBubblePos(i): string {
     const el = document.getElementById('chart' + i);
-    const pos = this.elementPosition.getCoordinates(el);
-    let value = ((pos.left + this.getSize(el).width / 2) / this.screenWidth) * 100 - 9;
+    let value = ((el.getBoundingClientRect().left + el.offsetWidth / 2) / this.screenWidth) * 100 - 9;
     value += value * 0.025;
     return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }
