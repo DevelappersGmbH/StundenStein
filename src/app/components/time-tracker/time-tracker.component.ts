@@ -80,7 +80,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       const change = changes['timeLogs'];
       this.logs = [];
       const logComp: String[] = [];
-      change.currentValue.forEach(log => {
+      change.currentValue.slice(0, 100).forEach(log => {
         const logCompString: String = this.makeLogComparisonString(log);
         if (
           !isUndefined(log.comment) &&
