@@ -241,8 +241,7 @@ export class DataService {
         );
         const redmineTimeEntryActivities: RedmineTimeEntryActivities = results.find(
           item =>
-            (<RedmineTimeEntryActivities>item).time_entry_activities !==
-              undefined &&
+            (<RedmineTimeEntryActivities>item).time_entry_activities !== undefined &&
             (<RedmineTimeEntryActivities>item).time_entry_activities !== null
         );
         return this.hourglassMapper.mapHourGlassTimeTrackersToFirstTimeTracker(
@@ -329,8 +328,12 @@ export class DataService {
                       redmineTimeEntryActivities
                     ),
                     comments: createdTimeLog.comments,
-                    issue_id: timelog.issue.id,
-                    project_id: timelog.project.id,
+                    issue_id:
+                      timelog.issue && timelog.issue.id ? timelog.issue.id : null,
+                    project_id:
+                      timelog.project && timelog.project.id
+                        ? timelog.project.id
+                        : null,
                     user_id: timelog.user.id
                   }
                 };
