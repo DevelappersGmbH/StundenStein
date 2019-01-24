@@ -752,7 +752,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
 
   doUpdateIfNecessaryAndStop(startNewAfterwards = false): void {
     let comment: String = this.logCtrl.value;
-    if (comment.includes('$$')) {
+    if (comment !== null && comment !== undefined && comment.includes('$$')) {
       comment = comment.substring(comment.indexOf('$$') + 2);
     }
     const issue: Issue = this.issueCtrl.value;
