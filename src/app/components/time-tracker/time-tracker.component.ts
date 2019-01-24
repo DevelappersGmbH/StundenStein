@@ -483,12 +483,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
     let prefix = '';
+    this.stoppingBlockedByNegativeTime = (sec <= 3);
     if (sec < 0) {
       sec = -sec;
       prefix = '- ';
-      this.stoppingBlockedByNegativeTime = true;
-    } else {
-      this.stoppingBlockedByNegativeTime = false;
     }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);
