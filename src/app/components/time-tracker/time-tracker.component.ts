@@ -297,10 +297,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             project: null
           };
         }
-        this.stoppingBlockedByLoading = false;
-        this.updateAutoCompletes();
         if (stopTrackerAfterwards) {
           this.stopTimeTracker(startNewTrackerAfterStoppingIt, false);
+        } else {
+          this.stoppingBlockedByLoading = false;
+          this.updateAutoCompletes();
         }
       },
       error => {
@@ -761,10 +762,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.timeTracker.issue === issue &&
       this.timeTracker.project === project
       ) {
-        console.log('noUpdateNecessary');
         this.stopTimeTracker(startNewAfterwards, false);
     } else {
-      console.log('updateNecessary');
       this.updateTracker(true, startNewAfterwards);
     }
   }
