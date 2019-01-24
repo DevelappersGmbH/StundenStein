@@ -6,9 +6,9 @@ import {
   OnChanges,
   OnInit,
   SimpleChanges
-  } from '@angular/core';
+} from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
-import { isNull, isUndefined } from 'util';
+import { isUndefined } from 'util';
 import { TimeLog } from 'src/app/model/time-log.interface';
 declare var require: any;
 
@@ -182,8 +182,8 @@ export class UserReportsComponent implements OnInit, OnChanges {
     width.forEach(e => {
       e[1] = Math.round((e[1] / counter) * 100);
       e[3] === 0
-      ? e[3] = 0
-      : e[3] = Math.round((e[3] / counterBillable) * 100);
+        ? (e[3] = 0)
+        : (e[3] = Math.round((e[3] / counterBillable) * 100));
     });
     width.sort((a, b) => a[0].localeCompare(b[0]));
     const npaValue = width.find(function(element) {
@@ -249,8 +249,12 @@ export class UserReportsComponent implements OnInit, OnChanges {
 
   // returns false if there is no project for the selected period
   projectExists() {
-    const check = this.bilCheck ? !this.generalArray.every(x => this.noProjectIsBillable(x)) : true;
-    return !isUndefined(this.generalArray) && this.generalArray.length > 0 && check;
+    const check = this.bilCheck
+      ? !this.generalArray.every(x => this.noProjectIsBillable(x))
+      : true;
+    return (
+      !isUndefined(this.generalArray) && this.generalArray.length > 0 && check
+    );
   }
 
   noProjectIsBillable(e): boolean {
@@ -283,18 +287,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
 
   // the following functions return data shown in the bubble that is popping up by hovering over a project
   getRequiredTime(i): string {
-    let h, m;
-    const temp = this.generalArray[i][!this.bilCheck ? 4 : 5];
-    if (temp < 0.017) {
-      return '00:01';
-    }
-    Math.floor(temp) < 10
-      ? (h = '0' + Math.floor(temp))
-      : (h = Math.floor(temp));
-    (temp % 1) * 60 < 10
-      ? (m = '0' + Math.round((temp % 1) * 60))
-      : (m = Math.round((temp % 1) * 60));
-    return h + ':' + m;
+    return this.getTimeInHHMM(this.generalArray[i][!this.bilCheck ? 4 : 5]);
   }
 
   getPercentage(i): string {
@@ -308,18 +301,32 @@ export class UserReportsComponent implements OnInit, OnChanges {
           '% billable';
   }
 
+  getTotalTime(bool: boolean): string {
+    return this.getTimeInHHMM(
+      this.generalArray.reduce((a, b) => a + b[bool ? 5 : 4], 0)
+    );
+  }
+
+  // calculate the timeInHours in a HH:MM format
+  getTimeInHHMM(temp: number): string {
+    let h, m;
+    if (temp < 0.017) {
+      return '00:01';
+    }
+    Math.floor(temp) < 10
+      ? (h = '0' + Math.floor(temp))
+      : (h = Math.floor(temp));
+    (temp % 1) * 60 < 10
+      ? (m = '0' + Math.round((temp % 1) * 60))
+      : (m = Math.round((temp % 1) * 60));
+    return h + ':' + m;
+  }
+
   // returning the percentaged number of the position of the bubble explained above
   getBubblePos(i): string {
     const el = document.getElementById('chart' + i);
     const pos = this.elementPosition.getCoordinates(el);
-    const posFirstLeft = this.elementPosition.getCoordinates(
-      document.getElementById('chart0')
-    );
-    const posLastRight = this.elementPosition.getCoordinates(
-      document.getElementById('chart' + (this.generalArray.length - 1))
-    );
-    let value =
-      ((pos.left + this.getSize(el).width / 2) / this.screenWidth) * 100 - 9;
+    let value = ((pos.left + this.getSize(el).width / 2) / this.screenWidth) * 100 - 9;
     value += value * 0.025;
     return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }
