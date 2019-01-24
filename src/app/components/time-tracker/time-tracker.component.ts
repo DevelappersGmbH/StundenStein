@@ -79,17 +79,34 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
       this.logs = [];
+      const logComp: String[] = [];
       change.currentValue.forEach(log => {
+        const logCompString: String = this.makeLogComparisonString(log);
         if (
           !isUndefined(log.comment) &&
           !isNull(log.comment) &&
-          log.comment.length > 0
+          log.comment.length > 0 &&
+          !logComp.includes(logCompString)
         ) {
           this.logs.unshift(log);
+          logComp.unshift(logCompString);
         }
       });
     }
   }
+
+  /**
+   * Returns a String containing all important data of given TimeLog for comment-issue-project comparison
+   * @param log TimeLog to create comparison string from
+   */
+  makeLogComparisonString(log: TimeLog): String {
+    let issueComp: String = '';
+    if (log.issue !== null && log.issue !== undefined) { issueComp = log.issue.id.toString(); }
+    let projectComp: String = '';
+    if (log.project !== null && log.project !== undefined) { projectComp = log.project.id.toString(); }
+    return log.comment + '|' + issueComp + '|' + projectComp;
+  }
+
 
   ngOnInit() {
     this.issueCtrl.disable();
