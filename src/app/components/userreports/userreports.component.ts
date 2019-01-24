@@ -1,17 +1,15 @@
-declare var require: any;
 import {
+  ChangeDetectionStrategy,
   Component,
-  OnInit,
+  HostListener,
   Input,
   OnChanges,
-  SimpleChanges,
-  HostListener,
-  ChangeDetectionStrategy
+  OnInit,
+  SimpleChanges
 } from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
+import { isUndefined } from 'util';
 import { TimeLog } from 'src/app/model/time-log.interface';
-import { isNull, isUndefined } from 'util';
-// import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.spec';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,12 +28,12 @@ export class UserReportsComponent implements OnInit, OnChanges {
   elementPosition;
   getSize;
   firstInit = true;
+  elementLeft: number;
+  elementWidth: number;
 
   // constructor is loading various npm packages for scaling due to the info bubble
   constructor(private errorService: ErrorService) {
     this.pixelWidth = require('string-pixel-width');
-    this.elementPosition = require('element-position');
-    this.getSize = require('get-size');
     this.onResize();
   }
 
@@ -183,7 +181,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
     });
     width.forEach(e => {
       e[1] = Math.round((e[1] / counter) * 100);
-      e[3] = Math.round((e[3] / counterBillable) * 100);
+      e[3] === 0
+        ? (e[3] = 0)
+        : (e[3] = Math.round((e[3] / counterBillable) * 100));
     });
     width.sort((a, b) => a[0].localeCompare(b[0]));
     const npaValue = width.find(function(element) {
@@ -197,7 +197,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   // due to the filter function above
-
   npaFinder(element: Array<any>) {
     return element[0] !== 'No project assigned';
   }
@@ -240,6 +239,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
     event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
   }
 
+  // called when sth from the dropdown is selected
   selectedOption() {
     this.onResize();
     this.period = Number(this.selected);
@@ -247,8 +247,18 @@ export class UserReportsComponent implements OnInit, OnChanges {
     this.ngOnInit();
   }
 
+  // returns false if there is no project for the selected period
   projectExists() {
-    return !(isUndefined(this.generalArray) || this.generalArray.length === 0);
+    const check = this.bilCheck
+      ? !this.generalArray.every(x => this.noProjectIsBillable(x))
+      : true;
+    return (
+      !isUndefined(this.generalArray) && this.generalArray.length > 0 && check
+    );
+  }
+
+  noProjectIsBillable(e): boolean {
+    return e[3] === 0;
   }
 
   // the following "get"-function returns are corresponding to the project id "i"
@@ -277,18 +287,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
 
   // the following functions return data shown in the bubble that is popping up by hovering over a project
   getRequiredTime(i): string {
-    let h, m;
-    const temp = this.generalArray[i][!this.bilCheck ? 4 : 5];
-    if (temp < 0.017) {
-      return '00:01';
-    }
-    Math.floor(temp) < 10
-      ? (h = '0' + Math.floor(temp))
-      : (h = Math.floor(temp));
-    (temp % 1) * 60 < 10
-      ? (m = '0' + Math.round((temp % 1) * 60))
-      : (m = Math.round((temp % 1) * 60));
-    return h + ':' + m;
+    return this.getTimeInHHMM(this.generalArray[i][!this.bilCheck ? 4 : 5]);
   }
 
   getPercentage(i): string {
@@ -302,18 +301,31 @@ export class UserReportsComponent implements OnInit, OnChanges {
           '% billable';
   }
 
+  getTotalTime(bool: boolean): string {
+    return this.getTimeInHHMM(
+      this.generalArray.reduce((a, b) => a + b[bool ? 5 : 4], 0)
+    );
+  }
+
+  // calculate the timeInHours in a HH:MM format
+  getTimeInHHMM(temp: number): string {
+    let h, m;
+    if (temp < 0.017) {
+      return '00:01';
+    }
+    Math.floor(temp) < 10
+      ? (h = '0' + Math.floor(temp))
+      : (h = Math.floor(temp));
+    (temp % 1) * 60 < 10
+      ? (m = '0' + Math.round((temp % 1) * 60))
+      : (m = Math.round((temp % 1) * 60));
+    return h + ':' + m;
+  }
+
   // returning the percentaged number of the position of the bubble explained above
   getBubblePos(i): string {
     const el = document.getElementById('chart' + i);
-    const pos = this.elementPosition.getCoordinates(el);
-    const posFirstLeft = this.elementPosition.getCoordinates(
-      document.getElementById('chart0')
-    );
-    const posLastRight = this.elementPosition.getCoordinates(
-      document.getElementById('chart' + (this.generalArray.length - 1))
-    );
-    let value =
-      ((pos.left + this.getSize(el).width / 2) / this.screenWidth) * 100 - 9;
+    let value = ((el.getBoundingClientRect().left + el.offsetWidth / 2) / this.screenWidth) * 100 - 9;
     value += value * 0.025;
     return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }

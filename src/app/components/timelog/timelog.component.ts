@@ -29,8 +29,7 @@ import { User } from '../../model/user.interface';
 @Component({
   selector: 'app-timelog',
   templateUrl: './timelog.component.html',
-  styleUrls: ['./timelog.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  styleUrls: ['./timelog.component.scss']
 })
 export class TimeLogComponent implements OnInit, OnChanges {
   constructor(
@@ -50,12 +49,12 @@ export class TimeLogComponent implements OnInit, OnChanges {
 
   trackedTime: Date;
   editMode = false;
-  editButton = 'edit';
-  loading = false;
-  loadingDel = false;
+  editButton = 'edit'; // mat icon used for edit button accroding to current mode
+  loading = false; // spinner indicator for edit buttons
+  loadingDel = false; // spinner indicator for delete button
+  trackerSpinning = false; // spinner indicator for play button
 
   restartBlocked = false;
-  trackerSpinning = false;
 
   issueControl = new FormControl();
   projectControl = new FormControl();
@@ -145,6 +144,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     });
   }
 
+  /*truncate the subjects shown in autocomplete dropdowns*/
   shorten(value: string, maxLength: number, abbr: string = '…'): string {
     if (!value) {
       return '';
@@ -159,9 +159,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     if (!issue) {
       return '';
     }
-    return (
-      issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject
-    );
+    return issue.tracker + ' #' + issue.id.toString() + ': ' + issue.subject;
   }
 
   displayProject = project => {
@@ -182,6 +180,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     return log.substring(log.indexOf('$$') + 2);
   }
 
+  /*filter issues dsplayed in issue autocomplete*/
   private filterIssues(value): Issue[] {
     if (!this.isString(value)) {
       value = value.subject;
@@ -201,6 +200,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     );
   }
 
+  /*filter projects dsplayed in project autocomplete*/
   private filterProjects(value): Project[] {
     if (!this.isString(value)) {
       value = value.name;
@@ -218,6 +218,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     );
   }
 
+  /*filter comment dsplayed in comment autocomplete*/
   private filterLogs(value): TimeLog[] {
     if (!this.isString(value)) {
       value = value.comment;
@@ -242,6 +243,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     return Object.prototype.toString.call(value) === '[object String]';
   }
 
+  /*updates issues used for filtering according to chosen project*/
   updateIssueOptions(project) {
     this.issueOptions = [];
     this.issues.forEach(issue => {
@@ -251,6 +253,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     });
   }
 
+  /*updates projects used for filtering according to chosen issue*/
   selectIssue(issue) {
     if (this.findIssue(issue)) {
       this.timeLog.issue = issue;
@@ -275,6 +278,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     }
   }
 
+  /*updates issues and projects used for filtering according to chosen project*/
   selectProject(project) {
     if (this.findProject(project)) {
       this.timeLog.project = project;
@@ -293,6 +297,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     }
   }
 
+  /*updates current issue and project when an appropriate comment is selected*/
   selectLog(logData: string) {
     if (logData === null || logData.length < 1 || !logData.includes('$$')) {
       this.timeLog.comment = '';
@@ -334,6 +339,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.timeLog.billable = !this.timeLog.billable;
   }
 
+  /*updates end time when new end time is set*/
   changeEndTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
@@ -351,6 +357,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.calculateTime();
   }
 
+  /*updates start time when new start time is set*/
   changeStartTime(time) {
     const hours = parseInt(time.split(':')[0], 10);
     const mins = parseInt(time.split(':')[1], 10);
@@ -368,6 +375,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.calculateTime();
   }
 
+  /*updates tracked time according to new start time and end time*/
   private calculateTime() {
     const seconds =
       (<any>this.timeLog.timeStopped - <any>this.timeLog.timeStarted) / 1000;
@@ -386,6 +394,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     }
   }
 
+  /*change between edit mode and view mode*/
   changeMode() {
     if (this.editMode === false) {
       /*change button to "accept", everything editable*/
@@ -400,6 +409,18 @@ export class TimeLogComponent implements OnInit, OnChanges {
         this.editButton = 'edit';
       }
       this.updateTimeLog();
+    }
+    this.editMode = !this.editMode;
+  }
+
+  /*exit edit mode without saving*/
+  abort() {
+    if (this.timeLog.booked === false) {
+      /*change button to "ACHTUNG!", issue, comment, project, billable, end/start time uneditable*/
+      this.editButton = 'playlist_add';
+    } else {
+      /* change button to "edit", issue, comment, project, billable, end/start time uneditable*/
+      this.editButton = 'edit';
     }
     this.editMode = !this.editMode;
   }

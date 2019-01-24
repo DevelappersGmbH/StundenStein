@@ -10,3 +10,25 @@ body {
   border: 1px solid #d62c36;
 }
 
+.icon {
+  color: #ccc;
+}
+
+.icon.active {
+  color: limegreen;
+}
+
+.icon.attention {
+  color: orangered;
+}
+
+.icon.warning {
+  position: relative;
+  bottom: -5px;
+  color: orangered;
+  margin-left: 5px;
+}
+
+#URcheckbox label {
+  padding-bottom: 3px;
+}
