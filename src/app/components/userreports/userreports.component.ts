@@ -28,8 +28,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   elementPosition;
   getSize;
   firstInit = true;
-  elementLeft: number;
-  elementWidth: number;
 
   // constructor is loading various npm packages for scaling due to the info bubble
   constructor(private errorService: ErrorService) {

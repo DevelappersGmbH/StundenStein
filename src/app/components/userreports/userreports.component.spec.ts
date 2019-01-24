@@ -30,27 +30,20 @@ describe('UserReportsComponent', () => {
     userService = TestBed.get(UserService);
     dataService = TestBed.get(DataService);
     fixture.detectChanges();
+    component.date = DataServiceMock.getMockTimeLog().timeStopped;
+    component.timeLogs = new Array(DataServiceMock.getMockTimeLog());
+    component.ngOnInit();
   });
 
   it('should create', () => {
-    component.ngOnInit();
     expect(component).toBeTruthy();
   });
 
   it('should set generalArray correctly', () => {
-    const correctGeneralArray = new Array();
-    correctGeneralArray.push('TestProject', 100, 'Red', 100, 5, 5);
-    component.date = DataServiceMock.getMockTimeLog().timeStopped;
-    const temp = new Array();
-    temp.push(DataServiceMock.getMockTimeLog());
-    component.timeLogs = temp;
-    console.log(component.timeLogs);
-    component.ngOnInit();
-    expect(component.generalArray).toEqual([correctGeneralArray]);
+    expect(component.generalArray).toEqual(new Array(['TestProject', 100, 'Red', 100, 5, 5]));
   });
 
   it('should set time correctly to hh:mm format', () => {
-    component.ngOnInit();
     expect(component.getRequiredTime(0)).toBe('05:00');
   });
 });
