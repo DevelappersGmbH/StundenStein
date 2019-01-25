@@ -11,6 +11,8 @@ import { ErrorService } from '../../services/error/error.service';
 import { isUndefined } from 'util';
 import { TimeLog } from 'src/app/model/time-log.interface';
 
+declare var require: any;
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-userreports',
