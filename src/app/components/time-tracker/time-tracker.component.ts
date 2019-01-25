@@ -79,17 +79,34 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
       this.logs = [];
-      change.currentValue.forEach(log => {
+      const logComp: String[] = [];
+      change.currentValue.slice(0, 100).forEach(log => {
+        const logCompString: String = this.makeLogComparisonString(log);
         if (
           !isUndefined(log.comment) &&
           !isNull(log.comment) &&
-          log.comment.length > 0
+          log.comment.length > 0 &&
+          !logComp.includes(logCompString)
         ) {
           this.logs.unshift(log);
+          logComp.unshift(logCompString);
         }
       });
     }
   }
+
+  /**
+   * Returns a String containing all important data of given TimeLog for comment-issue-project comparison
+   * @param log TimeLog to create comparison string from
+   */
+  makeLogComparisonString(log: TimeLog): String {
+    let issueComp: String = '';
+    if (log.issue !== null && log.issue !== undefined) { issueComp = log.issue.id.toString(); }
+    let projectComp: String = '';
+    if (log.project !== null && log.project !== undefined) { projectComp = log.project.id.toString(); }
+    return log.comment + '|' + issueComp + '|' + projectComp;
+  }
+
 
   ngOnInit() {
     this.issueCtrl.disable();
@@ -263,10 +280,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
   }
 
-  updateTracker(): void {
+  updateTracker(stopTrackerAfterwards = false, startNewTrackerAfterStoppingIt = false): void {
     this.lastTrackerUpdate = this.now();
     this.timeTracker.comment = this.logCtrl.value;
-    if (this.timeTracker.comment.includes('$$')) {
+    if (this.timeTracker.comment !== null && this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
       this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
     }
     if (isUndefined(this.timeTracker.id)) {
@@ -297,8 +314,12 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             project: null
           };
         }
-        this.stoppingBlockedByLoading = false;
-        this.updateAutoCompletes();
+        if (stopTrackerAfterwards) {
+          this.stopTimeTracker(startNewTrackerAfterStoppingIt, false);
+        } else {
+          this.stoppingBlockedByLoading = false;
+          this.updateAutoCompletes();
+        }
       },
       error => {
         this.errorService.errorDialog('Couldn\'t update time tracker.');
@@ -483,12 +504,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
     let prefix = '';
+    this.stoppingBlockedByNegativeTime = (sec <= 3);
     if (sec < 0) {
       sec = -sec;
       prefix = '- ';
-      this.stoppingBlockedByNegativeTime = true;
-    } else {
-      this.stoppingBlockedByNegativeTime = false;
     }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);
@@ -746,7 +765,30 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     this.stopTimeTracker(true);
   }
 
-  stopTimeTracker(startNewAfterwards = false): void {
+  doUpdateIfNecessaryAndStop(startNewAfterwards = false): void {
+    let comment: String = this.logCtrl.value;
+    if (comment !== null && comment !== undefined && comment.includes('$$')) {
+      comment = comment.substring(comment.indexOf('$$') + 2);
+    }
+    const issue: Issue = this.issueCtrl.value;
+    const project: Project = this.projectCtrl.value;
+    if (
+      this.timeTracker.comment === comment &&
+      this.timeTracker.issue === issue &&
+      this.timeTracker.project === project
+      ) {
+        this.stopTimeTracker(startNewAfterwards, false);
+    } else {
+      this.updateTracker(true, startNewAfterwards);
+    }
+  }
+
+  stopTimeTracker(startNewAfterwards = false, updateBeforeExecution = true): void {
+    // Check if update has to be performed first
+    if (updateBeforeExecution) {
+      this.doUpdateIfNecessaryAndStop(startNewAfterwards);
+      return;
+    }
     this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
     this.timeTracker.comment = this.logCtrl.value;

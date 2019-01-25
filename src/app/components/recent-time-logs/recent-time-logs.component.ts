@@ -35,6 +35,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   unbookedTimeLogsMap: Map<Date, number>;
   numberOfUnbookedTimeLogs: number;
   listLoading: boolean;
+  loadingMoreTimeLogs: boolean;
 
   @Input() projects: Project[];
   @Input() issues: Issue[];
@@ -52,6 +53,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
+    this.loadingMoreTimeLogs = false;
   }
 
   seperateDates() {
@@ -114,6 +116,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   }
 
   loadMoreTimeLogs() {
+    this.loadingMoreTimeLogs = true;
     this.reloadTriggerService.triggerLoadMoreTimeLogs();
   }
 }
