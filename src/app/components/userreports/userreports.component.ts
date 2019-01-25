@@ -21,7 +21,6 @@ declare var require: any;
 export class UserReportsComponent implements OnInit, OnChanges {
   screenWidth;
   period = 0;
-  date = new Date();
   bilCheck = false;
   generalArray = new Array();
   selected = '0';
@@ -29,8 +28,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
   elementPosition;
   getSize;
   firstInit = true;
-  elementLeft: number;
-  elementWidth: number;
 
   // constructor is loading various npm packages for scaling due to the info bubble
   constructor(private errorService: ErrorService) {
@@ -70,66 +67,72 @@ export class UserReportsComponent implements OnInit, OnChanges {
     return this.period === 0
       ? this.timeLogs.filter(x => this.checkDay(x))
       : this.period === 1
-      ? this.timeLogs.filter(x => this.checkYesterday(x))
+      ? this.timeLogs.filter(x => this.checkYesterday(x, true))
       : this.period === 2
       ? this.timeLogs.filter(x => this.checkWeek(x))
       : this.period === 3
-      ? this.timeLogs.filter(x => this.checkLastWeek(x))
+      ? this.timeLogs.filter(x => this.checkLastWeek(x, true))
       : this.period === 4
       ? this.timeLogs.filter(x => this.checkMonth(x))
-      : this.timeLogs.filter(x => this.checkLastMonth(x));
+      : this.timeLogs.filter(x => this.checkLastMonth(x, true));
   }
 
   // the following functions check if the timelog that is passed from the setPeriod function is in corresponding period
   checkDay(value: TimeLog) {
-    return (
-      this.date.getDate() === value.timeStopped.getDate() &&
-      this.date.getMonth() === value.timeStopped.getMonth() &&
-      this.date.getFullYear() === value.timeStopped.getFullYear()
-    );
+    return this.compareDates(new Date(), value.timeStopped);
   }
 
-  checkYesterday(value: TimeLog) {
-    const date = new Date(new Date().setDate(this.date.getDate() - 1));
-    return (
-      date.getDate() === value.timeStopped.getDate() &&
-      date.getMonth() === value.timeStopped.getMonth() &&
-      date.getFullYear() === value.timeStopped.getFullYear()
-    );
-  }
+  checkYesterday(value: TimeLog, bool: boolean) {
+    const date = new Date(new Date().setDate(new Date().getDate() - 1));
+    return (bool
+    ? this.compareDates(date, value.timeStarted) : false) ||
+      this.compareDates(date, value.timeStopped);
+    }
 
   checkWeek(value: TimeLog) {
     return (
-      this.getWeekNumber(value.timeStopped) === this.getWeekNumber(this.date) &&
-      this.date.getFullYear() === value.timeStopped.getFullYear()
+      this.getWeekNumber(value.timeStopped) ===
+        this.getWeekNumber(new Date()) &&
+      new Date().getFullYear() === value.timeStopped.getFullYear()
     );
   }
 
-  checkLastWeek(value: TimeLog) {
-    return (
-      this.getWeekNumber(value.timeStopped) ===
-        this.getWeekNumber(
-          new Date(new Date().setDate(this.date.getDate() - 7))
-        ) &&
-      this.date.getFullYear() -
-        (this.getWeekNumber(this.date) === 1 ? 1 : 0) ===
-        value.timeStopped.getFullYear()
-    );
+  checkLastWeek(value: TimeLog, bool: boolean) {
+    return (( bool ? (this.getWeekNumber(value.timeStarted) ===
+      this.getWeekNumber(new Date(new Date().setDate(new Date().getDate() - 7))) &&
+      new Date().getFullYear() - (this.getWeekNumber(new Date()) === 1 ? 1 : 0) === value.timeStarted.getFullYear()) : false) ||
+      (this.getWeekNumber(value.timeStopped) === this.getWeekNumber(new Date(new Date().setDate(new Date().getDate() - 7))) &&
+      new Date().getFullYear() - (this.getWeekNumber(new Date()) === 1 ? 1 : 0) === value.timeStopped.getFullYear()));
+
   }
 
   checkMonth(value: TimeLog) {
     return (
-      this.date.getMonth() === value.timeStopped.getMonth() &&
-      this.date.getFullYear() === value.timeStopped.getFullYear()
+      new Date().getMonth() === value.timeStopped.getMonth() &&
+      new Date().getFullYear() === value.timeStopped.getFullYear()
     );
   }
 
-  checkLastMonth(value: TimeLog) {
-    return this.date.getMonth() === 0
-      ? value.timeStopped.getMonth() === 11 &&
-          this.date.getFullYear() - 1 === value.timeStopped.getFullYear()
-      : this.date.getMonth() - 1 === value.timeStopped.getMonth() &&
-          this.date.getFullYear() === value.timeStopped.getFullYear();
+  checkLastMonth(value: TimeLog, bool: boolean) {
+    return ( bool ? (new Date().getMonth() === 0
+      ? value.timeStarted.getMonth() === 11 &&
+        new Date().getFullYear() - 1 === value.timeStarted.getFullYear()
+      : new Date().getMonth() - 1 === value.timeStarted.getMonth() &&
+        new Date().getFullYear() === value.timeStarted.getFullYear()) : false) ||
+      new Date().getMonth() === 0
+        ? value.timeStopped.getMonth() === 11 &&
+          new Date().getFullYear() - 1 === value.timeStopped.getFullYear()
+        : new Date().getMonth() - 1 === value.timeStopped.getMonth() &&
+          new Date().getFullYear() === value.timeStopped.getFullYear();
+  }
+
+  // compares two Date objects if they are containing the same day (time excluded)
+  compareDates(date1: Date, date2: Date) {
+    return (
+      date1.getDate() === date2.getDate() &&
+      date1.getMonth() === date2.getMonth() &&
+      date1.getFullYear() === date2.getFullYear()
+    );
   }
 
   // claculates the week number of a passed date object
@@ -146,8 +149,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
     let indexOfWidth,
       counter = 0,
       counterBillable = 0;
-    let width = new Array();
+    const width = new Array();
     array.forEach(e => {
+      const time = this.timeForPreviousDay(e)
+      ? this.setTime(e.timeStarted, e.timeStopped, e.timeInHours)
+      : 24 - (e.timeStarted.getHours() + ((e.timeStarted.getMinutes() / 3) * 5) / 100);
       if (
         width.find(function(element, index) {
           indexOfWidth = index;
@@ -156,7 +162,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
             : element[0] === 'No project assigned';
         })
       ) {
-        const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         width[indexOfWidth][1] += time;
         width[indexOfWidth][4] += time;
         if (e.billable) {
@@ -164,7 +169,6 @@ export class UserReportsComponent implements OnInit, OnChanges {
           width[indexOfWidth][5] += time;
         }
       } else {
-        const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
         width.push([
           e.project !== null ? e.project.name : 'No project assigned',
           time,
@@ -174,9 +178,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
           e.billable ? time : 0
         ]);
       }
-      counter += e.timeInHours;
+      counter += time;
       if (e.billable) {
-        counterBillable += e.timeInHours;
+        counterBillable += time;
       }
     });
     width.forEach(e => {
@@ -185,15 +189,35 @@ export class UserReportsComponent implements OnInit, OnChanges {
         ? (e[3] = 0)
         : (e[3] = Math.round((e[3] / counterBillable) * 100));
     });
-    width.sort((a, b) => a[0].localeCompare(b[0]));
-    const npaValue = width.find(function(element) {
+    this.generalArray = this.filterAndSort(width);
+  }
+
+  // filters and sorts the generalArray
+  filterAndSort(array: Array<any>): Array<any> {
+    array.sort((a, b) => a[0].localeCompare(b[0]));
+    const npaValue = array.find(function(element) {
       return element[0] === 'No project assigned';
     });
     if (npaValue !== undefined) {
-      width = width.filter(x => this.npaFinder(x));
-      width.push(npaValue);
+      array = array.filter(x => this.npaFinder(x));
+      array.push(npaValue);
     }
-    this.generalArray = width;
+    return array;
+  }
+
+  // check for timelogs passing midnight
+  timeForPreviousDay(e: TimeLog): boolean {
+    return this.period === 0
+      ? this.checkDay(e)
+      : this.period === 1
+      ? this.checkYesterday(e, false)
+      : this.period === 2
+      ? this.checkWeek(e)
+      : this.period === 3
+      ? this.checkLastWeek(e, false)
+      : this.period === 4
+      ? this.checkMonth(e)
+      : this.checkLastMonth(e, false);
   }
 
   // due to the filter function above
@@ -203,18 +227,16 @@ export class UserReportsComponent implements OnInit, OnChanges {
 
   // checks if a timelog is passing midnight and returns the duration of a timlog in hours
   setTime(start: Date, stop: Date, time: number): number {
-    return this.period === 0
+    return this.period === 0 || this.period === 1
       ? this.checkSameDayTimelog(start, stop, time)
-      : this.period === 1
+      : this.period === 2 || this.period === 3
       ? this.checkSameWeekTimelog(start, stop, time)
       : this.checkSameMonthTimelog(start, stop, time);
   }
 
   // the following functions are called by the setTime function in order to compare two date objects if they contain the same day
   checkSameDayTimelog(start: Date, stop: Date, time: number) {
-    return start.getDate() === stop.getDate() &&
-      start.getMonth() === stop.getMonth() &&
-      start.getFullYear() === stop.getFullYear()
+    return this.compareDates(start, stop)
       ? time
       : stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
   }
@@ -257,6 +279,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
     );
   }
 
+  // for the function above
   noProjectIsBillable(e): boolean {
     return e[3] === 0;
   }
@@ -325,7 +348,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
   // returning the percentaged number of the position of the bubble explained above
   getBubblePos(i): string {
     const el = document.getElementById('chart' + i);
-    let value = ((el.getBoundingClientRect().left + el.offsetWidth / 2) / this.screenWidth) * 100 - 9;
+    let value =
+      ((el.getBoundingClientRect().left + el.offsetWidth / 2) /
+        this.screenWidth) *
+        100 -
+      9;
     value += value * 0.025;
     return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }
