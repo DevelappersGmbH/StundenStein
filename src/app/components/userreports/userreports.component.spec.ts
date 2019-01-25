@@ -46,4 +46,13 @@ describe('UserReportsComponent', () => {
   it('should set time correctly to hh:mm format', () => {
     expect(component.getRequiredTime(0)).toBe('05:00');
   });
+  it('should return true if ther is a timelog in the correspondent time period', () => {
+    expect(component.projectExists()).toBe(true);
+  });
+  it('should return correct percentage of billable projects', () => {
+    expect(component.getBillPercent(0)).toBe('100% billable');
+  });
+  it('should return correct total time', () => {
+    expect(component.getTotalTime(false)).toBe('05:00');
+  });
 });
