@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+  import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { RecentTimeLogsComponent } from './recent-time-logs.component';
 import { UserServiceMock } from '../../services/mocked-services/UserServiceMock.spec';
 import { DataServiceMock } from '../../services/mocked-services/DataServiceMock.spec';
