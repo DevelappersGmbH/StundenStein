@@ -139,21 +139,23 @@ describe('RecentTimeLogsComponent', () => {
 
   it('should count number of unbookedTimeLogs correctly', () => {
     const timeLogMap = new Map();
-    timeLogMap.set(new Date('October 1, 2018 03: 24: 00'), [
-      mockTimeLog1,
-      mockTimeLog2
-    ]);
-    timeLogMap.set(new Date('October 4, 2018 03: 24: 00'), [mockTimeLog3]);
-    timeLogMap.set(new Date('October 5, 2018 03: 24: 00'), [mockTimeLog4]);
+    const d1 = new Date('October 1, 2018 03: 24: 00');
+    const d2 = new Date('October 4, 2018 03: 24: 00');
+    const d3 = new Date('October 5, 2018 03: 24: 00');
+    timeLogMap.set(d1, [mockTimeLog1, mockTimeLog2]);
+    timeLogMap.set(d2, [mockTimeLog3]);
+    timeLogMap.set(d3, [mockTimeLog4]);
     const unbookedTimeLogsMap = new Map();
-    unbookedTimeLogsMap.set(new Date('October 1, 2018 03: 24: 00'), 1);
-    unbookedTimeLogsMap.set(new Date('October 4, 2018 03: 24: 00'), 0);
-    unbookedTimeLogsMap.set(new Date('October 5, 2018 03: 24: 00'), 1);
+    unbookedTimeLogsMap.set(d1, 1);
+    unbookedTimeLogsMap.set(d2, 0);
+    unbookedTimeLogsMap.set(d3, 1);
     component.ngOnInit();
     component.timeLogMap = timeLogMap;
     component.countUnbookedTimeLogs();
     expect(component.numberOfUnbookedTimeLogs).toBe(2);
-    expect(component.unbookedTimeLogsMap).toEqual(unbookedTimeLogsMap);
+    expect(component.unbookedTimeLogsMap.get(d1)).toEqual(1);
+    expect(component.unbookedTimeLogsMap.get(d2)).toEqual(0);
+    expect(component.unbookedTimeLogsMap.get(d3)).toEqual(1);
   });
 
   it('should seperate dates correctly', () => {
@@ -183,8 +185,10 @@ describe('RecentTimeLogsComponent', () => {
       mockTimeLog4
     ];
     component.seperateDates();
-    list.forEach( (value: Date, index: number) => {
-          expect(component.compareDatesEqual(component.dateList[index], value)).toBeTruthy();
-      });
+    list.forEach((value: Date, index: number) => {
+      expect(
+        component.compareDatesEqual(component.dateList[index], value)
+      ).toBeTruthy();
+    });
   });
 });
