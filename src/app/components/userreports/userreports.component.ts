@@ -10,6 +10,7 @@ import {
 import { ErrorService } from '../../services/error/error.service';
 import { isUndefined } from 'util';
 import { TimeLog } from 'src/app/model/time-log.interface';
+
 declare var require: any;
 
 @Component({
@@ -45,6 +46,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
   }
 
   ngOnInit() {
+    // console.log(this.mock.getMockTimeLog());
     if (isUndefined(this.timeLogs)) {
       this.errorService.errorDialog(
         'Did not receive data from the dataService, wich distributes the project data.'
