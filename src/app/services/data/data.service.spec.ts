@@ -10,6 +10,7 @@ import { RedmineServiceMock } from '../mocked-services/RedmineServiceMock.spec';
 import { RedmineMapper } from 'src/app/model/mappers/redmine-mapper';
 import { ColorService } from '../color/color.service';
 import { UserService } from '../user/user.service';
+import { of } from 'rxjs';
 
 describe('DataService', () => {
   beforeEach(() =>
@@ -28,7 +29,7 @@ describe('DataService', () => {
   it('should get Projects', () => {
     const service: DataService = TestBed.get(DataService);
     const mapper: RedmineMapper = new RedmineMapper(new ColorService(), new UserService());
-    let projectArray = [{
+    const projectArray = [mapper.mapRedmineProjectToProject({
       id: 1,
       name: 'name',
       identifier: 'identifier',
@@ -40,7 +41,9 @@ describe('DataService', () => {
       status: 1,
       created_on: '12.12.12',
       updated_on: '13.13.13'
-    }];
-    expect(service.getProjects()).toEqual(mapper.mapRedmineProjectArrayToProjectArray(projectArray));
+    })];
+    service.getProjects().subscribe(data => {
+      expect(data).toEqual(projectArray);
+    });
   });
 });
