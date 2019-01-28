@@ -60,6 +60,7 @@ export class DataService {
     } else {
       this.projectsObservable = this.redmineService.getProjects().pipe(
         map(data => {
+          console.log(data);
           this.projects = this.redmineMapper.mapRedmineProjectArrayToProjectArray(
             data
           );

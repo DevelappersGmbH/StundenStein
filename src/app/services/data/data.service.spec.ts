@@ -1,16 +1,14 @@
-import { mockRedmineProjects } from './../mocked-services/RedmineServiceMock.spec';
+import { ColorService } from '../color/color.service';
 import { CookieService } from 'ngx-cookie-service';
-import { TestBed } from '@angular/core/testing';
-
 import { DataService } from './data.service';
-import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { of } from 'rxjs';
+import { RedmineMapper } from 'src/app/model/mappers/redmine-mapper';
 import { RedmineService } from '../redmine/redmine.service';
 import { RedmineServiceMock } from '../mocked-services/RedmineServiceMock.spec';
-import { RedmineMapper } from 'src/app/model/mappers/redmine-mapper';
-import { ColorService } from '../color/color.service';
+import { TestBed } from '@angular/core/testing';
 import { UserService } from '../user/user.service';
-import { of } from 'rxjs';
 
 describe('DataService', () => {
   beforeEach(() =>
@@ -18,7 +16,7 @@ describe('DataService', () => {
       imports: [HttpClientModule],
       providers: [CookieService, DatePipe,
         { provide: RedmineService, useClass: RedmineServiceMock }]
-})
+    })
   );
 
   it('should be created', () => {
@@ -26,24 +24,21 @@ describe('DataService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should get Projects', () => {
+  it('should get Projects correctly', () => {
     const service: DataService = TestBed.get(DataService);
     const mapper: RedmineMapper = new RedmineMapper(new ColorService(), new UserService());
-    const projectArray = [mapper.mapRedmineProjectToProject({
-      id: 1,
-      name: 'name',
-      identifier: 'identifier',
-      description: 'description',
-      parent: {
-        id: 2,
-        name: 'name2'
-      },
-      status: 1,
-      created_on: '12.12.12',
-      updated_on: '13.13.13'
-    })];
     service.getProjects().subscribe(data => {
-      expect(data).toEqual(projectArray);
+      expect(data).toEqual(mapper.mapRedmineProjectArrayToProjectArray(RedmineServiceMock.mockRedmineProjects));
+    });
+  });
+
+  it('Should get Issues correctly', () => {
+    const service: DataService = TestBed.get(DataService);
+    const mapper: RedmineMapper = new RedmineMapper(new ColorService(), new UserService());
+    service.getIssues().subscribe(data => {
+      expect(data).toEqual(mapper.mapRedmineIssueArrayToIssueArray(
+        RedmineServiceMock.mockRedmineIssues,
+        mapper.mapRedmineProjectArrayToProjectArray(RedmineServiceMock.mockRedmineProjects)));
     });
   });
 });
