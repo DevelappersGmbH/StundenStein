@@ -49,7 +49,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
 
   trackedTime: Date;
   editMode = false;
-  editButton = 'edit'; // mat icon used for edit button accroding to current mode
+  editButton = 'edit'; // mat icon used for edit button according to current mode
   loading = false; // spinner indicator for edit buttons
   loadingDel = false; // spinner indicator for delete button
   trackerSpinning = false; // spinner indicator for play button
@@ -218,7 +218,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     );
   }
 
-  /*filter comment dsplayed in comment autocomplete*/
+  /*filter comment displayed in comment autocomplete*/
   private filterLogs(value): TimeLog[] {
     if (!this.isString(value)) {
       value = value.comment;
@@ -460,29 +460,25 @@ export class TimeLogComponent implements OnInit, OnChanges {
   }
 
   deleteTimeLog() {
-    const that = this;
-    this.dataService.deleteTimeLog(this.timeLog).subscribe({
-      next() {
-        that.reloadTriggerService.triggerTimeLogDeleted(that.timeLog.id);
+    this.dataService.deleteTimeLog(this.timeLog).subscribe(() => {
+        this.reloadTriggerService.triggerTimeLogDeleted(this.timeLog.id);
       },
-      error() {
+      (error) => {
         this.errorService.errorDialog('Could not delete this timeLog :(');
       }
-    });
+    );
   }
 
   updateTimeLog() {
-    const that = this;
-    that.loading = true;
-    this.dataService.updateTimeLog(this.timeLog).subscribe({
-      next() {
-        that.loading = false;
-        that.reloadTriggerService.triggerTimeLogUpdated(that.timeLog);
+    this.loading = true;
+    this.dataService.updateTimeLog(this.timeLog).subscribe(() => {
+        this.loading = false;
+        this.reloadTriggerService.triggerTimeLogUpdated(this.timeLog);
       },
-      error() {
+        (error) => {
         this.errorService.errorDialog('Could not update this timeLog :(');
-        that.loading = false;
+        this.loading = false;
       }
-    });
+    );
   }
 }
