@@ -2,6 +2,7 @@ import { TimeLog } from 'src/app/model/time-log.interface';
 import { Observable, of } from 'rxjs';
 import { Project } from 'src/app/model/project.interface';
 import { Issue } from 'src/app/model/issue.interface';
+import { TimeTracker } from 'src/app/model/time-tracker.interface';
 const mockUser = {
   name: 'TestUser',
   id: 99
@@ -59,5 +60,9 @@ export class DataServiceMock {
 
   public getIssues(): Observable<Issue[]>{
     return of(mockIssues);
+  }
+
+  public getTimeTrackerByUserId(userId: number): Observable<TimeTracker> {
+    return of(undefined);
   }
 }
