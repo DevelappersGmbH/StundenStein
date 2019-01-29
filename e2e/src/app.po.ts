@@ -9,7 +9,7 @@ export class AppPage {
     return element(by.css('app-root h1')).getText();
   }
 
-  getTLIssue() {
+  /*getTLIssue() {
     return element(by.id('issue'));
   }
 
@@ -48,4 +48,5 @@ export class AppPage {
   getTLDelBtn() {
     return element(by.id('btnDel'));
   }
+  */
 }

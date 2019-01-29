@@ -12,6 +12,7 @@ describe('workspace-project App', () => {
     expect(page.getParagraphText()).toEqual('Welcome to StundenStein!');
   });
 
+  /*
   it('should make issue input clickable depending on the mode', () => {
     page.navigateTo();
     page.getTLEditBtn().click();
@@ -61,6 +62,7 @@ describe('workspace-project App', () => {
   });
 
   // + 1 test getTLDelBtn
+  */
 
 });
 
