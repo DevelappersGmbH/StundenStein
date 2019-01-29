@@ -1,5 +1,5 @@
 <mat-card>
-  <form *ngIf="startTimeModification">
+  <form *ngIf="startTimeModification && timeTracker !== null && timeTracker !== undefined && timeTracker.timeStarted !== null && timeTracker.timeStarted !== undefined">
     <div class="field-container">
       <span class="field"> Current time running: {{ currentTrackerTimeString }}, started at {{ timeTracker.timeStarted.toLocaleTimeString() }}</span>
       <mat-form-field class="field field-tiny time">
