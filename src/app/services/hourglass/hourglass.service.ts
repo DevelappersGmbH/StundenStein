@@ -207,13 +207,14 @@ export class HourGlassService extends BaseDataService {
   bookTimeLog(
     timeLogId: number,
     bookTimeLogRequest: HourGlassTimeLogBookRequest
-  ): Observable<HourGlassTimeBooking> {
+  ): Observable<HttpResponse<HourGlassTimeBooking>> {
     const query = this.getJsonEndpointUrl(
       this.timeLogsUrl + '/' + timeLogId + '/book'
     );
     return this.httpClient.post<HourGlassTimeBooking>(
       query,
-      bookTimeLogRequest
+      bookTimeLogRequest,
+      { observe: 'response' }
     );
   }
 
