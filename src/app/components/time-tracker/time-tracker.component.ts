@@ -184,12 +184,19 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     if (this.timeTracker !== null && this.timeTracker !== undefined) {
       if (this.timeTracker.id !== null && this.timeTracker.id !== undefined) {
         if (!this.stoppingBlockedByLoading && !this.stoppingBlockedByNegativeTime) {
-          console.log(this.timeTracker.timeStarted.toLocaleTimeString());
           this.startTimeCtrl.setValue(this.timeTracker.timeStarted.toLocaleTimeString());
           this.startTimeModification = true;
         }
       }
     }
+  }
+
+  /**
+   * Modifies selected tracker start time if allowed
+   */
+  modifyTrackerStart(): void {
+    const selectedTime: String = this.startTimeCtrl.value;
+    console.log(selectedTime);
   }
 
   /**
