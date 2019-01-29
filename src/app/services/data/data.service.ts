@@ -241,7 +241,8 @@ export class DataService {
         );
         const redmineTimeEntryActivities: RedmineTimeEntryActivities = results.find(
           item =>
-            (<RedmineTimeEntryActivities>item).time_entry_activities !== undefined &&
+            (<RedmineTimeEntryActivities>item).time_entry_activities !==
+              undefined &&
             (<RedmineTimeEntryActivities>item).time_entry_activities !== null
         );
         return this.hourglassMapper.mapHourGlassTimeTrackersToFirstTimeTracker(
@@ -329,7 +330,9 @@ export class DataService {
                     ),
                     comments: createdTimeLog.comments,
                     issue_id:
-                      timelog.issue && timelog.issue.id ? timelog.issue.id : null,
+                      timelog.issue && timelog.issue.id
+                        ? timelog.issue.id
+                        : null,
                     project_id:
                       timelog.project && timelog.project.id
                         ? timelog.project.id
@@ -340,9 +343,9 @@ export class DataService {
                 return this.hourglassService
                   .bookTimeLog(createdTimeLog.id, bookRequest)
                   .pipe(
-                    map(booking =>
+                    map(response =>
                       this.hourglassMapper.mapHourGlassTimeBookingToTimeLog(
-                        booking,
+                        response.body,
                         projects,
                         issues,
                         redmineTimeEntryActivities
@@ -412,12 +415,44 @@ export class DataService {
         }
 
         return forkJoin(calls).pipe(
-          map(results => {
+          flatMap(results => {
             let result = true;
             results.forEach(r => {
               result = result && r.ok;
             });
-            return result;
+            if (
+              result &&
+              (timelog.redmineTimeEntryId === undefined ||
+                timelog.redmineTimeEntryId === null) &&
+              timelog.project !== undefined &&
+              timelog.project !== null
+            ) {
+              // A timelog is booked if it has got a project attached.
+              // Book created time log
+              const bookRequest: HourGlassTimeLogBookRequest = {
+                time_booking: {
+                  start: timelog.timeStarted.toISOString(),
+                  stop: timelog.timeStopped.toISOString(),
+                  activity_id: this.redmineMapper.mapBillableToRedmineTimeEntryActivityId(
+                    timelog.billable,
+                    timeEntryActivities
+                  ),
+                  comments: timelog.comment,
+                  issue_id:
+                    timelog.issue && timelog.issue.id ? timelog.issue.id : null,
+                  project_id:
+                    timelog.project && timelog.project.id
+                      ? timelog.project.id
+                      : null,
+                  user_id: timelog.user.id
+                }
+              };
+
+              return this.hourglassService
+                .bookTimeLog(timelog.id, bookRequest)
+                .pipe(map(response => result && response.ok));
+            }
+            return of(result);
           })
         );
       })
