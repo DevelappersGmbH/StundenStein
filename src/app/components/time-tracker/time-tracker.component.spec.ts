@@ -33,6 +33,7 @@ describe('TimeTrackerComponent', () => {
   });
 
   it('should create', () => {
+    component.ngOnInit();
     expect(component).toBeTruthy();
   });
 });
