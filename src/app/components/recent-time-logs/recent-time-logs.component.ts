@@ -1,3 +1,4 @@
+import { ReloadTriggerService } from './../../services/reload-trigger.service';
 import {
   Component,
   Input,
@@ -19,7 +20,8 @@ import { UserService } from 'src/app/services/user/user.service';
 export class RecentTimeLogsComponent implements OnInit, OnChanges {
   constructor(
     private dataService: DataService,
-    private userService: UserService
+    private userService: UserService,
+    private reloadTriggerService: ReloadTriggerService
   ) {
     this.listLoading = true;
     this.numberOfUnbookedTimeLogs = 0;
@@ -33,10 +35,12 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
   unbookedTimeLogsMap: Map<Date, number>;
   numberOfUnbookedTimeLogs: number;
   listLoading: boolean;
+  loadingMoreTimeLogs: boolean;
 
   @Input() projects: Project[];
   @Input() issues: Issue[];
   @Input() timeLogs: TimeLog[];
+  @Input() allTimeLogsLoaded: boolean;
 
   ngOnInit() {}
 
@@ -49,6 +53,7 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       this.countUnbookedTimeLogs();
       this.listLoading = false;
     }
+    this.loadingMoreTimeLogs = false;
   }
 
   seperateDates() {
@@ -64,13 +69,25 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
         }
       });
       if (!dateExists) {
-        newDate = timeLog.timeStarted;
+        newDate = this.createEmptyDate(timeLog.timeStarted);
         seperateDates.push(newDate);
         this.timeLogMap.set(newDate, new Array());
       }
       this.timeLogMap.get(newDate).push(timeLog);
     });
     this.dateList = seperateDates;
+  }
+
+  createEmptyDate(date: Date) {
+    const newDate = new Date();
+    newDate.setUTCDate(date.getUTCDate());
+    newDate.setUTCMonth(date.getUTCMonth());
+    newDate.setUTCFullYear(date.getUTCFullYear());
+    newDate.setUTCHours(0);
+    newDate.setUTCMinutes(0);
+    newDate.setUTCSeconds(0);
+    newDate.setUTCMilliseconds(0);
+    return newDate;
   }
 
   compareDatesEqual(d1: Date, d2: Date) {
@@ -96,5 +113,10 @@ export class RecentTimeLogsComponent implements OnInit, OnChanges {
       });
       this.unbookedTimeLogsMap.set(date, unbookedTimeLogs);
     });
+  }
+
+  loadMoreTimeLogs() {
+    this.loadingMoreTimeLogs = true;
+    this.reloadTriggerService.triggerLoadMoreTimeLogs();
   }
 }
