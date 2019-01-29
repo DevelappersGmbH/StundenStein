@@ -1,3 +1,5 @@
+import { DataService } from 'src/app/services/data/data.service';
+import { DataServiceMock } from './../../services/mocked-services/DataServiceMock.spec';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TimeLogComponent } from './timelog.component';
 import {Project} from '../../model/project.interface';

@@ -6,11 +6,12 @@
       [issues]="issues"
       [timeLogs]="timelogs"
     ></app-time-tracker>
-    <app-userreports></app-userreports>
+    <app-userreports [timeLogs]="timelogs"></app-userreports>
     <app-recent-time-logs
       [projects]="projects"
       [issues]="issues"
       [timeLogs]="timelogs"
+      [allTimeLogsLoaded]="allTimeLogsLoaded"
     ></app-recent-time-logs>
   </div>
 </div>

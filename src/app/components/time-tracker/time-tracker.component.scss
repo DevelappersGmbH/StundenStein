@@ -1,9 +1,22 @@
 $break-small: 700px;
-$break-large: 1240px;
+$break-large: 1270px;
 .field {
-  padding-left: 10px;
-  padding-right: 10px;
+  margin-left: 5px;
+  margin-right: 5px;
   display: inline-block;
+}
+mat-form-field {
+  margin: 0;
+}
+.maxsizeOnly {
+  @media screen and (max-width: $break-large) {
+    display: none !important;
+  }
+}
+.maxsizeHidden {
+  @media screen and (min-width: $break-large+1) {
+    display: none !important;
+  }
 }
 .field-large {
   width: 30%;
@@ -23,8 +36,8 @@ $break-large: 1240px;
     display: block;
   }
   @media screen and (max-width: $break-small) {
-    &:first-child .field {
-      display: block;
+    &:not(:last-child) .field {
+      display: inline-block;
       width: 100%;
       padding: 0;
     }

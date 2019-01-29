@@ -1,11 +1,35 @@
-input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit-inner-spin-button {
-  display: none;
+$break-small: 700px;
+$break-medium: 992px;
 
+input[type="time"]::-webkit-clear-button,
+::-webkit-outer-spin-button,
+::-webkit-inner-spin-button {
+  display: none;
 }
 
-.total-div{
+.flex-container {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex-wrap: wrap;
+  }
+  @media screen and (max-width: $break-small) {
+    display: block;
+  }
+}
+
+.part3 {
+  flex-grow: 0;
+  flex-shrink: 0;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex: 1 0 45%;
+    order: 2;
+  }
+  @media screen and (max-width: $break-small) {
+    margin-top: -15px;
+    margin-bottom: 20px;
+  }
 }
 
 .oneline {
@@ -13,78 +37,81 @@ input[type="time"]::-webkit-clear-button, ::-webkit-outer-spin-button, ::-webkit
 }
 
 .field {
-  margin-left: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-left: 15px;
 }
 
 .issue {
-  width:25%;
+  flex-grow: 3;
+  flex-shrink: 1;
+  flex-basis: 0;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex: 1 1 45%;
+    order: 1;
+  }
 }
 
 .project {
-  width:10%;
-  margin-right: 20px;
+  flex-grow: 2;
+  flex-shrink: 1;
+  flex-basis: 0;
+  margin-right: 10px;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex: 1 1 100%;
+    order: 4;
+    margin-top: 7px;
+  }
+  @media screen and (max-width: $break-small) {
+    margin-top: 5px;
+  }
 }
 
 .comment {
-  width:25%;
+  flex-grow: 3;
+  flex-shrink: 1;
+  flex-basis: 0;
+  @media screen and (min-width: $break-small) and (max-width: $break-medium) {
+    flex: 1 1 100%;
+    order: 3;
+  }
+  @media screen and (max-width: $break-small) {
+    margin-top: 5px;
+  }
 }
 
-.icon{
-  color: #ccc;
-}
-
-.icon.active {
-  color: limegreen;
-}
-
-.icon.transparent {
-  position:relative;
-  bottom:-5px;
-  color: transparent;
-  margin-right: 5px;
-}
-
-.icon.attention {
-  color: orangered;
-}
-
-.icon.warning{
-  position:relative;
-  bottom:-5px;
-  color: orangered;
-  margin-right: 5px;
-}
-
-.start-time {
-  position:relative;
-  bottom:-2px;
-}
-
-.end-time {
-  position:relative;
-  bottom:-2px;
-  margin-left:3px;
-}
-
-.spinner{
-  position:relative;
-  bottom:-5px;
+.spinner {
+  position: relative;
+  bottom: -5px;
   margin-left: 9px;
   margin-right: 9px;
 }
 
 .tracked-time {
-  position:relative;
-  bottom:-1px;
-  margin-left:8px;
+  position: relative;
+  margin-left: 15px;
 }
 
-mat-form-field.edit .mat-form-field-underline {
-  display: none;
+.start-time {
+  width: 65px;
+}
+
+.end-time {
+  width: 65px;
+}
+
+.warning{
+  margin-right: 3px;
 }
 
 .mat-form-field-infix {
   width: 100%;
+}
+
+.mat-input-element {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cdk-overlay-pane {

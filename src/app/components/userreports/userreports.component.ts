@@ -1,475 +1,342 @@
-declare var require: any;
-import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { DataService } from '../../services/data/data.service';
-import { UserService } from '../../services/user/user.service';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  Input,
+  OnChanges,
+  OnInit,
+  SimpleChanges
+} from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
-import { HostListener } from '@angular/core';
-// import { pixelWidth } from 'string-pixel-width';
+import { isUndefined } from 'util';
+import { TimeLog } from 'src/app/model/time-log.interface';
+
+declare var require: any;
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-userreports',
   templateUrl: './userreports.component.html',
   styleUrls: ['./userreports.component.scss']
 })
-
-@HostListener('window:resize', ['$event'])
-
-export class UserReportsComponent implements OnInit, AfterViewInit {
-  tdArray = [[], [], []];
-  projectData = []; // data for project names
-  selected = 'day'; // day week month selection for user
-  periodArray = [[], [], []]; // final data array for every use in component
-  width = []; // width for the stripe chart sequences
-  tempWidth;
-  tempArray;
-  widthHelp = [];
-  actualSelect = 0;
-  dwmArray = new Array(); // array for order of elements in periodArray
-  periodArrayOB; // periodArray only billable
-  ob = false;
-  hoverBubbleRight = 0;
-  hoverTemp = new Array();
-  bilCheck = false;
-  pixelWidth;
-  screenHeight;
+export class UserReportsComponent implements OnInit, OnChanges {
   screenWidth;
+  period = 0;
+  date = new Date();
+  bilCheck = false;
+  generalArray = new Array();
+  selected = '0';
+  pixelWidth;
+  elementPosition;
+  getSize;
+  firstInit = true;
 
-  constructor(
-    private dataService: DataService,
-    private userService: UserService,
-    private errorService: ErrorService
-  ) {
+  // constructor is loading various npm packages for scaling due to the info bubble
+  constructor(private errorService: ErrorService) {
+    this.pixelWidth = require('string-pixel-width');
     this.onResize();
   }
-  onResize(event?) {
-    this.screenHeight = window.innerHeight;
-    this.screenWidth = window.innerWidth;
+
+  @Input() timeLogs: TimeLog[] = [];
+
+  // function called when window is resizing due to the info bubble
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.screenWidth = window.innerWidth + (this.firstInit ? 14 : 0);
+    this.firstInit = false;
   }
 
   ngOnInit() {
-    this.pixelWidth = require('string-pixel-width');
-    this.tdArray = [[], [], []];
-    this.widthHelp = [];
-    this.periodArray = [[], [], []]; // final data array for every use in component
-    this.dataService
-      .getTimeLogs(this.userService.getUser().id)
-      .subscribe(res => {
-        if (res === undefined) {
-          this.errorService.errorDialog('Did not recieved data from the dataService, wich distributes the project data.');
-        }
-        // fill dmwArray
-        const date = new Date();
-        this.dwmArray = [];
-        for (let i = 0; i < res.length; i++) {
-          // month sequence
-          if (
-            new Date(res[i].timeStopped).getFullYear() === date.getFullYear() &&
-            new Date(res[i].timeStopped).getMonth() === date.getMonth()
-          ) {
-            if (this.dwmArray[i] === undefined) {
-              this.dwmArray[i] = [2];
-            } else {
-              this.dwmArray[i][this.dwmArray[i].length] = 2;
-            }
-            // day sequence
-            if (new Date(res[i].timeStopped).getDate() === date.getDate()) {
-              if (this.dwmArray[i] === undefined) {
-                this.dwmArray[i] = [0];
-              } else {
-                this.dwmArray[i][this.dwmArray[i].length] = 0;
-              }
-            }
-          }
-          // week sequence
-          if (
-            this.getWeekNumber(new Date(res[i].timeStopped)) ===
-            this.getWeekNumber(date)
-          ) {
-            if (this.dwmArray[i] === undefined) {
-              this.dwmArray[i] = [1];
-            } else {
-              this.dwmArray[i][this.dwmArray[i].length] = 1;
-            }
-          }
-          if (this.dwmArray[i] === undefined) {
-            this.dwmArray[i] = [];
-          }
-        }
-        // fill periodArray
-        for (let i = 0; i < res.length; i++) {
-          for (let m = 0; m < this.dwmArray[i].length; m++) {
-            let projEx = false;
-            let projN = 0;
-            // check if project already exists for the period
-            if (this.periodArray !== undefined) {
-              for (
-                let n = 0;
-                n < this.periodArray[this.dwmArray[i][m]].length;
-                n++
-              ) {
-                if (res[i].booked && res[i].project !== undefined) {
-                  if (
-                    this.periodArray[this.dwmArray[i][m]][n][0] ===
-                    res[i].project.name
-                  ) {
-                    projEx = true;
-                    projN = n;
-                  }
-                } else {
-                  if (this.periodArray[this.dwmArray[i][m]][n][0] == null) {
-                    projEx = true;
-                    projN = n;
-                  }
-                }
-              }
-            }
-            let timeInHoursMod;
-            if (this.dwmArray[i][m] === 0) {
-              timeInHoursMod = this.checkSameDay(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
-              );
-            } else if (this.dwmArray[i][m] === 1) {
-              timeInHoursMod = this.checkSameWeek(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
-              );
-            } else if (this.dwmArray[i][m] === 2) {
-              timeInHoursMod = this.checkSameMonth(
-                res[i].timeStarted,
-                res[i].timeStopped,
-                res[i].timeInHours
-              );
-            }
-            // add to suitable period and project
-            if (projEx) {
-              this.periodArray[this.dwmArray[i][m]][projN][2] += timeInHoursMod;
-              if (!res[i].billable) {
-                if (this.periodArray[this.dwmArray[i][m]][projN].length === 4) {
-                  this.periodArray[this.dwmArray[i][m]][
-                    projN
-                  ][3] += timeInHoursMod;
-                } else {
-                  this.periodArray[this.dwmArray[i][m]][
-                    projN
-                  ][3] = timeInHoursMod;
-                }
-              }
-            } else {
-              // create new project in suitable period
-              if (res[i].booked) {
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length
-                ] = [res[i].project.name, res[i].project.color, timeInHoursMod];
-              } else {
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length
-                ] = [null, '#585a5e', timeInHoursMod];
-              }
-              if (!res[i].billable) {
-                if (
-                  this.periodArray[this.dwmArray[i][m]][
-                    this.periodArray[this.dwmArray[i][m]].length - 1
-                  ].length === 4
-                ) {
-                  this.periodArray[this.dwmArray[i][m]][
-                    this.periodArray[this.dwmArray[i][m]].length - 1
-                  ][3] += timeInHoursMod;
-                }
-                this.periodArray[this.dwmArray[i][m]][
-                  this.periodArray[this.dwmArray[i][m]].length - 1
-                ][3] = timeInHoursMod;
-              }
-            }
-          }
-        }
-        // some settings for new shown period
-        for (let j = 0; j < 3; j++) {
-          for (let x = 0; x < this.periodArray[j].length; x++) {
-            this.tdArray[j][x] = x;
-          }
-        }
-        this.width = []; // width for the stripe chart sequences
-        this.setWidth();
-      });
-  }
-  ngAfterViewInit() {
-    if (this.ob) {
-      this.ob = false;
-      this.periodArray = this.periodArrayOB;
-    }
-    this.setWidth();
-    for (let x = 0; x < this.width.length; x++) {
-      this.tdArray[this.actualSelect][x] = x;
+    // console.log(this.mock.getMockTimeLog());
+    if (isUndefined(this.timeLogs)) {
+      this.errorService.errorDialog(
+        'Did not receive data from the dataService, wich distributes the project data.'
+      );
+    } else if (this.timeLogs.length > 0) {
+      // calculating the data
+      this.setWidth(this.setPeriod());
     }
   }
-  // checks if timelog is started and stopped at the same day
-  checkSameDay(start: Date, stop: Date, time: number) {
-    if (
-      start.getDate() === stop.getDate() &&
-      start.getMonth() === stop.getMonth() &&
-      start.getFullYear() === stop.getFullYear()
-    ) {
-      return time;
-    } else {
-      return stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
+  // function is called when @Input variable is updated
+  ngOnChanges(changes: SimpleChanges): void {
+    if (typeof changes['timeLogs'] !== 'undefined') {
+      const change = changes['timeLogs'];
     }
+    this.ngOnInit();
   }
-  // checks if timelog is started and stopped at the same week
-  checkSameWeek(start: Date, stop: Date, time: number) {
-    if (this.getWeekNumber(start) === this.getWeekNumber(stop)) {
-      return time;
-    } else {
-      let temp = 0;
-      let stop0 = stop.getDay();
-      if (stop.getDay() === 0) {
-        stop0 = 7;
-      }
-      for (let i = 1; i < stop0; i++) {
-        temp += 24;
-      }
-      return temp + stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
-    }
+
+  // filtering the timelogs suitable to the time period that was selected by the user
+  setPeriod() {
+    return this.period === 0
+      ? this.timeLogs.filter(x => this.checkDay(x))
+      : this.period === 1
+      ? this.timeLogs.filter(x => this.checkYesterday(x))
+      : this.period === 2
+      ? this.timeLogs.filter(x => this.checkWeek(x))
+      : this.period === 3
+      ? this.timeLogs.filter(x => this.checkLastWeek(x))
+      : this.period === 4
+      ? this.timeLogs.filter(x => this.checkMonth(x))
+      : this.timeLogs.filter(x => this.checkLastMonth(x));
   }
-  // checks if timelog is started and stopped in the same month
-  checkSameMonth(start: Date, stop: Date, time: number) {
-    if (start.getMonth() === stop.getMonth()) {
-      return time;
-    } else {
-      let temp = 0;
-      for (let i = 1; i < stop.getDate() + 1; i++) {
-        temp += 24;
-      }
-      return temp + stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
-    }
-  }
-  // change period for stripe chart view
-  selectedOption() {
-    if (this.bilCheck) {
-      for (let i = 0; i < this.periodArray[this.actualSelect].length; i++) {
-        if (this.periodArray[this.actualSelect][i].length === 4) {
-          this.periodArray[this.actualSelect][i][2] += this.periodArray[
-            this.actualSelect
-          ][i][3];
-        }
-      }
-      this.bilCheck = false;
-    }
-    if (this.selected === 'day') {
-      this.actualSelect = 0;
-    } else if (this.selected === 'week') {
-      this.actualSelect = 1;
-    } else if (this.selected === 'month') {
-      this.actualSelect = 2;
-    }
-    this.ngAfterViewInit();
-  }
-  // checks if there are existing project for this period
-  projectExists() {
-    if (this.periodArray[this.actualSelect].length === 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-  // checking if issue is in the acutal month
-  workInSameMonth(date1: Date, date2: Date) {
+
+  // the following functions check if the timelog that is passed from the setPeriod function is in corresponding period
+  checkDay(value: TimeLog) {
     return (
-      (date1.getDate() === date2.getDate() &&
-        date1.getMonth() === date2.getMonth() &&
-        date1.getFullYear() === date2.getFullYear()) ||
-      (new Date(+new Date() + 86400000).getDate() > new Date().getDate() &&
-        new Date(+new Date() - 86400000).getDate() < new Date().getDate())
+      this.date.getDate() === value.timeStopped.getDate() &&
+      this.date.getMonth() === value.timeStopped.getMonth() &&
+      this.date.getFullYear() === value.timeStopped.getFullYear()
     );
   }
-  // get week number
+
+  checkYesterday(value: TimeLog) {
+    const date = new Date(new Date().setDate(this.date.getDate() - 1));
+    return (
+      date.getDate() === value.timeStopped.getDate() &&
+      date.getMonth() === value.timeStopped.getMonth() &&
+      date.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkWeek(value: TimeLog) {
+    return (
+      this.getWeekNumber(value.timeStopped) === this.getWeekNumber(this.date) &&
+      this.date.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkLastWeek(value: TimeLog) {
+    return (
+      this.getWeekNumber(value.timeStopped) ===
+        this.getWeekNumber(
+          new Date(new Date().setDate(this.date.getDate() - 7))
+        ) &&
+      this.date.getFullYear() -
+        (this.getWeekNumber(this.date) === 1 ? 1 : 0) ===
+        value.timeStopped.getFullYear()
+    );
+  }
+
+  checkMonth(value: TimeLog) {
+    return (
+      this.date.getMonth() === value.timeStopped.getMonth() &&
+      this.date.getFullYear() === value.timeStopped.getFullYear()
+    );
+  }
+
+  checkLastMonth(value: TimeLog) {
+    return this.date.getMonth() === 0
+      ? value.timeStopped.getMonth() === 11 &&
+          this.date.getFullYear() - 1 === value.timeStopped.getFullYear()
+      : this.date.getMonth() - 1 === value.timeStopped.getMonth() &&
+          this.date.getFullYear() === value.timeStopped.getFullYear();
+  }
+
+  // claculates the week number of a passed date object
   getWeekNumber(d: Date): number {
     d = new Date(+d);
     d.setHours(0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil(
-      ((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7
+    return Math.ceil(((d.valueOf() - yearStart.valueOf()) / 86400000 + 1) / 7);
+  }
+
+  // setting up and sorting an array that contains all the data the component needs to resort to
+  setWidth(array: any[]) {
+    let indexOfWidth,
+      counter = 0,
+      counterBillable = 0;
+    let width = new Array();
+    array.forEach(e => {
+      if (
+        width.find(function(element, index) {
+          indexOfWidth = index;
+          return e.project !== null
+            ? element[0] === e.project.name
+            : element[0] === 'No project assigned';
+        })
+      ) {
+        const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+        width[indexOfWidth][1] += time;
+        width[indexOfWidth][4] += time;
+        if (e.billable) {
+          width[indexOfWidth][3] += time;
+          width[indexOfWidth][5] += time;
+        }
+      } else {
+        const time = this.setTime(e.timeStarted, e.timeStopped, e.timeInHours);
+        width.push([
+          e.project !== null ? e.project.name : 'No project assigned',
+          time,
+          e.project !== null ? e.project.color : '#585a5e',
+          e.billable ? time : 0,
+          time,
+          e.billable ? time : 0
+        ]);
+      }
+      counter += e.timeInHours;
+      if (e.billable) {
+        counterBillable += e.timeInHours;
+      }
+    });
+    width.forEach(e => {
+      e[1] = Math.round((e[1] / counter) * 100);
+      e[3] === 0
+        ? (e[3] = 0)
+        : (e[3] = Math.round((e[3] / counterBillable) * 100));
+    });
+    width.sort((a, b) => a[0].localeCompare(b[0]));
+    const npaValue = width.find(function(element) {
+      return element[0] === 'No project assigned';
+    });
+    if (npaValue !== undefined) {
+      width = width.filter(x => this.npaFinder(x));
+      width.push(npaValue);
+    }
+    this.generalArray = width;
+  }
+
+  // due to the filter function above
+  npaFinder(element: Array<any>) {
+    return element[0] !== 'No project assigned';
+  }
+
+  // checks if a timelog is passing midnight and returns the duration of a timlog in hours
+  setTime(start: Date, stop: Date, time: number): number {
+    return this.period === 0
+      ? this.checkSameDayTimelog(start, stop, time)
+      : this.period === 1
+      ? this.checkSameWeekTimelog(start, stop, time)
+      : this.checkSameMonthTimelog(start, stop, time);
+  }
+
+  // the following functions are called by the setTime function in order to compare two date objects if they contain the same day
+  checkSameDayTimelog(start: Date, stop: Date, time: number) {
+    return start.getDate() === stop.getDate() &&
+      start.getMonth() === stop.getMonth() &&
+      start.getFullYear() === stop.getFullYear()
+      ? time
+      : stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
+  }
+
+  checkSameWeekTimelog(start: Date, stop: Date, time: number) {
+    return this.getWeekNumber(start) === this.getWeekNumber(stop)
+      ? time
+      : stop.getHours() + ((stop.getMinutes() / 3) * 5) / 100;
+  }
+
+  checkSameMonthTimelog(start: Date, stop: Date, time: number) {
+    return start.getMonth() === stop.getMonth()
+      ? time
+      : (stop.getDate() - 1) * 24 +
+          stop.getHours() +
+          ((stop.getMinutes() / 3) * 5) / 100;
+  }
+
+  // called when the "show only billable" checkbox is clicked by user
+  checkBox(event) {
+    this.onResize();
+    event.checked ? (this.bilCheck = true) : (this.bilCheck = false);
+  }
+
+  // called when sth from the dropdown is selected
+  selectedOption() {
+    this.onResize();
+    this.period = Number(this.selected);
+    this.bilCheck = false;
+    this.ngOnInit();
+  }
+
+  // returns false if there is no project for the selected period
+  projectExists() {
+    const check = this.bilCheck
+      ? !this.generalArray.every(x => this.noProjectIsBillable(x))
+      : true;
+    return (
+      !isUndefined(this.generalArray) && this.generalArray.length > 0 && check
     );
-    return weekNo;
   }
-  // set array for stripe chart project percentages
-  setWidth() {
-    this.widthHelp = [];
-    this.width = [];
-    if (this.periodArray[this.actualSelect].length === 0) {
-      this.widthHelp[0] = 0;
-    } else {
-      for (let i = 0; i < this.periodArray[this.actualSelect].length; i++) {
-        this.widthHelp[i] = this.periodArray[this.actualSelect][i][2];
-      }
-      const currentNewWidthHelp = [];
-      this.widthHelp.forEach(entry => {
-        if (entry !== 0) {
-          currentNewWidthHelp.push(entry);
-        }
-      });
-      this.widthHelp = currentNewWidthHelp;
-      let temp = 0;
-      for (let i = 0; i < this.widthHelp.length; i++) {
-        temp += this.widthHelp[i];
-      }
-      for (let i = 0; i < this.widthHelp.length; i++) {
-        this.width[i] = Math.round((this.widthHelp[i] / temp) * 100);
-      }
-    }
+
+  noProjectIsBillable(e): boolean {
+    return e[3] === 0;
   }
-  // called from html component in ngFor loop
-  getWidth(i) {
-    return this.width[i] + '%';
+
+  // the following "get"-function returns are corresponding to the project id "i"
+
+  // returns the project name
+  getProjectName(i: number, bool: Boolean): string {
+    const pixel =
+      (this.screenWidth - 20) *
+      (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
+    return this.pixelWidth(this.generalArray[i][0], {
+      size: 14
+    }) <= pixel || bool
+      ? this.generalArray[i][0]
+      : this.generalArray[i][0].charAt(0);
   }
-  // called from html component in ngFor loop
-  getColor(i) {
-    if (this.periodArray[this.actualSelect].length === 0) {
-      return '#35383d';
-    } else {
-      if (this.bilCheck) {
-        let count = i;
-        while (this.periodArray[this.actualSelect][count][2] === 0) {
-          count++;
-        }
-        return this.periodArray[this.actualSelect][count][1];
-      }
-      return this.periodArray[this.actualSelect][i][1];
-    }
+
+  // returns the width of the table td
+  getWidth(i: number): string {
+    return this.generalArray[i][!this.bilCheck ? 1 : 3] + '%';
   }
-  // get name of Project
-  getProjectData(i, bool) {
-    let pixelTemp = this.screenWidth - 20;
-    pixelTemp = pixelTemp * (this.width[i] / 100);
-    if (this.periodArray[this.actualSelect][i][0] == null) {
-      return 'No project assigned';
-    } else {
-      if (this.bilCheck) {
-        let count = i;
-        while (this.periodArray[this.actualSelect][count][2] === 0) {
-          count++;
-        }
-        if (
-          this.pixelWidth(this.periodArray[this.actualSelect][count][0], {
-            size: 14
-          }) <= pixelTemp ||
-          bool
-        ) {
-          return this.periodArray[this.actualSelect][count][0];
-        } else {
-          return this.periodArray[this.actualSelect][count][0].charAt(0);
-        }
-      }
-    }
-    if (
-      this.pixelWidth(this.periodArray[this.actualSelect][i][0], {
-        size: 14
-      }) <= pixelTemp ||
-      bool
-    ) {
-      return this.periodArray[this.actualSelect][i][0];
-    } else {
-      return this.periodArray[this.actualSelect][i][0].charAt(0);
-    }
+
+  // returns the project color for the table td and the shown name
+  getColor(i: number): string {
+    return this.generalArray[i][2];
   }
-  // get duration of project work
-  getRequiredTime(i) {
+
+  // the following functions return data shown in the bubble that is popping up by hovering over a project
+  getRequiredTime(i): string {
+    return this.getTimeInHHMM(this.generalArray[i][!this.bilCheck ? 4 : 5]);
+  }
+
+  getPercentage(i): string {
+    return this.generalArray[i][!this.bilCheck ? 1 : 3] + ' %';
+  }
+
+  getBillPercent(i): string {
+    return this.generalArray[i][1] <= this.generalArray[i][3] || this.bilCheck
+      ? '100% billable'
+      : Math.round((this.generalArray[i][3] / this.generalArray[i][1]) * 100) +
+          '% billable';
+  }
+
+  getTotalTime(bool: boolean): string {
+    return this.getTimeInHHMM(
+      this.generalArray.reduce((a, b) => a + b[bool ? 5 : 4], 0)
+    );
+  }
+
+  // calculate the timeInHours in a HH:MM format
+  getTimeInHHMM(temp: number): string {
     let h, m;
-    const temp = this.periodArray[this.actualSelect][i][2];
     if (temp < 0.017) {
       return '00:01';
     }
-    if (Math.floor(temp) < 10) {
-      h = '0' + Math.floor(temp);
-    } else {
-      h = '' + Math.floor(temp);
-    }
-    if ((temp % 1) * 60 < 10) {
-      m = '0' + Math.round((temp % 1) * 60);
-    } else {
-      m = '' + Math.round((temp % 1) * 60);
-    }
+    Math.floor(temp) < 10
+      ? (h = '0' + Math.floor(temp))
+      : (h = Math.floor(temp));
+    (temp % 1) * 60 < 10
+      ? (m = '0' + Math.round((temp % 1) * 60))
+      : (m = Math.round((temp % 1) * 60));
     return h + ':' + m;
   }
-  // get get percential width of project for stripe chart
-  getPercentage(i) {
-    if (this.periodArray[this.actualSelect].length === 0) {
-      return 0;
-    } else {
-      return this.getWidth(i);
-    }
+
+  // returning the percentaged number of the position of the bubble explained above
+  getBubblePos(i): string {
+    const el = document.getElementById('chart' + i);
+    let value = ((el.getBoundingClientRect().left + el.offsetWidth / 2) / this.screenWidth) * 100 - 9;
+    value += value * 0.025;
+    return value > 83 ? '83%' : value < 1 ? '0%' : value + '%';
   }
-  // get percentage of billable/non billable of a project
-  getBillPercent(i) {
-    if (this.periodArray[this.actualSelect][i].length < 4) {
-      return '100 % billable';
-    } else {
-      const temp =
-        this.periodArray[this.actualSelect][i][2] +
-        this.periodArray[this.actualSelect][i][3];
-      return (
-        Math.round((this.periodArray[this.actualSelect][i][2] / temp) * 100) +
-        '% billable' +
-        ', ' +
-        Math.round((this.periodArray[this.actualSelect][i][3] / temp) * 100) +
-        '% non billable'
-      );
-    }
-  }
-  // get percential width of billable project issues for stripe chart
-  checkBox(event) {
-    if (event.checked) {
-      this.bilCheck = true;
-      for (let i = 0; i < this.periodArray[this.actualSelect].length; i++) {
-        if (this.periodArray[this.actualSelect][i].length === 4) {
-          this.periodArray[this.actualSelect][i][2] -= this.periodArray[
-            this.actualSelect
-          ][i][3];
-        }
-      }
-    } else if (!event.checked) {
-      this.bilCheck = false;
-      for (let i = 0; i < this.periodArray[this.actualSelect].length; i++) {
-        if (this.periodArray[this.actualSelect][i].length === 4) {
-          this.periodArray[this.actualSelect][i][2] += this.periodArray[
-            this.actualSelect
-          ][i][3];
-        }
-      }
-    }
-    this.periodArrayOB = this.periodArray;
-    this.ob = true;
-    this.tdArray = [[], [], []];
-    this.ngAfterViewInit();
-  }
-  // set positin of bubble arrow
-  bubbleHover(a, i) {
-    if (a === 1 && this.hoverTemp[i] > 82) {
-      this.hoverBubbleRight = 1;
-    } else if (a === 1 && this.hoverTemp[i] < 0) {
-      this.hoverBubbleRight = 2;
-    } else {
-      this.hoverBubbleRight = 0;
-    }
-  }
-  // get postion of detail bubble for suitale project
-  bubblePos(a) {
-    let counter = 0;
-    for (let i = 0; i < a; i++) {
-      counter += this.width[i];
-    }
-    const temp = this.width[a] / 2;
-    let temp2 = counter + temp - 8 - a * 0.2;
-    this.hoverTemp[a] = temp2;
-    if (temp2 > 82) {
-      temp2 = 82;
-    }
-    if (temp2 < 1) {
-      temp2 = 1;
-    }
-    return temp2 + '%';
+
+  /*didnt found an efficient method for the corresponding position for the bubble arrow
+    at the border of the screen so I just decided to dont show it there*/
+  bubbleAtBorder(i) {
+    return this.getBubblePos(i) === '83%'
+      ? true
+      : this.getBubblePos(i) === '0%'
+      ? true
+      : false;
   }
 }

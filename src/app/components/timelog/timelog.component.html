@@ -1,9 +1,9 @@
-<mat-card class="record-component">
-  <mat-card-content>
+
     <form class="total-record">
-      <div class="total-div">
-          <mat-form-field [floatLabel]="'never'" class="field issue" [ngClass]="{ edit: !editMode }">
-            <input id="issue" type="text" appEnforcedInputs [readonly]="!editMode" matInput (click)="$event.target.select()"
+      <div class="flex-container">
+          <ng-container *ngIf="editMode; else showModeIssue">
+          <mat-form-field [floatLabel]="'never'" class = "field issue" [ngClass]="{ edit: editMode }">
+            <input id="issue" type="text" appEnforcedInputs  matInput (click)="$event.target.select()"
                    [formControl]="issueControl" [matAutocomplete]="autoIssue" />
             <mat-placeholder class="placeholder">Issue</mat-placeholder>
           </mat-form-field>
@@ -11,9 +11,18 @@
           <mat-autocomplete #autoIssue="matAutocomplete" (optionSelected)="selectIssue($event.option.value)" [displayWith]="displayIssue" >
             <mat-option *ngFor="let issue of (filteredIssues | async)" [value]="issue"> {{issue.tracker}} #{{issue.id}}: {{issue.subject}} </mat-option>
           </mat-autocomplete>
+        </ng-container>
+        <ng-template #showModeIssue>
+            <div class="field issue mat-body" [style.color] = "timeLog.issue? 'black' : '#938d8d'">
+              <span>{{ this.issueControl.value ? this.issueControl.value.tracker + ' #' +
+                this.issueControl.value.id.toString() + ': ' + this.issueControl.value.subject : "Issue" }}</span>
+            </div>
+        </ng-template>
 
-          <mat-form-field [floatLabel]="'never'" class="field comment" [ngClass]="{ edit: !editMode }">
-            <input id="comment" type="text" [readonly]="!editMode" matInput (click)="$event.target.select()"
+
+        <ng-container *ngIf="editMode; else showModeComment">
+          <mat-form-field [floatLabel]="'never'" class = "field comment" [ngClass]="{ edit: editMode }">
+            <input id="comment" type="text"  matInput (click)="$event.target.select()"
                    [formControl]="logControl" [matAutocomplete]="autoLog"/>
             <mat-placeholder class="placeholder">Comment</mat-placeholder>
           </mat-form-field>
@@ -25,10 +34,18 @@
               <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
             </mat-option>
           </mat-autocomplete>
+        </ng-container>
+        <ng-template #showModeComment>
+          <div class="field comment mat-body" [style.color] = "timeLog.comment? 'black' : '#938d8d'">
+            <span>{{ this.logControl.value ? this.logControl.value : "Comment" }}</span>
+          </div>
+        </ng-template>
 
-          <mat-form-field [floatLabel]="'never'" class="field project" [ngClass]="{ edit: !editMode }">
-            <mat-icon id="warning" class="icon" [ngClass]="{ transparent: timeLog.booked, warning: !timeLog.booked}" matPrefix>warning</mat-icon>
-            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : 'black'" [readonly]="!editMode" matInput (click)="$event.target.select()"
+
+        <ng-container *ngIf="editMode; else showModeProject">
+          <mat-form-field [floatLabel]="'never'" class = "field project" [ngClass]="{ edit: editMode }">
+            <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matPrefix>warning</mat-icon>
+            <input id="project" type="text" appEnforcedInputs [style.color] = "timeLog.project? timeLog.project.color : '#938d8d'"  matInput (click)="$event.target.select()"
                    [formControl]="projectControl" [matAutocomplete]="autoProject" />
             <mat-placeholder class="placeholder">Project</mat-placeholder>
           </mat-form-field>
@@ -37,11 +54,17 @@
             <mat-option *ngFor="let project of (filteredProjects| async)" [style.color]="project.color" [value]="project"> {{project.name}}
             </mat-option>
           </mat-autocomplete>
+        </ng-container>
+        <ng-template #showModeProject>
+          <div class="field project mat-body">
+            <mat-icon class="icon" *ngIf="!timeLog.booked" [ngClass]="{warning: !timeLog.booked}" matSuffix>warning</mat-icon>
+            <span [style.color]="this.projectControl.value? this.projectControl.value.color : '#938d8d'">{{ this.projectControl.value ? this.projectControl.value.name : "Project"}}</span>
+          </div>
+        </ng-template>
 
-        <div class="empty"><!-- empty space --></div>
+        <div class="oneline"><!-- empty space --></div>
 
         <div class="part3">
-          <div class="oneline">
             <mat-spinner
               class = "spinner"
               *ngIf="trackerSpinning"
@@ -53,30 +76,38 @@
             <button id="btnPlay" *ngIf="!trackerSpinning" mat-icon-button class="button_play" [disabled]="editMode || restartBlocked" (click)="startTracker()">
               <mat-icon class="icon">play_arrow</mat-icon>
             </button>
-          </div>
 
-          <div class="oneline">
-          <button id="btnBill" mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
+
+          <button mat-icon-button class="button" [disabled]="!editMode" (click)="markBillable()"><mat-icon
             class="icon" [ngClass]="{ active: timeLog.billable }">attach_money</mat-icon></button>
-          </div>
-
           <div class="oneline">
+
+            <ng-container *ngIf="editMode; else showModeStart">
             <mat-form-field class="start-time" [ngClass]="{ edit: !editMode }">
-              <input id="startTime" [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
+              <input [ngModel]="timeLog.timeStarted | date: 'HH:mm'" (ngModelChange)="changeStartTime($event)"
                      [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
             </mat-form-field>
+            </ng-container>
+          <ng-template #showModeStart>
+            <span class="mat-body sp">{{ timeLog.timeStarted | date: 'HH:mm' }}</span>
+          </ng-template>
           </div>
 
           -
 
           <div class="oneline">
+            <ng-container *ngIf="editMode; else showModeEnd">
           <mat-form-field class="end-time" [ngClass]="{ edit: !editMode }">
             <input id="endTime" [ngModel]="timeLog.timeStopped | date: 'HH:mm'" (ngModelChange)="changeEndTime($event)"
                    [readonly]="!editMode" [ngModelOptions]="{ standalone: true }" type="time" matInput/>
           </mat-form-field>
+            </ng-container>
+            <ng-template #showModeEnd>
+              <span class="mat-body sp">{{ timeLog.timeStopped| date: 'HH:mm' }}</span>
+            </ng-template>
           </div>
 
-          <span class="tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
+          <span class="mat-body  oneline tracked-time"> {{ trackedTime | date: "HH:mm:ss" }} </span>
 
           <div class="oneline">
             <mat-spinner
@@ -89,12 +120,19 @@
             </mat-spinner>
           </div>
 
-            <div class="oneline">
-          <button id="btnEdit" *ngIf="!loading" mat-icon-button class="button" (click)="changeMode()">
+
+          <div class="oneline">
+          <button *ngIf="!loading" mat-icon-button class="button" (click)="changeMode()">
             <mat-icon  class="icon" [ngClass]="{ active: editMode, attention: editButton == 'assignment' }">{{ editButton }}
             </mat-icon>
           </button>
-            </div>
+          </div>
+
+          <div class="oneline">
+            <button *ngIf="editMode" mat-icon-button class="button" (click)="abort()">
+              <mat-icon  class="icon attention">close</mat-icon>
+            </button>
+          </div>
 
           <div class="oneline">
             <mat-spinner
@@ -107,15 +145,12 @@
             </mat-spinner>
           </div>
 
-              <div class="oneline">
-          <button id="btnDel" mat-icon-button class="button" *ngIf="!loadingDel" (click)="showDeleteWarning()">
+          <div class="oneline">
+          <button mat-icon-button class="button" *ngIf="!loadingDel" (click)="showDeleteWarning()">
             <mat-icon class="icon">delete
             </mat-icon>
           </button>
-              </div>
-
+          </div>
         </div>
       </div>
     </form>
-  </mat-card-content>
-</mat-card>

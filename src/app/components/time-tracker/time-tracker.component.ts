@@ -8,7 +8,7 @@ import {
 import { DataService } from 'src/app/services/data/data.service';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { Favicons } from 'src/app/services/favicon/favicon.service';
-import { forkJoin, interval, Observable } from 'rxjs';
+import { forkJoin, interval, Observable, Subscription } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { isNull, isUndefined } from 'util';
 import { Issue } from 'src/app/model/issue.interface';
@@ -18,6 +18,7 @@ import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { Title } from '@angular/platform-browser';
+import { Time } from '@angular/common';
 import { TrackerService } from 'src/app/services/tracker/tracker.service';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -58,27 +59,59 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   filteredLogs: Observable<TimeLog[]>;
   filteredObject = false;
   stoppingBlockedByNegativeTime = true;
+  componentBlockedByInitialTrackerLoad = true;
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
+  loggingBlockedByLoading = false;
+  manualStartDate: Date;
+  manualStopDate: Date;
+  manualStartTime: Time;
+  manualStartTimeIllegal = true;
+  manualStopTime: Time;
+  manualStopTimeIllegal = true;
+  timer: Subscription;
+  trackerReloading: Subscription;
+  lastTrackerUpdate: Date = this.now();
 
   favIconRunning = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (typeof changes['timeLogs'] !== 'undefined') {
       const change = changes['timeLogs'];
-      change.currentValue.forEach(log => {
+      this.logs = [];
+      const logComp: String[] = [];
+      change.currentValue.slice(0, 100).forEach(log => {
+        const logCompString: String = this.makeLogComparisonString(log);
         if (
           !isUndefined(log.comment) &&
           !isNull(log.comment) &&
-          log.comment.length > 0
+          log.comment.length > 0 &&
+          !logComp.includes(logCompString)
         ) {
           this.logs.unshift(log);
+          logComp.unshift(logCompString);
         }
       });
     }
   }
 
+  /**
+   * Returns a String containing all important data of given TimeLog for comment-issue-project comparison
+   * @param log TimeLog to create comparison string from
+   */
+  makeLogComparisonString(log: TimeLog): String {
+    let issueComp: String = '';
+    if (log.issue !== null && log.issue !== undefined) { issueComp = log.issue.id.toString(); }
+    let projectComp: String = '';
+    if (log.project !== null && log.project !== undefined) { projectComp = log.project.id.toString(); }
+    return log.comment + '|' + issueComp + '|' + projectComp;
+  }
+
+
   ngOnInit() {
+    this.issueCtrl.disable();
+    this.logCtrl.disable();
+    this.projectCtrl.disable();
     this.trackerService.reTrackingInProgress.subscribe(isTracking => {
       this.stoppingBlockedByLoading = isTracking;
     });
@@ -89,7 +122,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.updateAutoCompletes();
       this.stoppingBlockedByLoading = false;
     });
-    interval(1000).subscribe(val => {
+    this.trackerReloading = interval(10000).subscribe( val => {
+      this.loadTimeTrackerChanges();
+    });
+    this.timer = interval(1000).subscribe(val => {
       if (!isUndefined(this.timeTracker.timeStarted)) {
         this.setTimeString(
           (new Date().valueOf() -
@@ -109,12 +145,19 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         }
       }
     });
+    this.trackerService.logoutEvent.subscribe(logout => {
+      this.timer.unsubscribe();
+      this.trackerReloading.unsubscribe();
+      this.titleService.setTitle('StundenStein');
+      this.faviconService.activate('idle');
+    });
     this.currentTrackerTimeString = '00:00:00';
     this.titleService.setTitle('StundenStein');
     this.loadTimeTracker();
     this.automaticMode = true;
-    // Block manual mode until implemented
-    this.automaticLock = true;
+    this.manualStartDate = this.now();
+    this.manualStopDate = this.now();
+
     this.filteredIssues = this.issueCtrl.valueChanges.pipe(
       startWith(''),
       map(issue => (issue ? this._filterIssues(issue) : this.issues.slice()))
@@ -129,9 +172,120 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       startWith(''),
       map(log => (log ? this._filterLogs(log) : this.logs.slice()))
     );
+
   }
 
-  updateTracker(): void {
+  /**
+   * Validates start and end time selected in manual mode
+   */
+  validateStartStop(): boolean {
+    this.manualStartTimeIllegal = false;
+    this.manualStopTimeIllegal = false;
+    if (isUndefined(this.manualStartTime)) {
+      this.manualStartTimeIllegal = true;
+    }
+    if (isUndefined(this.manualStopTime)) {
+      this.manualStopTimeIllegal = true;
+    }
+    if (!isUndefined(this.manualStartTime) && !isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStartDate, this.manualStopDate)) {
+      if (this.isLater(this.manualStartTime, this.manualStopTime)) {
+        // FAIL: stop before start
+        this.manualStopTimeIllegal = true;
+      }
+      if ( JSON.stringify(this.manualStartTime) === JSON.stringify(this.manualStopTime)) {
+        // FAIL: stop and start equal
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (!isUndefined(this.manualStartTime) &&
+    this.sameday(this.manualStartDate, this.now())) {
+      if (this.isLater(this.manualStartTime, this.currentTime())) {
+        // FAIL: starts before now
+        this.manualStartTimeIllegal = true;
+      }
+    }
+    if (!isUndefined(this.manualStopTime) &&
+    this.sameday(this.manualStopDate, this.now())) {
+      if (this.isLater(this.manualStopTime, this.currentTime())) {
+        // FAIL: ends before now
+        this.manualStopTimeIllegal = true;
+      }
+    }
+    if (this.manualStartTimeIllegal || this.manualStopTimeIllegal) { return false; }
+    return true;
+  }
+
+  /**
+   * Compares if two Date objects represent the same day
+   * @param date1 first date
+   * @param date2 second date
+   */
+  sameday(date1: Date, date2: Date): boolean {
+    return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate();
+  }
+
+  /**
+   * Tells if a time is later than another one
+   * @param reference time to check
+   * @param compareTo time to compare against
+   */
+  isLater(reference: Time, compareTo: Time): boolean {
+    if (reference.hours > compareTo.hours) { return true; }
+    if (reference.hours === compareTo.hours && reference.minutes > compareTo.minutes) { return true; }
+    return false;
+  }
+
+  /**
+   * Converts a 24hr time string to Time Object
+   * @param value time string (24hr format)
+   */
+  stringToTime(value: string): Time {
+    return {
+      hours: parseInt(value.substring(0, 2), 10) ,
+      minutes: parseInt(value.substring(3, 5), 10)
+    };
+  }
+
+  /**
+   * Converts a Time Object to 24hr time string
+   * @param value time object
+   */
+  timeToString(value: Time): string {
+    if (isUndefined(value) || isUndefined(value.hours)) {
+      return '';
+    }
+    let hrs = value.hours.toString();
+    if (hrs.length < 2) { hrs = '0' + hrs; }
+    let min = value.minutes.toString();
+    if (min.length < 2) { min = '0' + min; }
+    return hrs + ':' + min;
+  }
+
+  /**
+   * Returns a new Date object which is the current date
+   */
+  now(): Date {
+    return new Date();
+  }
+
+  /**
+   * Returns the current time
+   */
+  currentTime(): Time {
+    const dateObj = this.now();
+    return {
+      hours: dateObj.getHours(),
+      minutes: dateObj.getMinutes()
+    };
+  }
+
+  updateTracker(stopTrackerAfterwards = false, startNewTrackerAfterStoppingIt = false): void {
+    this.lastTrackerUpdate = this.now();
+    this.timeTracker.comment = this.logCtrl.value;
+    if (this.timeTracker.comment !== null && this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
+      this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
+    }
     if (isUndefined(this.timeTracker.id)) {
       return;
     }
@@ -147,11 +301,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.updateTimeTracker(timeTracker).subscribe(
       t => {
+        this.lastTrackerUpdate = this.now();
         if (!isNull(t) && !isUndefined(t)) {
           this.timeTracker = t;
           this.ensureSelectedIssueIsFromIssueList();
           this.ensureSelectedProjectIsFromProjectList();
-          this.stoppingBlockedByLoading = false;
         } else {
           this.timeTracker = {
             billable: true,
@@ -159,9 +313,13 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             issue: null,
             project: null
           };
-          this.stoppingBlockedByLoading = false;
         }
-        this.updateAutoCompletes();
+        if (stopTrackerAfterwards) {
+          this.stopTimeTracker(startNewTrackerAfterStoppingIt, false);
+        } else {
+          this.stoppingBlockedByLoading = false;
+          this.updateAutoCompletes();
+        }
       },
       error => {
         this.errorService.errorDialog('Couldn\'t update time tracker.');
@@ -346,12 +504,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   setTimeString(duration: number): void {
     let sec: number = Math.floor(duration);
     let prefix = '';
+    this.stoppingBlockedByNegativeTime = (sec <= 3);
     if (sec < 0) {
       sec = -sec;
       prefix = '- ';
-      this.stoppingBlockedByNegativeTime = true;
-    } else {
-      this.stoppingBlockedByNegativeTime = false;
     }
     let min: number = Math.floor(sec / 60);
     const hrs: number = Math.floor(min / 60);
@@ -426,9 +582,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   private updateAutoCompletes(): void {
     this.issueCtrl.setValue(this.timeTracker.issue);
     this.projectCtrl.setValue(this.timeTracker.project);
+    this.logCtrl.setValue(this.timeTracker.comment);
   }
 
-  loadTimeTracker() {
+  loadTimeTracker(startNewIfNone = false) {
     const calls: Observable<any>[] = [
       this.dataService.getProjects(),
       this.dataService.getIssues()
@@ -441,7 +598,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             this.timeTracker = t;
             this.ensureSelectedIssueIsFromIssueList();
             this.ensureSelectedProjectIsFromProjectList();
-            this.stoppingBlockedByLoading = false;
           } else {
             this.timeTracker = {
               billable: true,
@@ -449,12 +605,145 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               issue: null,
               project: null
             };
-            this.stoppingBlockedByLoading = false;
+            if (startNewIfNone) {
+              this.startTimeTracker();
+            }
           }
           this.updateAutoCompletes();
           this.stoppingBlockedByLoading = false;
+          this.initialTrackerLoadFinished();
         });
     });
+  }
+
+  /**
+   * Gets the current TimeTracker from the API and makes local changes if necessary
+   * @return Changes have been applied
+   */
+  loadTimeTrackerChanges(): boolean {
+    // Check if there is a reload happening or has been recently (last 5sec)
+    if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+      Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5 ) {
+      return false;
+    }
+    // Prepare TimeTracker query
+    const calls: Observable<any>[] = [
+      this.dataService.getProjects(),
+      this.dataService.getIssues()
+    ];
+    forkJoin(calls).subscribe(x => {
+      this.dataService
+        .getTimeTrackerByUserId(this.userService.getUser().id)
+        .subscribe(t => {
+          // Put current remote tracker data to trackerUpdate variable
+          let trackerUpdate: Partial<TimeTracker>;
+          if (!isNull(t) && !isUndefined(t)) {
+            trackerUpdate = t;
+          } else {
+            trackerUpdate = {
+              billable: true,
+              comment: '',
+              issue: null,
+              project: null
+            };
+          }
+          // Check again if there is a reload happening or has been recently (last 5sec)
+          if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
+            Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5) {
+            return false;
+          }
+          // Set tracker update to now
+          this.lastTrackerUpdate = this.now();
+          // Create flag to indicate if anything has changed
+          let dataChanged = false;
+          // Check if local tracker is unset (undefined or null), or if IDs don't match
+          if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
+            || (isUndefined(this.timeTracker.id) && !isUndefined(trackerUpdate.id))) {
+              this.timeTracker = trackerUpdate;
+              this.updateAutoCompletes();
+              dataChanged = true;
+            }
+          // Check if both local and remote IDs are unset
+          if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
+            && (isUndefined(trackerUpdate.id) || isNull(trackerUpdate.id))) {
+            return false;
+          }
+          // Check again if IDs don't match
+          if (this.timeTracker.id !== trackerUpdate.id) {
+            this.timeTracker = trackerUpdate;
+            this.updateAutoCompletes();
+            dataChanged = true;
+          }
+          // Check for inequality of issue
+          if (
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              (isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              !(isUndefined(trackerUpdate.issue) || isNull(trackerUpdate.issue))
+            )
+            ||
+            (
+              !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
+              this.timeTracker.issue.id !== trackerUpdate.issue.id
+            )) {
+              this.timeTracker.issue = trackerUpdate.issue;
+              this.issueCtrl.setValue(this.timeTracker.issue);
+              dataChanged = true;
+          }
+          // Check for inequality of project
+          if (
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              (isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+            (
+              (isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              !(isUndefined(trackerUpdate.project) || isNull(trackerUpdate.project))
+            )
+            ||
+            (
+              !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
+              this.timeTracker.project.id !== trackerUpdate.project.id
+            )) {
+              this.timeTracker.project = trackerUpdate.project;
+              this.projectCtrl.setValue(this.timeTracker.project);
+              dataChanged = true;
+          }
+          // Check for inequality of timeStarted
+          if (this.timeTracker.timeStarted !== trackerUpdate.timeStarted) {
+            this.timeTracker.timeStarted = trackerUpdate.timeStarted;
+            dataChanged = true;
+          }
+          // Check for inequality of billable
+          if (this.timeTracker.billable !== trackerUpdate.billable) {
+            this.timeTracker.billable = trackerUpdate.billable;
+            dataChanged = true;
+          }
+          // Check for inequality of comment
+          if (this.timeTracker.comment !== trackerUpdate.comment) {
+            this.timeTracker.comment = trackerUpdate.comment;
+            this.logCtrl.setValue(this.timeTracker.comment);
+            dataChanged = true;
+          }
+          // Return flag that indicates if changes have been applied
+          return dataChanged;
+        });
+    });
+  }
+
+  /**
+   * Enables GUI interaction after tracker has been loaded initially
+   */
+  private initialTrackerLoadFinished(): void {
+    this.componentBlockedByInitialTrackerLoad = false;
+    this.issueCtrl.enable();
+    this.logCtrl.enable();
+    this.projectCtrl.enable();
   }
 
   startTimeTracker(): void {
@@ -469,8 +758,43 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       });
   }
 
-  stopTimeTracker(): void {
+  /**
+   * Stops the running tracker and starts a new one with empty data
+   */
+  stopAndNew(): void {
+    this.stopTimeTracker(true);
+  }
+
+  doUpdateIfNecessaryAndStop(startNewAfterwards = false): void {
+    let comment: String = this.logCtrl.value;
+    if (comment !== null && comment !== undefined && comment.includes('$$')) {
+      comment = comment.substring(comment.indexOf('$$') + 2);
+    }
+    const issue: Issue = this.issueCtrl.value;
+    const project: Project = this.projectCtrl.value;
+    if (
+      this.timeTracker.comment === comment &&
+      this.timeTracker.issue === issue &&
+      this.timeTracker.project === project
+      ) {
+        this.stopTimeTracker(startNewAfterwards, false);
+    } else {
+      this.updateTracker(true, startNewAfterwards);
+    }
+  }
+
+  stopTimeTracker(startNewAfterwards = false, updateBeforeExecution = true): void {
+    // Check if update has to be performed first
+    if (updateBeforeExecution) {
+      this.doUpdateIfNecessaryAndStop(startNewAfterwards);
+      return;
+    }
+    this.lastTrackerUpdate = this.now();
     this.stoppingBlockedByLoading = true;
+    this.timeTracker.comment = this.logCtrl.value;
+    if (this.timeTracker.comment !== undefined && this.timeTracker.comment.includes('$$')) {
+      this.timeTracker.comment = this.timeTracker.comment.substring(this.timeTracker.comment.indexOf('$$') + 2);
+    }
     let timeTracker: TimeTracker;
     timeTracker = {
       id: this.timeTracker.id,
@@ -482,12 +806,13 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     };
     this.dataService.stopTimeTracker(timeTracker).subscribe(
       data => {
+        this.lastTrackerUpdate = this.now();
         if (data === undefined || data === null) {
           this.errorService.errorDialog('Couldn\'t stop time tracker');
           this.stoppingBlockedByLoading = false;
         } else {
           this.reloadTriggerSerivce.triggerTimeLogAdded(data);
-          this.loadTimeTracker();
+          this.loadTimeTracker(startNewAfterwards);
         }
       },
       error => {
@@ -496,4 +821,41 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       }
     );
   }
+
+  createLog(): void {
+    this.loggingBlockedByLoading = true;
+    this.automaticLock = true;
+    if (this.validateStartStop()) {
+      this.manualStartDate.setHours(this.manualStartTime.hours);
+      this.manualStartDate.setMinutes(this.manualStartTime.minutes);
+      this.manualStopDate.setHours(this.manualStopTime.hours);
+      this.manualStopDate.setMinutes(this.manualStopTime.minutes);
+      this.dataService.createTimeLog({
+        id: undefined,
+        timeStarted: this.manualStartDate,
+        timeStopped: this.manualStopDate,
+        comment: this.timeTracker.comment,
+        timeInHours: 0,
+        booked: !isNull(this.timeTracker.project) && !isUndefined(this.timeTracker.project),
+        hourGlassTimeBookingId: undefined,
+        redmineTimeEntryId: undefined,
+        billable: this.timeTracker.billable,
+        issue: this.timeTracker.issue,
+        project: this.timeTracker.project,
+        user: this.userService.getUser()
+      }).subscribe(result => {
+        this.reloadTriggerSerivce.triggerTimeLogAdded(result);
+        this.loggingBlockedByLoading = false;
+        this.automaticLock = false;
+      }, error => {
+        this.errorService.errorDialog(error.error.message[0].replace(/\[.*\]/, ''));
+        this.loggingBlockedByLoading = false;
+        this.automaticLock = false;
+      });
+    } else {
+      this.loggingBlockedByLoading = false;
+      this.automaticLock = false;
+    }
+  }
+
 }
