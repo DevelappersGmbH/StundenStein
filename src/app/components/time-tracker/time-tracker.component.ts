@@ -890,8 +890,12 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         }
       },
       error => {
-        this.errorService.errorDialog('Couldn\'t stop time tracker');
-        this.stoppingBlockedByLoading = true;
+        let errorMessage: string = 'Couldn\'t stop time tracker.';
+        if (error !== undefined && error.error !== undefined && error.error.message !== undefined) {
+          errorMessage += '\n' + error.error.message;
+        }
+        this.errorService.errorDialog(errorMessage);
+        this.stoppingBlockedByLoading = false;
       }
     );
   }
