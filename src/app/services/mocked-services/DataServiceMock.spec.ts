@@ -1,5 +1,7 @@
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { Observable, of } from 'rxjs';
+import { Project } from 'src/app/model/project.interface';
+import { Issue } from 'src/app/model/issue.interface';
 const mockUser = {
   name: 'TestUser',
   id: 99
@@ -35,7 +37,11 @@ const mockTimeLog = {
 };
 
 const mockTimeLogs: TimeLog[] = new Array();
+const mockProjects: Project[] = new Array();
+const mockIssues: Issue[] = new Array();
 mockTimeLogs.push(mockTimeLog);
+mockProjects.push(mockProject);
+mockIssues.push(mockIssue);
 
 export class DataServiceMock {
 
@@ -45,5 +51,13 @@ export class DataServiceMock {
 
   public static getMockTimeLog(): TimeLog {
     return mockTimeLog;
+  }
+
+  public getProjects(): Observable<Project[]>{
+    return of(mockProjects);
+  }
+
+  public getIssues(): Observable<Issue[]>{
+    return of(mockIssues);
   }
 }
