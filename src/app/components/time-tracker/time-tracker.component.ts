@@ -236,8 +236,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
    * Modifies selected tracker start time if allowed
    */
   modifyTrackerStart(): void {
-    const selectedTime: String = this.startTimeCtrl.value;
-    console.log(selectedTime);
+    this.updateNewTrackerTimeString();
+    this.timeTracker.timeStarted = this.newTrackerStart;
+    this.updateTracker();
+    this.disableStartTimeModification();
   }
 
   updateNewTrackerTimeString(): void {
