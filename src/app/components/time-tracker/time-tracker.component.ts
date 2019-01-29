@@ -196,6 +196,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     if (this.timeTracker !== null && this.timeTracker !== undefined) {
       if (this.timeTracker.id !== null && this.timeTracker.id !== undefined) {
         if (!this.stoppingBlockedByLoading && !this.stoppingBlockedByNegativeTime) {
+          this.newTrackerStart = this.timeTracker.timeStarted;
+          this.startTimeCtrl.setValue(this.timeTracker.timeStarted.toLocaleTimeString());
           this.newTrackerPreview = interval(1000).subscribe(timePassed => {
             if (this.timeTracker === null ||
               this.timeTracker === undefined ||
@@ -205,8 +207,6 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               this.stoppingBlockedByNegativeTime) {
                 this.disableStartTimeModification();
               }
-            this.newTrackerStart = this.timeTracker.timeStarted;
-            this.startTimeCtrl.setValue(this.timeTracker.timeStarted.toLocaleTimeString());
             const duration = ((new Date().valueOf() - new Date(this.newTrackerStart).valueOf()) / 1000);
             let sec: number = Math.floor(duration);
             let prefix = '';
