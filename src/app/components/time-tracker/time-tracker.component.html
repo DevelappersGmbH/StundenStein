@@ -1,5 +1,20 @@
 <mat-card>
-  <form>
+  <form *ngIf="startTimeModification && timeTracker !== null && timeTracker !== undefined && timeTracker.timeStarted !== null && timeTracker.timeStarted !== undefined">
+    <div class="field-container">
+      <span class="field"> Current time running: {{ currentTrackerTimeString }}, started at {{ timeTracker.timeStarted.toLocaleTimeString() }}</span>
+      <mat-form-field class="field field-tiny time">
+        <input [formControl]="startTimeCtrl" (change)="updateNewTrackerTimeString()" placeholder="New start time" type="time" matInput />
+      </mat-form-field>
+      <span class="field"> Time running after modification: {{ newTrackerTimeString }}</span>
+      <button class="field" (click)="modifyTrackerStart()" mat-flat-button color="primary">
+          <span>Modify start time</span>
+      </button>
+      <button class="field" (click)="disableStartTimeModification();" mat-stroked-button color="primary">
+        <span>Cancel</span>
+      </button>
+    </div>
+  </form>
+  <form *ngIf="!startTimeModification">
       <div class="field-container">
         <mat-form-field class="field field-small">
           <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
@@ -66,7 +81,7 @@
       </div>
       <br *ngIf="!automaticMode"/>
       <div class="field-container" [ngClass]="{ maxsizeHidden: !automaticMode }">
-        <span *ngIf="automaticMode" class="field">{{ currentTrackerTimeString }}</span>
+        <span (dblclick)="enableStartTimeModification()" *ngIf="automaticMode && !startTimeModification" class="field">{{ currentTrackerTimeString }}</span>
         <div class="field">
           <button [disabled]="componentBlockedByInitialTrackerLoad" name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
             class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon></button>

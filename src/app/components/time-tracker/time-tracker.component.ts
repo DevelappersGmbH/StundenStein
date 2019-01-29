@@ -44,6 +44,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   @Input() issues: Issue[] = [];
   currentTrackerTimeString: string;
   automaticMode: boolean;
+  startTimeModification = false;
   automaticLock: boolean;
   timeTracker: Partial<TimeTracker> = {
     billable: true,
@@ -54,6 +55,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
   logCtrl = new FormControl();
+  startTimeCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
   filteredLogs: Observable<TimeLog[]>;
@@ -63,6 +65,10 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   startingBlockedByLoading = false;
   stoppingBlockedByLoading = false;
   loggingBlockedByLoading = false;
+  newTrackerStartTime: Time;
+  newTrackerStart: Date;
+  newTrackerTimeString: string;
+  newTrackerPreview: Subscription;
   manualStartDate: Date;
   manualStopDate: Date;
   manualStartTime: Time;
@@ -173,6 +179,82 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       map(log => (log ? this._filterLogs(log) : this.logs.slice()))
     );
 
+  }
+
+  /**
+   * Disable start time modification
+   */
+  disableStartTimeModification(): void {
+    if (this.newTrackerPreview !== null && this.newTrackerPreview !== undefined) { this.newTrackerPreview.unsubscribe(); }
+    this.startTimeModification = false;
+  }
+
+  /**
+   * Enable start time modification if allowed
+   */
+  enableStartTimeModification(): void {
+    if (this.timeTracker !== null && this.timeTracker !== undefined) {
+      if (this.timeTracker.id !== null && this.timeTracker.id !== undefined) {
+        if (!this.stoppingBlockedByLoading && !this.stoppingBlockedByNegativeTime) {
+          this.newTrackerStart = this.timeTracker.timeStarted;
+          this.startTimeCtrl.setValue(this.timeTracker.timeStarted.toLocaleTimeString());
+          this.newTrackerPreview = interval(1000).subscribe(timePassed => {
+            if (this.timeTracker === null ||
+              this.timeTracker === undefined ||
+              this.timeTracker.id === null ||
+              this.timeTracker.id === undefined ||
+              this.stoppingBlockedByLoading ||
+              this.stoppingBlockedByNegativeTime) {
+                this.disableStartTimeModification();
+              }
+            const duration = ((new Date().valueOf() - new Date(this.newTrackerStart).valueOf()) / 1000);
+            let sec: number = Math.floor(duration);
+            let prefix = '';
+            this.stoppingBlockedByNegativeTime = (sec <= 3);
+            if (sec < 0) {
+              sec = -sec;
+              prefix = '- ';
+            }
+            let min: number = Math.floor(sec / 60);
+            const hrs: number = Math.floor(min / 60);
+            sec = sec % 60;
+            min = min % 60;
+            let secStr: string = sec.toString();
+            if (secStr.length < 2) {
+                secStr = '0' + secStr;
+            }
+            let minStr: string = min.toString();
+            if (minStr.length < 2) {
+                minStr = '0' + minStr;
+            }
+            let hrsStr: string = hrs.toString();
+            if (hrsStr.length < 2) {
+              hrsStr = '0' + hrsStr;
+            }
+            this.newTrackerTimeString =
+              prefix + hrsStr + ':' + minStr + ':' + secStr;
+          });
+          this.startTimeModification = true;
+        }
+      }
+    }
+  }
+
+  /**
+   * Modifies selected tracker start time if allowed
+   */
+  modifyTrackerStart(): void {
+    this.updateNewTrackerTimeString();
+    this.timeTracker.timeStarted = this.newTrackerStart;
+    this.updateTracker();
+    this.disableStartTimeModification();
+  }
+
+  updateNewTrackerTimeString(): void {
+    this.newTrackerStartTime = this.stringToTime(this.startTimeCtrl.value);
+    this.newTrackerStart = new Date(this.timeTracker.timeStarted.valueOf());
+    this.newTrackerStart.setHours(this.newTrackerStartTime.hours);
+    this.newTrackerStart.setMinutes(this.newTrackerStartTime.minutes);
   }
 
   /**
@@ -816,8 +898,12 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         }
       },
       error => {
-        this.errorService.errorDialog('Couldn\'t stop time tracker');
-        this.stoppingBlockedByLoading = true;
+        let errorMessage: string = 'Couldn\'t stop time tracker.';
+        if (error !== undefined && error.error !== undefined && error.error.message !== undefined) {
+          errorMessage += '\n' + error.error.message;
+        }
+        this.errorService.errorDialog(errorMessage);
+        this.stoppingBlockedByLoading = false;
       }
     );
   }

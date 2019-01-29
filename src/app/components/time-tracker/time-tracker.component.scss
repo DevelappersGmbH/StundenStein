@@ -30,6 +30,9 @@ mat-form-field {
     width: 25%;
   }
 }
+.field-tiny {
+  width: 100px;
+}
 .field-container {
   display: inline;
   @media screen and (max-width: $break-large) {
