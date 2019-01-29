@@ -5,7 +5,8 @@ import {
   Input,
   OnChanges,
   OnInit,
-  SimpleChanges
+  SimpleChanges,
+  ChangeDetectorRef
 } from '@angular/core';
 import { ErrorService } from '../../services/error/error.service';
 import { isUndefined } from 'util';
@@ -26,12 +27,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
   generalArray = new Array();
   selected = '0';
   pixelWidth;
-  elementPosition;
-  getSize;
+  date = new Date();
   firstInit = true;
 
   // constructor is loading various npm packages for scaling due to the info bubble
-  constructor(private errorService: ErrorService) {
+  constructor(private errorService: ErrorService, private ref: ChangeDetectorRef) {
     this.pixelWidth = require('string-pixel-width');
     this.onResize();
   }
@@ -41,12 +41,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
   // function called when window is resizing due to the info bubble
   @HostListener('window:resize', ['$event'])
   onResize() {
-    this.screenWidth = window.innerWidth + (this.firstInit ? 14 : 0);
+    this.screenWidth = window.innerWidth;
     this.firstInit = false;
   }
 
   ngOnInit() {
-    // console.log(this.mock.getMockTimeLog());
     if (isUndefined(this.timeLogs)) {
       this.errorService.errorDialog(
         'Did not receive data from the dataService, wich distributes the project data.'
@@ -62,6 +61,9 @@ export class UserReportsComponent implements OnInit, OnChanges {
       const change = changes['timeLogs'];
     }
     this.ngOnInit();
+    setTimeout(() => {
+      this.ref.markForCheck();
+    }, 500);
   }
 
   // filtering the timelogs suitable to the time period that was selected by the user
@@ -81,11 +83,11 @@ export class UserReportsComponent implements OnInit, OnChanges {
 
   // the following functions check if the timelog that is passed from the setPeriod function is in corresponding period
   checkDay(value: TimeLog) {
-    return this.compareDates(new Date(), value.timeStopped);
+    return this.compareDates(this.date, value.timeStopped);
   }
 
   checkYesterday(value: TimeLog, bool: boolean) {
-    const date = new Date(new Date().setDate(new Date().getDate() - 1));
+    const date = new Date(new Date().setDate(this.date.getDate() - 1));
     return (bool
     ? this.compareDates(date, value.timeStarted) : false) ||
       this.compareDates(date, value.timeStopped);
@@ -94,38 +96,38 @@ export class UserReportsComponent implements OnInit, OnChanges {
   checkWeek(value: TimeLog) {
     return (
       this.getWeekNumber(value.timeStopped) ===
-        this.getWeekNumber(new Date()) &&
-      new Date().getFullYear() === value.timeStopped.getFullYear()
+        this.getWeekNumber(this.date) &&
+        this.date.getFullYear() === value.timeStopped.getFullYear()
     );
   }
 
   checkLastWeek(value: TimeLog, bool: boolean) {
     return (( bool ? (this.getWeekNumber(value.timeStarted) ===
-      this.getWeekNumber(new Date(new Date().setDate(new Date().getDate() - 7))) &&
-      new Date().getFullYear() - (this.getWeekNumber(new Date()) === 1 ? 1 : 0) === value.timeStarted.getFullYear()) : false) ||
-      (this.getWeekNumber(value.timeStopped) === this.getWeekNumber(new Date(new Date().setDate(new Date().getDate() - 7))) &&
-      new Date().getFullYear() - (this.getWeekNumber(new Date()) === 1 ? 1 : 0) === value.timeStopped.getFullYear()));
+      this.getWeekNumber(new Date(new Date().setDate(this.date.getDate() - 7))) &&
+      this.date.getFullYear() - (this.getWeekNumber(this.date) === 1 ? 1 : 0) === value.timeStarted.getFullYear()) : false) ||
+      (this.getWeekNumber(value.timeStopped) === this.getWeekNumber(new Date(new Date().setDate(this.date.getDate() - 7))) &&
+      this.date.getFullYear() - (this.getWeekNumber(this.date) === 1 ? 1 : 0) === value.timeStopped.getFullYear()));
 
   }
 
   checkMonth(value: TimeLog) {
     return (
-      new Date().getMonth() === value.timeStopped.getMonth() &&
-      new Date().getFullYear() === value.timeStopped.getFullYear()
+      this.date.getMonth() === value.timeStopped.getMonth() &&
+      this.date.getFullYear() === value.timeStopped.getFullYear()
     );
   }
 
   checkLastMonth(value: TimeLog, bool: boolean) {
-    return ( bool ? (new Date().getMonth() === 0
+    return ( bool ? (this.date.getMonth() === 0
       ? value.timeStarted.getMonth() === 11 &&
-        new Date().getFullYear() - 1 === value.timeStarted.getFullYear()
-      : new Date().getMonth() - 1 === value.timeStarted.getMonth() &&
-        new Date().getFullYear() === value.timeStarted.getFullYear()) : false) ||
-      new Date().getMonth() === 0
+        this.date.getFullYear() - 1 === value.timeStarted.getFullYear()
+      : this.date.getMonth() - 1 === value.timeStarted.getMonth() &&
+        this.date.getFullYear() === value.timeStarted.getFullYear()) : false) ||
+      this.date.getMonth() === 0
         ? value.timeStopped.getMonth() === 11 &&
-          new Date().getFullYear() - 1 === value.timeStopped.getFullYear()
-        : new Date().getMonth() - 1 === value.timeStopped.getMonth() &&
-          new Date().getFullYear() === value.timeStopped.getFullYear();
+          this.date.getFullYear() - 1 === value.timeStopped.getFullYear()
+        : this.date.getMonth() - 1 === value.timeStopped.getMonth() &&
+          this.date.getFullYear() === value.timeStopped.getFullYear();
   }
 
   // compares two Date objects if they are containing the same day (time excluded)
@@ -294,7 +296,7 @@ export class UserReportsComponent implements OnInit, OnChanges {
       (this.screenWidth - 20) *
       (this.generalArray[i][!this.bilCheck ? 1 : 3] / 100);
     return this.pixelWidth(this.generalArray[i][0], {
-      size: 14
+      size: 15
     }) <= pixel || bool
       ? this.generalArray[i][0]
       : this.generalArray[i][0].charAt(0);
