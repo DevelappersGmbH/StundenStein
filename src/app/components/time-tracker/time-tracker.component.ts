@@ -44,6 +44,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   @Input() issues: Issue[] = [];
   currentTrackerTimeString: string;
   automaticMode: boolean;
+  startTimeModification = false;
   automaticLock: boolean;
   timeTracker: Partial<TimeTracker> = {
     billable: true,
@@ -54,6 +55,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   issueCtrl = new FormControl();
   projectCtrl = new FormControl();
   logCtrl = new FormControl();
+  startTimeCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
   filteredLogs: Observable<TimeLog[]>;
@@ -173,6 +175,21 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       map(log => (log ? this._filterLogs(log) : this.logs.slice()))
     );
 
+  }
+
+  /**
+   * Enable start time modification if allowed
+   */
+  enableStartTimeModification(): void {
+    if (this.timeTracker !== null && this.timeTracker !== undefined) {
+      if (this.timeTracker.id !== null && this.timeTracker.id !== undefined) {
+        if (!this.stoppingBlockedByLoading && !this.stoppingBlockedByNegativeTime) {
+          console.log(this.timeTracker.timeStarted.toLocaleTimeString());
+          this.startTimeCtrl.setValue(this.timeTracker.timeStarted.toLocaleTimeString());
+          this.startTimeModification = true;
+        }
+      }
+    }
   }
 
   /**

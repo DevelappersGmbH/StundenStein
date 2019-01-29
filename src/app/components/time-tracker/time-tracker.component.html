@@ -66,7 +66,10 @@
       </div>
       <br *ngIf="!automaticMode"/>
       <div class="field-container" [ngClass]="{ maxsizeHidden: !automaticMode }">
-        <span *ngIf="automaticMode" class="field">{{ currentTrackerTimeString }}</span>
+        <span (dblclick)="enableStartTimeModification()" *ngIf="automaticMode && !startTimeModification" class="field">{{ currentTrackerTimeString }}</span>
+        <mat-form-field *ngIf="automaticMode && startTimeModification" class="field field-small time">
+          <input [formControl]="startTimeCtrl" placeholder="Modify start time" (change)="modifyTrackerStart()" type="time" matInput />
+        </mat-form-field>
         <div class="field">
           <button [disabled]="componentBlockedByInitialTrackerLoad" name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
             class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon></button>
