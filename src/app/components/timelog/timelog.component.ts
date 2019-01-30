@@ -375,6 +375,7 @@ export class TimeLogComponent implements OnInit, OnChanges {
     this.calculateTime();
   }
 
+
   /*updates tracked time according to new start time and end time*/
   private calculateTime() {
     const seconds =
