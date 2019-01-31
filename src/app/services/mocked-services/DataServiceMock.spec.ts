@@ -3,18 +3,19 @@ import { Observable, of } from 'rxjs';
 import { Project } from 'src/app/model/project.interface';
 import { Issue } from 'src/app/model/issue.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
-const mockUser = {
+import { User } from 'src/app/model/user.interface';
+const mockUser: User = {
   name: 'TestUser',
   id: 99
 };
 
-const mockProject = {
+const mockProject: Project = {
   id: 2,
   name: 'TestProject',
   color: 'Red'
 };
 
-const mockIssue = {
+const mockIssue: Issue = {
   id: 3,
   subject: 'TestIssue',
   tracker: 'TestTracker',
@@ -22,7 +23,7 @@ const mockIssue = {
   assignedTo: mockUser
 };
 
-const mockTimeLog = {
+const mockTimeLog: TimeLog = {
   id: 1,
   timeStarted: new Date('October 1, 2018 11:00:00'),
   timeStopped: new Date('October 1, 2018 16:00:00'),
@@ -36,6 +37,15 @@ const mockTimeLog = {
   project: mockProject,
   user: mockUser
 };
+
+let mockTimeTracker: TimeTracker = {
+  id: 13,
+  timeStarted: undefined,
+  billable: false,
+  project: mockProject,
+  issue: undefined,
+  comment: 'example comment'
+}
 
 const mockTimeLogs: TimeLog[] = new Array();
 const mockProjects: Project[] = new Array();
@@ -63,6 +73,11 @@ export class DataServiceMock {
   }
 
   public getTimeTrackerByUserId(userId: number): Observable<TimeTracker> {
-    return of(undefined);
+    return of(mockTimeTracker);
+  }
+
+  public stopTimeTracker(timeTracker: TimeTracker): Observable<Boolean> {
+    mockTimeTracker = undefined;
+    return of(true);
   }
 }

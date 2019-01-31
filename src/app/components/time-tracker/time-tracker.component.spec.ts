@@ -73,4 +73,54 @@ describe('TimeTrackerComponent', () => {
     }
     expect(component.makeLogComparisonString(log)).toBe(log.comment + '|' + log.issue.id.toString() + '|' + log.project.id.toString());
   });
+
+  it('should detect if two dates are on the same day', () => {
+    expect(component.sameday(new Date("2018-01-01 13:24"), new Date("2018-01-01 23:59"))).toBe(true);
+    expect(component.sameday(new Date("2018-01-02 00:01"), new Date("2018-01-01 23:59"))).toBe(false);
+    expect(component.sameday(new Date("2018-01-02 00:01"), new Date("2010-01-02 00:01"))).toBe(false);
+    expect(component.sameday(new Date("2018-01-02 00:01"), new Date("2018-10-02 00:01"))).toBe(false);
+    expect(component.sameday(new Date("2018-01-02 00:01"), new Date("2018-01-20 00:01"))).toBe(false);
+  });
+  
+  /*it('should set billable to false after click and true after second click', () => {
+    component.timeTracker.billable = true;
+    fixture.detectChanges();
+    fixture.debugElement.nativeElement.querySelector('button[name="billable"]').click();
+    fixture.detectChanges();
+    expect(component.timeTracker.billable).toBeFalsy();
+    fixture.debugElement.nativeElement.querySelector('button[name="billable"]').click();
+    fixture.detectChanges();
+    expect(component.timeTracker.billable).toBeTruthy();
+  });*/
+
+  // POSSIBLY FAILS WHEN RUNNING TETS IN RANDOM ORDER!
+  it('loads the running time tracker correctly', () => {
+    component.timeTracker = {};
+    component.loadTimeTracker();
+    expect(JSON.stringify(component.timeTracker)).toBe(JSON.stringify({
+      id: 13,
+      timeStarted: undefined,
+      billable: false,
+      project: {
+        id: 2,
+        name: 'TestProject',
+        color: 'Red'
+      },
+      issue: undefined,
+      comment: 'example comment'
+    }));
+  });
+
+  // POSSIBLY FAILS WHEN RUNNING TETS IN RANDOM ORDER!
+  it('to stop the running tracker', () => {
+    component.loadTimeTracker();
+    component.stopTimeTracker();
+    expect(JSON.stringify(component.timeTracker)).toBe(JSON.stringify({
+      billable: true,
+      comment: '',
+      issue: null,
+      project: null
+    }));
+  });
+
 });
