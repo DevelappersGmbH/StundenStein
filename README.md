@@ -28,10 +28,6 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
 
-## Project Status
-
-The REST-API itself contains a whole bunch of functionality. This wrapper is still under development. New functions will be added successively. You can find detailed information about recent changes in [change log](CHANGELOG.md).
-
 ## Contribution
 
 Bug reports and pull requests are welcome on [GitHub](https://github.com/DevelappersGmbH/StundenStein). Please check the [contribution guide](CONTRIBUTING.md).This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to our [code of conduct](CODE_OF_CONDUCT.md).
