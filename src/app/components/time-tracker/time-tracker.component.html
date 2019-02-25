@@ -1,13 +1,16 @@
 <mat-card>
-  <form *ngIf="startTimeModification && timeTracker !== null && timeTracker !== undefined && timeTracker.timeStarted !== null && timeTracker.timeStarted !== undefined">
+  <form
+    *ngIf="startTimeModification && timeTracker !== null && timeTracker !== undefined && timeTracker.timeStarted !== null && timeTracker.timeStarted !== undefined">
     <div class="field-container">
-      <span class="field"> Current time running: {{ currentTrackerTimeString }}, started at {{ timeTracker.timeStarted.toLocaleTimeString() }}</span>
+      <span class="field"> Current time running: {{ currentTrackerTimeString }}, started at
+        {{ timeTracker.timeStarted.toLocaleTimeString() }}</span>
       <mat-form-field class="field field-tiny time">
-        <input [formControl]="startTimeCtrl" (change)="updateNewTrackerTimeString()" placeholder="New start time" type="time" matInput />
+        <input [formControl]="startTimeCtrl" (change)="updateNewTrackerTimeString()" placeholder="New start time"
+          type="time" matInput />
       </mat-form-field>
       <span class="field"> Time running after modification: {{ newTrackerTimeString }}</span>
       <button class="field" (click)="modifyTrackerStart()" mat-flat-button color="primary">
-          <span>Modify start time</span>
+        <span>Modify start time</span>
       </button>
       <button class="field" (click)="disableStartTimeModification();" mat-stroked-button color="primary">
         <span>Cancel</span>
@@ -15,92 +18,122 @@
     </div>
   </form>
   <form *ngIf="!startTimeModification">
-      <div class="field-container">
-        <mat-form-field class="field field-small">
-          <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue" matInput [matAutocomplete]="autoIssue">
-          <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"  autoActiveFirstOption #autoIssue="matAutocomplete">
-            <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
-              {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
-            </mat-option>
-          </mat-autocomplete>
-        </mat-form-field>
-        <mat-form-field class="field field-large">
-          <input type="text" (change)="updateTracker()" [formControl]="logCtrl" name="comment" placeholder="Comment" matInput [matAutocomplete]="autoLog">
-          <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog" #autoLog="matAutocomplete">
-            <mat-option *ngFor="let log of filteredLogs | async" [value]="log.id + '$$' + log.comment">
-              <span>{{shorten(log.comment, 25)}}</span>
-              <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
-              <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
-            </mat-option>
-          </mat-autocomplete>
-        </mat-form-field>
-        <mat-form-field class="field field-small">
-            <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project" [style.color]="_getProjectColor()" placeholder="Project" matInput [matAutocomplete]="autoProject">
-              <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject" autoActiveFirstOption #autoProject="matAutocomplete">
-                <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
-                  {{project.name}}
-                </mat-option>
-              </mat-autocomplete>
-        </mat-form-field>
+    <div class="field-container">
+      <mat-form-field class="field field-small">
+        <input type="text" appEnforcedInputs [formControl]="issueCtrl" name="issue" placeholder="Issue"
+          (focus)="issueCtrlFocused=true" (blur)="issueCtrlFocused=false" matInput [matAutocomplete]="autoIssue">
+        <mat-autocomplete (optionSelected)="selectIssue($event.option.value)" [displayWith]="_displayIssue"
+          autoActiveFirstOption #autoIssue="matAutocomplete">
+          <mat-option *ngFor="let issue of filteredIssues | async" [value]="issue">
+            {{issue.tracker}} #{{issue.id}}: {{issue.subject}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field class="field field-large">
+        <input type="text" (change)="updateTracker()" [formControl]="logCtrl" name="comment" placeholder="Comment"
+          (focus)="logCtrlFocused=true" (blur)="logCtrlFocused=false" matInput [matAutocomplete]="autoLog">
+        <mat-autocomplete (optionSelected)="selectLog($event.option.value)" [displayWith]="_displayLog"
+          #autoLog="matAutocomplete">
+          <mat-option *ngFor="let log of filteredLogs | async" [value]="log.id + '$$' + log.comment">
+            <span>{{shorten(log.comment, 25)}}</span>
+            <small *ngIf="log.issue"> | #{{log.issue.id}}: {{shorten(log.issue.subject, 10)}}</small>
+            <small *ngIf="log.project" [style.color]="log.project.color"> | {{log.project.name}}</small>
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+      <mat-form-field class="field field-small">
+        <input type="text" appEnforcedInputs [formControl]="projectCtrl" name="project"
+          [style.color]="_getProjectColor()" placeholder="Project" (focus)="projectCtrlFocused=true"
+          (blur)="projectCtrlFocused=false" matInput [matAutocomplete]="autoProject">
+        <mat-autocomplete (optionSelected)="selectProject($event.option.value)" [displayWith]="_displayProject"
+          autoActiveFirstOption #autoProject="matAutocomplete">
+          <mat-option *ngFor="let project of filteredProjects | async" [style.color]="project.color" [value]="project">
+            {{project.name}}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+    <div class="field-container maxsizeOnly" *ngIf="!automaticMode">
+      <div class="field">
+        <button name="billable" mat-icon-button class="button"
+          (click)="timeTracker.billable = !timeTracker.billable; updateTracker()">
+          <mat-icon class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon>
+        </button>
       </div>
-      <div class="field-container maxsizeOnly" *ngIf="!automaticMode">
-        <div class="field">
-          <button name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
-            class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon></button>
-        </div>
-        <div class="field">
-          <button [disabled]="loggingBlockedByLoading" (click)="createLog()" mat-flat-button color="primary">
-            <span>Save  </span>
-            <mat-icon>save</mat-icon>
-          </button>
-        </div>
-        <div class="field">
-          <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="automaticLock" color="primary">Automatic Mode</button>
-        </div>
+      <div class="field">
+        <button [disabled]="loggingBlockedByLoading" (click)="createLog()" mat-flat-button color="primary">
+          <span>Save </span>
+          <mat-icon>save</mat-icon>
+        </button>
       </div>
-      <br *ngIf="!automaticMode"/>
-      <div class="field-container" *ngIf="!automaticMode">
-        <mat-form-field class="field field-large date">
-          <input [max]="now()" matInput [matDatepicker]="picker1" placeholder="Choose start date" [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
-            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-            <mat-datepicker #picker1></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field class="field field-small time">
-          <input [style.color]="manualStartTimeIllegal ? 'red' : 'black'" placeholder="Choose start time" [ngModel]="timeToString(manualStartTime)" (ngModelChange)="manualStartTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
-        </mat-form-field>
+      <div class="field">
+        <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="automaticLock"
+          color="primary">Automatic Mode</button>
       </div>
-      <div class="field-container" *ngIf="!automaticMode">
-        <mat-form-field class="field field-large date">
-          <input [min]="manualStartDate" [max]="now()" matInput [matDatepicker]="picker2" placeholder="Choose end date" [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }"/>
-            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-            <mat-datepicker #picker2></mat-datepicker>
-        </mat-form-field>
-        <mat-form-field class="field field-small time">
-          <input [style.color]="manualStopTimeIllegal ? 'red' : 'black'" placeholder="Choose end time" [ngModel]="timeToString(manualStopTime)" (ngModelChange)="manualStopTime=stringToTime($event); validateStartStop()" [ngModelOptions]="{ standalone: true }" type="time" matInput />
-        </mat-form-field>
+    </div>
+    <br *ngIf="!automaticMode" />
+    <div class="field-container" *ngIf="!automaticMode">
+      <mat-form-field class="field field-large date">
+        <input [max]="now()" matInput [matDatepicker]="picker1" placeholder="Choose start date"
+          [(ngModel)]="manualStartDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" />
+        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+        <mat-datepicker #picker1></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field class="field field-small time">
+        <input [style.color]="manualStartTimeIllegal ? 'red' : 'black'" placeholder="Choose start time"
+          [ngModel]="timeToString(manualStartTime)"
+          (ngModelChange)="manualStartTime=stringToTime($event); validateStartStop()"
+          [ngModelOptions]="{ standalone: true }" type="time" matInput />
+      </mat-form-field>
+    </div>
+    <div class="field-container" *ngIf="!automaticMode">
+      <mat-form-field class="field field-large date">
+        <input [min]="manualStartDate" [max]="now()" matInput [matDatepicker]="picker2" placeholder="Choose end date"
+          [(ngModel)]="manualStopDate" (ngModelChange)="validateStartStop()" [ngModelOptions]="{ standalone: true }" />
+        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+        <mat-datepicker #picker2></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field class="field field-small time">
+        <input [style.color]="manualStopTimeIllegal ? 'red' : 'black'" placeholder="Choose end time"
+          [ngModel]="timeToString(manualStopTime)"
+          (ngModelChange)="manualStopTime=stringToTime($event); validateStartStop()"
+          [ngModelOptions]="{ standalone: true }" type="time" matInput />
+      </mat-form-field>
+    </div>
+    <br *ngIf="!automaticMode" />
+    <div class="field-container" [ngClass]="{ maxsizeHidden: !automaticMode }">
+      <span (dblclick)="enableStartTimeModification()" *ngIf="automaticMode && !startTimeModification"
+        class="field">{{ currentTrackerTimeString }}</span>
+      <div class="field">
+        <button [disabled]="componentBlockedByInitialTrackerLoad" name="billable" mat-icon-button class="button"
+          (click)="timeTracker.billable = !timeTracker.billable; updateTracker()">
+          <mat-icon class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon>
+        </button>
       </div>
-      <br *ngIf="!automaticMode"/>
-      <div class="field-container" [ngClass]="{ maxsizeHidden: !automaticMode }">
-        <span (dblclick)="enableStartTimeModification()" *ngIf="automaticMode && !startTimeModification" class="field">{{ currentTrackerTimeString }}</span>
-        <div class="field">
-          <button [disabled]="componentBlockedByInitialTrackerLoad" name="billable" mat-icon-button class="button" (click)="timeTracker.billable = !timeTracker.billable; updateTracker()"><mat-icon
-            class="icon" [ngClass]="{ active: timeTracker.billable }">attach_money</mat-icon></button>
-        </div>
-        <div class="field">
-          <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" mat-flat-button color="primary" [disabled]="componentBlockedByInitialTrackerLoad || startingBlockedByLoading">Start</button>
-          <button *ngIf="automaticMode && this.timeTracker.id !== undefined" [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopTimeTracker()" mat-flat-button color="warn">Stop</button>
-          <button *ngIf="!automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || loggingBlockedByLoading" (click)="createLog()" mat-flat-button color="primary">
-            <span>Save  </span>
-            <mat-icon>save</mat-icon>
-          </button>
-        </div>
-        <div class="field" *ngIf="automaticMode && this.timeTracker.id !== undefined">
-          <button [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading" (click)="stopAndNew()" mat-flat-button color="warn">Stop and new</button>
-        </div>
-        <div class="field">
-          <button mat-stroked-button *ngIf="automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock || this.timeTracker.id !== undefined" (click)="automaticMode = false;" color="primary">Manual Mode</button>
-          <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;" [disabled]="componentBlockedByInitialTrackerLoad || automaticLock" color="primary">Automatic Mode</button>
-        </div>
+      <div class="field">
+        <button *ngIf="automaticMode && this.timeTracker.id === undefined" (click)="startTimeTracker()" mat-flat-button
+          color="primary" [disabled]="componentBlockedByInitialTrackerLoad || startingBlockedByLoading">Start</button>
+        <button *ngIf="automaticMode && this.timeTracker.id !== undefined"
+          [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading"
+          (click)="stopTimeTracker()" mat-flat-button color="warn">Stop</button>
+        <button *ngIf="!automaticMode" [disabled]="componentBlockedByInitialTrackerLoad || loggingBlockedByLoading"
+          (click)="createLog()" mat-flat-button color="primary">
+          <span>Save </span>
+          <mat-icon>save</mat-icon>
+        </button>
       </div>
+      <div class="field" *ngIf="automaticMode && this.timeTracker.id !== undefined">
+        <button
+          [disabled]="componentBlockedByInitialTrackerLoad || stoppingBlockedByNegativeTime || stoppingBlockedByLoading"
+          (click)="stopAndNew()" mat-flat-button color="warn">Stop and new</button>
+      </div>
+      <div class="field">
+        <button mat-stroked-button *ngIf="automaticMode"
+          [disabled]="componentBlockedByInitialTrackerLoad || automaticLock || this.timeTracker.id !== undefined"
+          (click)="automaticMode = false;" color="primary">Manual Mode</button>
+        <button mat-stroked-button *ngIf="!automaticMode" (click)="automaticMode = true;"
+          [disabled]="componentBlockedByInitialTrackerLoad || automaticLock" color="primary">Automatic Mode</button>
+      </div>
+    </div>
   </form>
 </mat-card>

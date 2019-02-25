@@ -8,17 +8,22 @@ import {
 import { DataService } from 'src/app/services/data/data.service';
 import { ErrorService } from 'src/app/services/error/error.service';
 import { Favicons } from 'src/app/services/favicon/favicon.service';
-import { forkJoin, interval, Observable, Subscription } from 'rxjs';
+import {
+  forkJoin,
+  interval,
+  Observable,
+  Subscription
+  } from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { isNull, isUndefined } from 'util';
 import { Issue } from 'src/app/model/issue.interface';
 import { map, startWith } from 'rxjs/operators';
 import { Project } from 'src/app/model/project.interface';
 import { ReloadTriggerService } from 'src/app/services/reload-trigger.service';
+import { Time } from '@angular/common';
 import { TimeLog } from 'src/app/model/time-log.interface';
 import { TimeTracker } from 'src/app/model/time-tracker.interface';
 import { Title } from '@angular/platform-browser';
-import { Time } from '@angular/common';
 import { TrackerService } from 'src/app/services/tracker/tracker.service';
 import { UserService } from 'src/app/services/user/user.service';
 
@@ -36,7 +41,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     private reloadTriggerSerivce: ReloadTriggerService,
     private errorService: ErrorService,
     private trackerService: TrackerService
-  ) {}
+  ) { }
 
   logs: TimeLog[] = [];
   @Input() timeLogs: TimeLog[] = [];
@@ -53,8 +58,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
     project: null
   };
   issueCtrl = new FormControl();
+  issueCtrlFocused = false;
   projectCtrl = new FormControl();
+  projectCtrlFocused = false;
   logCtrl = new FormControl();
+  logCtrlFocused = false;
   startTimeCtrl = new FormControl();
   filteredIssues: Observable<Issue[]>;
   filteredProjects: Observable<Project[]>;
@@ -128,7 +136,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.updateAutoCompletes();
       this.stoppingBlockedByLoading = false;
     });
-    this.trackerReloading = interval(10000).subscribe( val => {
+    this.trackerReloading = interval(10000).subscribe(val => {
       this.loadTimeTrackerChanges();
     });
     this.timer = interval(1000).subscribe(val => {
@@ -136,7 +144,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
         this.setTimeString(
           (new Date().valueOf() -
             new Date(this.timeTracker.timeStarted).valueOf()) /
-            1000
+          1000
         );
         if (!this.favIconRunning) {
           this.faviconService.activate('running');
@@ -205,8 +213,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               this.timeTracker.id === undefined ||
               this.stoppingBlockedByLoading ||
               this.stoppingBlockedByNegativeTime) {
-                this.disableStartTimeModification();
-              }
+              this.disableStartTimeModification();
+            }
             const duration = ((new Date().valueOf() - new Date(this.newTrackerStart).valueOf()) / 1000);
             let sec: number = Math.floor(duration);
             let prefix = '';
@@ -221,11 +229,11 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
             min = min % 60;
             let secStr: string = sec.toString();
             if (secStr.length < 2) {
-                secStr = '0' + secStr;
+              secStr = '0' + secStr;
             }
             let minStr: string = min.toString();
             if (minStr.length < 2) {
-                minStr = '0' + minStr;
+              minStr = '0' + minStr;
             }
             let hrsStr: string = hrs.toString();
             if (hrsStr.length < 2) {
@@ -270,25 +278,25 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.manualStopTimeIllegal = true;
     }
     if (!isUndefined(this.manualStartTime) && !isUndefined(this.manualStopTime) &&
-    this.sameday(this.manualStartDate, this.manualStopDate)) {
+      this.sameday(this.manualStartDate, this.manualStopDate)) {
       if (this.isLater(this.manualStartTime, this.manualStopTime)) {
         // FAIL: stop before start
         this.manualStopTimeIllegal = true;
       }
-      if ( JSON.stringify(this.manualStartTime) === JSON.stringify(this.manualStopTime)) {
+      if (JSON.stringify(this.manualStartTime) === JSON.stringify(this.manualStopTime)) {
         // FAIL: stop and start equal
         this.manualStopTimeIllegal = true;
       }
     }
     if (!isUndefined(this.manualStartTime) &&
-    this.sameday(this.manualStartDate, this.now())) {
+      this.sameday(this.manualStartDate, this.now())) {
       if (this.isLater(this.manualStartTime, this.currentTime())) {
         // FAIL: starts before now
         this.manualStartTimeIllegal = true;
       }
     }
     if (!isUndefined(this.manualStopTime) &&
-    this.sameday(this.manualStopDate, this.now())) {
+      this.sameday(this.manualStopDate, this.now())) {
       if (this.isLater(this.manualStopTime, this.currentTime())) {
         // FAIL: ends before now
         this.manualStopTimeIllegal = true;
@@ -324,7 +332,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
    */
   stringToTime(value: string): Time {
     return {
-      hours: parseInt(value.substring(0, 2), 10) ,
+      hours: parseInt(value.substring(0, 2), 10),
       minutes: parseInt(value.substring(3, 5), 10)
     };
   }
@@ -385,9 +393,22 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       t => {
         this.lastTrackerUpdate = this.now();
         if (!isNull(t) && !isUndefined(t)) {
-          this.timeTracker = t;
-          this.ensureSelectedIssueIsFromIssueList();
-          this.ensureSelectedProjectIsFromProjectList();
+
+          this.timeTracker.id = t.id;
+          this.timeTracker.billable = t.billable;
+          if (!this.logCtrlFocused) {
+            this.timeTracker.comment = t.comment;
+          }
+          if (!this.issueCtrlFocused) {
+            this.timeTracker.issue = t.issue;
+            this.ensureSelectedIssueIsFromIssueList();
+          }
+          if (!this.projectCtrlFocused) {
+            this.timeTracker.project = t.project;
+            this.ensureSelectedProjectIsFromProjectList();
+          }
+          this.timeTracker.timeStarted = t.timeStarted;
+
         } else {
           this.timeTracker = {
             billable: true,
@@ -400,7 +421,17 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           this.stopTimeTracker(startNewTrackerAfterStoppingIt, false);
         } else {
           this.stoppingBlockedByLoading = false;
-          this.updateAutoCompletes();
+
+          // Update auto completes
+          if (!this.logCtrlFocused) {
+            this.logCtrl.setValue(this.timeTracker.comment);
+          }
+          if (!this.issueCtrlFocused) {
+            this.issueCtrl.setValue(this.timeTracker.issue);
+          }
+          if (!this.projectCtrlFocused) {
+            this.projectCtrl.setValue(this.timeTracker.project);
+          }
         }
       },
       error => {
@@ -705,7 +736,7 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   loadTimeTrackerChanges(): boolean {
     // Check if there is a reload happening or has been recently (last 5sec)
     if (this.stoppingBlockedByLoading || this.startingBlockedByLoading ||
-      Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5 ) {
+      Math.abs((this.lastTrackerUpdate.getTime() - this.now().getTime()) / 1000) < 5) {
       return false;
     }
     // Prepare TimeTracker query
@@ -741,12 +772,12 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           // Check if local tracker is unset (undefined or null), or if IDs don't match
           if (isNull(this.timeTracker) || isUndefined(this.timeTracker)
             || (isUndefined(this.timeTracker.id) && !isUndefined(trackerUpdate.id))) {
-              this.timeTracker = trackerUpdate;
-              this.updateAutoCompletes();
-              dataChanged = true;
-            }
+            this.timeTracker = trackerUpdate;
+            this.updateAutoCompletes();
+            dataChanged = true;
+          }
           // Check if both local and remote IDs are unset
-          if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id) )
+          if ((isUndefined(this.timeTracker.id) || isNull(this.timeTracker.id))
             && (isUndefined(trackerUpdate.id) || isNull(trackerUpdate.id))) {
             return false;
           }
@@ -772,9 +803,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               !(isUndefined(this.timeTracker.issue) || isNull(this.timeTracker.issue)) &&
               this.timeTracker.issue.id !== trackerUpdate.issue.id
             )) {
-              this.timeTracker.issue = trackerUpdate.issue;
-              this.issueCtrl.setValue(this.timeTracker.issue);
-              dataChanged = true;
+            this.timeTracker.issue = trackerUpdate.issue;
+            this.issueCtrl.setValue(this.timeTracker.issue);
+            dataChanged = true;
           }
           // Check for inequality of project
           if (
@@ -792,9 +823,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
               !(isUndefined(this.timeTracker.project) || isNull(this.timeTracker.project)) &&
               this.timeTracker.project.id !== trackerUpdate.project.id
             )) {
-              this.timeTracker.project = trackerUpdate.project;
-              this.projectCtrl.setValue(this.timeTracker.project);
-              dataChanged = true;
+            this.timeTracker.project = trackerUpdate.project;
+            this.projectCtrl.setValue(this.timeTracker.project);
+            dataChanged = true;
           }
           // Check for inequality of timeStarted
           if (this.timeTracker.timeStarted !== trackerUpdate.timeStarted) {
@@ -858,8 +889,8 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
       this.timeTracker.comment === comment &&
       this.timeTracker.issue === issue &&
       this.timeTracker.project === project
-      ) {
-        this.stopTimeTracker(startNewAfterwards, false);
+    ) {
+      this.stopTimeTracker(startNewAfterwards, false);
     } else {
       this.updateTracker(true, startNewAfterwards);
     }
