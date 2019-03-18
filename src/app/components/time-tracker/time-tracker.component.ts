@@ -106,7 +106,39 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
           logComp.unshift(logCompString);
         }
       });
+      this.sortProjects();
     }
+  }
+
+  /**
+   * Sorts the projects by name alphabetically and moves recently used ones first
+   */
+  sortProjects() {
+    this.projects = this.projects.sort((p1,p2) => {
+      if (this.recentlyUsedIndex(p1) === Infinity && this.recentlyUsedIndex(p2) === Infinity) {
+        if (p1.name.toLowerCase() < p2.name.toLowerCase()) {
+          return -1;
+        }
+        return 1;
+      }
+      if (this.recentlyUsedIndex(p1) < this.recentlyUsedIndex(p2)) {
+        return -1;
+      }
+      return 1;
+    });
+  }
+
+  /**
+   * Tests when project has been used the last time
+   * @param project project
+   */
+  recentlyUsedIndex(project: Project): number {
+    for (let i = 0; i < this.timeLogs.length; i++) {
+      if (this.timeLogs[i].project.id === project.id) {
+        return i;
+      }
+    }
+    return Infinity;
   }
 
   /**
