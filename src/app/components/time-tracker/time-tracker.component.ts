@@ -116,15 +116,9 @@ export class TimeTrackerComponent implements OnInit, OnChanges {
   sortProjects() {
     this.projects = this.projects.sort((p1,p2) => {
       if (this.recentlyUsedIndex(p1) === Infinity && this.recentlyUsedIndex(p2) === Infinity) {
-        if (p1.name.toLowerCase() < p2.name.toLowerCase()) {
-          return -1;
-        }
-        return 1;
+        return p1.name.toLowerCase() < p2.name.toLowerCase() ? -1 : 1;
       }
-      if (this.recentlyUsedIndex(p1) < this.recentlyUsedIndex(p2)) {
-        return -1;
-      }
-      return 1;
+      return this.recentlyUsedIndex(p1) < this.recentlyUsedIndex(p2) ? -1 : 1;
     });
   }
 
