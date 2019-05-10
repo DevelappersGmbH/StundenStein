@@ -1,26 +1,26 @@
 <div class="container">
   <mat-card>
     <h5>Login</h5>
-    <ng-container *ngIf="!isLoggedIn; else: loggedIn">
+    <ng-container *ngIf="!isLoggedIn; else loggedIn">
       <form (ngSubmit)="login()">
         <mat-form-field>
           <input
             matInput
+            type="text"
             placeholder="Redmine URL"
             required
             [(ngModel)]="redmineUrl"
-            name="redmineUrl"
-          />
+            name="redmineUrl" />
           <mat-hint>e.g. https://redmine.domain.com</mat-hint>
         </mat-form-field>
         <mat-form-field>
           <input
+            type="password"
             matInput
             placeholder="API Key"
             required
             [(ngModel)]="apiKey"
-            name="apiKey"
-          />
+            name="apiKey" />
         </mat-form-field>
         <button mat-raised-button color="primary" type="submit">Login</button>
       </form>
@@ -31,10 +31,9 @@
         mat-raised-button
         color="primary"
         type="button"
-        (click)="logout()"
-      >
+        (click)="logout()">
         Logout
       </button>
-    </ng-template></mat-card
-  >
+    </ng-template>
+  </mat-card>
 </div>
